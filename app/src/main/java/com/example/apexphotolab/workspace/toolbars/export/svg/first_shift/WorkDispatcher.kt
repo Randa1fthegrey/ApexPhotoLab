@@ -1,0 +1,57 @@
+package com.example.apexphotolab.workspace.toolbars.export.svg.first_shift
+
+import com.example.apexphotolab.workspace.toolbars.export.svg._temp_tools.FactoryFloorLogger
+import com.example.apexphotolab.workspace.toolbars.export.svg.utils.VRAM_Garage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+/**
+ * The "Factory Floor Dispatcher" for the First Shift (Color Quantization).
+ * Its single job is to manage the conveyor belt and the active, VRAM-aware managers.
+ */
+object WorkDispatcher {
+
+    suspend fun dispatch(
+        workSlices: List<IntRange>,
+        sourcePixels: IntArray,
+        targetPixels: IntArray
+    ) = withContext(Dispatchers.Default) {
+
+        val hiredCrew = HiringDepartment.hireManagers()
+        if (hiredCrew.isEmpty()) {
+            return@withContext
+        }
+
+        FactoryFloorLogger.logDispatcherReceived(hiredCrew.size)
+
+        val workQueue = Channel<IntRange>(Channel.Factory.UNLIMITED)
+
+        launch {
+            FactoryFloorLogger.logForemanPlacingWork(workSlices.size)
+            workSlices.forEach { workQueue.send(it) }
+            workQueue.close()
+            FactoryFloorLogger.logForemanFinished()
+        }
+
+        val managerJobs = hiredCrew.map { (manager, workstation) ->
+            launch(workstation) {
+                val vramSlot = VRAM_Garage.getSlotForManager(manager.id)
+
+                FactoryFloorLogger.logManagerStart(manager.id)
+                for (slice in workQueue) {
+                    FactoryFloorLogger.logManagerTakesWork(manager.id, slice)
+                    // Pass the private VRAM slot to the worker.
+                    manager.processSlice(sourcePixels, targetPixels, slice, vramSlot)
+                    FactoryFloorLogger.logManagerFinishesWork(manager.id, slice)
+                }
+                FactoryFloorLogger.logManagerEndsShift(manager.id)
+            }
+        }
+
+        managerJobs.joinAll()
+        FactoryFloorLogger.logAllManagersFinished()
+    }
+}

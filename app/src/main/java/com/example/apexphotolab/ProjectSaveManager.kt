@@ -1,0 +1,20 @@
+package com.example.apexphotolab
+
+import android.content.Context
+import android.net.Uri
+import androidx.documentfile.provider.DocumentFile
+import com.example.apexphotolab.workspace.toolbars.layers.Layer
+
+/**
+ * A manager dedicated to the single job of saving the project's data.
+ */
+object ProjectSaveManager {
+
+    suspend fun saveProject(context: Context, projectDirUri: Uri, layers: List<Layer>) {
+        val projectDir = DocumentFile.fromTreeUri(context, projectDirUri)
+        projectDir?.let {
+            // This calls the existing, lower-level ProjectManager
+            ProjectManager.saveProject(context, it, layers)
+        }
+    }
+}
