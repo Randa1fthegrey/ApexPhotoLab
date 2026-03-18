@@ -1,7 +1,6 @@
 package com.example.apexphotolab.workspace.toolbars.export.svg.second_shift
 
 import android.graphics.Color
-import android.util.Log
 
 /**
  * The "Color Group Sorter".
@@ -9,7 +8,6 @@ import android.util.Log
  */
 object ColorGroupSorter {
 
-    private const val TAG = "SVG"
     private const val ALPHA_THRESHOLD = 100
     private const val BLACK_VALUE_FLOOR = 0.25f // Sync'd with ColorSorter
 
@@ -22,10 +20,6 @@ object ColorGroupSorter {
                 groups[groupIndex].add(index)
             }
         }
-
-        val groupNames = listOf("Red", "Green", "Blue", "Yellow", "Cyan", "Magenta", "White", "Alpha", "Black", "Grey")
-        val summary = groups.mapIndexed { i, list -> "${groupNames[i]}: ${list.size}" }.joinToString(", ")
-        Log.d(TAG, "[Hiring Department] :: Handoff Summary: $summary")
 
         return groups
     }

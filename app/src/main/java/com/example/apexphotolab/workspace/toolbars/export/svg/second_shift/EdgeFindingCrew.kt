@@ -13,6 +13,6 @@ object EdgeFindingCrew {
      * Finds the boundary pixels using VRAM to prevent memory issues.
      */
     fun findEdges(blob: HashSet<Point>, width: Int, height: Int, vram: ByteBuffer): HashSet<Point> {
-        return VRAM_EdgeFinder.findEdges(blob, width, height, vram)
+        return VRAM_EdgeFinder.findEdgesVRAM(vram, width, height)
     }
 }

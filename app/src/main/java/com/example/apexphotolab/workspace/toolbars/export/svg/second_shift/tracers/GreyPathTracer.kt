@@ -1,7 +1,6 @@
 package com.example.apexphotolab.workspace.toolbars.export.svg.second_shift.tracers
 
 import android.graphics.Point
-import com.example.apexphotolab.workspace.toolbars.export.svg._temp_tools.TracerDiagnosticLogger
 import java.nio.ByteBuffer
 import kotlin.math.abs
 
@@ -23,7 +22,6 @@ object GreyPathTracer {
     )
 
     fun trace(edgePixels: HashSet<Point>, vram: ByteBuffer, width: Int): List<List<Point>> {
-        TracerDiagnosticLogger.logWorkReceived("Grey", edgePixels.size, 0)
         val allPaths = mutableListOf<List<Point>>()
         val remainingPixels = edgePixels.toMutableSet()
         
@@ -80,7 +78,6 @@ object GreyPathTracer {
                 }
             }
         }
-        TracerDiagnosticLogger.logWorkSummary("Grey", allPaths.size)
         return allPaths
     }
 

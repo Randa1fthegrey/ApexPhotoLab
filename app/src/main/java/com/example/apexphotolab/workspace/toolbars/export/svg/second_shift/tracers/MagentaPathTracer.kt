@@ -1,7 +1,6 @@
 package com.example.apexphotolab.workspace.toolbars.export.svg.second_shift.tracers
 
 import android.graphics.Point
-import com.example.apexphotolab.workspace.toolbars.export.svg._temp_tools.TracerDiagnosticLogger
 import java.nio.ByteBuffer
 import kotlin.math.abs
 
@@ -26,7 +25,6 @@ object MagentaPathTracer {
      * Traces magenta edges using VRAM bitmask for memory safety.
      */
     fun trace(edgePixels: HashSet<Point>, vram: ByteBuffer, width: Int): List<List<Point>> {
-        TracerDiagnosticLogger.logWorkReceived("Magenta", edgePixels.size, 0)
         val allPaths = mutableListOf<List<Point>>()
         val remainingPixels = edgePixels.toMutableSet()
         
@@ -83,7 +81,6 @@ object MagentaPathTracer {
                 }
             }
         }
-        TracerDiagnosticLogger.logWorkSummary("Magenta", allPaths.size)
         return allPaths
     }
 

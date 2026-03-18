@@ -2,7 +2,7 @@ package com.example.apexphotolab.workspace.toolbars.export.data
 
 import android.content.Context
 import android.net.Uri
-import com.example.apexphotolab.workspace.toolbars.export.svg._temp_tools.DiagnosticSvgGenerator
+import com.example.apexphotolab.workspace.toolbars.export.svg.svg_assembly.SvgGenerator
 import com.example.apexphotolab.workspace.toolbars.layers.Layer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
@@ -37,8 +37,7 @@ object ProjectExporter {
             ?: throw IllegalStateException("SVG Export failed: No visible layers.")
 
         ensureActive() // Cooperate with cancellation before heavy work
-        // Temporarily use the diagnostic generator to get detailed logs.
-        val svgContent = DiagnosticSvgGenerator.generate(flattenedBitmap, onProgress)
+        val svgContent = SvgGenerator.generate(flattenedBitmap, onProgress)
         ensureActive() // Cooperate with cancellation before writing to disk
 
         TextFileSaver.saveText(context, svgContent, outputUri)

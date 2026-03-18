@@ -41,10 +41,10 @@ object BlobSanitizer {
 
         // 2. Selective Conservative Healing:
         // We skip group 7 (Alpha) because it is too massive and doesn't need healing.
-        return if (index != 7) {
-            BlobHealer.healHolesVRAM(cleaned, width, height, vram)
-        } else {
-            cleaned
+        if (index != 7) {
+            BlobHealer.healInPlaceVRAM(width, height, vram)
         }
+        
+        return cleaned
     }
 }

@@ -2,7 +2,6 @@ package com.example.apexphotolab.workspace.toolbars.export.svg.svg_assembly.arti
 
 import android.graphics.Color
 import android.graphics.Point
-import com.example.apexphotolab.workspace.toolbars.export.svg._temp_tools.TracerDiagnosticLogger
 
 /**
  * File 6 (Artist Phase): The Solid Shape Fill Generator.

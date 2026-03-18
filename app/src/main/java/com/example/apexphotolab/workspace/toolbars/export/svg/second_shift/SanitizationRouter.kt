@@ -23,7 +23,7 @@ object SanitizationRouter {
             4 -> CyanBlobSanitizer.sanitize(blob, width, height)
             5 -> MagentaBlobSanitizer.sanitize(blob, width, height)
             6 -> WhiteBlobSanitizer.sanitize(blob, width, height)
-            7 -> AlphaBlobSanitizer.sanitize(blob, width, height)
+            7 -> blob // Alpha group bypasses this legacy route.
             8 -> BlackBlobSanitizer.sanitize(blob, width, height)
             9 -> GreyBlobSanitizer.sanitize(blob, width, height)
             else -> GreyBlobSanitizer.sanitize(blob, width, height)

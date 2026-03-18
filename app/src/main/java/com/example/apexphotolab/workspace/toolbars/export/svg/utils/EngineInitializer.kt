@@ -54,7 +54,6 @@ object EngineInitializer {
             PathDataGenerator.generate(emptyList())
             SolidFillGenerator.generate(emptyList(), 0)
             AlphaGradientDetector.detect(dummyBitmap)
-            // Fixed: Passed 1 for both width and height to match the new analyze signature.
             AlphaSlopeAnalyzer.analyze(hashSetOf(), IntArray(1), 1, 1)
             AlphaFillGenerator.generate(emptyList())
             
@@ -66,17 +65,18 @@ object EngineInitializer {
             ColorSorter.getNearestColor(0)
             SecondShiftOrchestrator.run(dummyBitmap)
             
-            // Warm up all 10 specialized tracers
-            BlackPathTracer.trace(hashSetOf(), hashSetOf())
-            RedPathTracer.trace(hashSetOf(), hashSetOf())
-            GreenPathTracer.trace(hashSetOf(), hashSetOf())
-            BluePathTracer.trace(hashSetOf(), hashSetOf())
-            YellowPathTracer.trace(hashSetOf(), hashSetOf())
-            CyanPathTracer.trace(hashSetOf(), hashSetOf())
-            MagentaPathTracer.trace(hashSetOf(), hashSetOf())
-            WhitePathTracer.trace(hashSetOf(), hashSetOf())
-            AlphaPathTracer.trace(hashSetOf(), hashSetOf())
-            GreyPathTracer.trace(hashSetOf(), hashSetOf())
+            // Warm up all 10 specialized tracers with current signatures
+            val dummyVram = VRAM_Garage.getSlotForManager(0)
+            BlackPathTracer.trace(hashSetOf(), dummyVram, 1)
+            RedPathTracer.trace(hashSetOf(), dummyVram, 1)
+            GreenPathTracer.trace(hashSetOf(), dummyVram, 1)
+            BluePathTracer.trace(hashSetOf(), dummyVram, 1)
+            YellowPathTracer.trace(hashSetOf(), dummyVram, 1)
+            CyanPathTracer.trace(hashSetOf(), dummyVram, 1)
+            MagentaPathTracer.trace(hashSetOf(), dummyVram, 1)
+            WhitePathTracer.trace(hashSetOf(), dummyVram, 1)
+            AlphaPathTracer.trace(hashSetOf(), dummyVram, 1)
+            GreyPathTracer.trace(hashSetOf(), dummyVram, 1)
             
             SeedFinder.findSeedPoint(emptyList(), dummyBitmap)
             FloodFiller.floodFill(Point(0,0), IntArray(1), 1, 1)

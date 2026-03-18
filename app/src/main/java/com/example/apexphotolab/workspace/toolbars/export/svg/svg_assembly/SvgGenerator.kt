@@ -1,6 +1,7 @@
 package com.example.apexphotolab.workspace.toolbars.export.svg.svg_assembly
 
 import android.graphics.Bitmap
+import com.example.apexphotolab.workspace.toolbars.export._temp_tools.HandoffLogger
 import com.example.apexphotolab.workspace.toolbars.export.data.TransparencyCrewOrchestrator
 import com.example.apexphotolab.workspace.toolbars.export.svg.first_shift.ColorQuantizer
 import com.example.apexphotolab.workspace.toolbars.export.svg.second_shift.SecondShiftOrchestrator
@@ -21,14 +22,19 @@ object SvgGenerator {
         withContext(Dispatchers.Default) {
             onProgress(0.1f)
             val quantizedImage = ColorQuantizer.quantize(image)
+            HandoffLogger.logShift1to2(quantizedImage.width, quantizedImage.height)
 
             val allSvgElements = coroutineScope {
                 // Run crews in parallel
                 val solidColorCrewJob = async {
                     onProgress(0.4f)
                     val (pathFragments, allEdges) = SecondShiftOrchestrator.run(quantizedImage)
+                    HandoffLogger.logShift2to3(pathFragments.size, allEdges.size)
+
                     onProgress(0.7f)
                     val pathColors = ThirdShiftOrchestrator.run(pathFragments, quantizedImage)
+                    HandoffLogger.logShift3toAssembly(pathColors.size)
+
                     AssemblyOrchestrator.run(pathFragments, pathColors, allEdges)
                 }
 
@@ -40,6 +46,8 @@ object SvgGenerator {
                 // so they are written to the SVG first (at the bottom).
                 transparencyCrewJob.await() + solidColorCrewJob.await()
             }
+
+            HandoffLogger.logAssemblyToFinish(allSvgElements.size)
 
             onProgress(0.9f)
             val finalSvg = SVGAssembler.assemble(allSvgElements, image.width, image.height)

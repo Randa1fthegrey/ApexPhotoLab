@@ -1,7 +1,6 @@
 package com.example.apexphotolab.workspace.toolbars.export.svg.svg_assembly
 
 import android.graphics.Point
-import com.example.apexphotolab.workspace.toolbars.export.svg._temp_tools.AssemblyLogger
 import com.example.apexphotolab.workspace.toolbars.export.svg.svg_assembly.artist.SolidFillGenerator
 import com.example.apexphotolab.workspace.toolbars.export.svg.utils.CoreHighwayFactory
 import kotlinx.coroutines.async
@@ -23,7 +22,6 @@ object AssemblyOrchestrator {
         pathColors: List<Int>,
         allEdges: HashSet<Point>
     ): List<String> = coroutineScope {
-        AssemblyLogger.logHandoff(pathFragments.size, pathColors.size)
 
         // 1. Group the fragments by their color family.
         val fragmentsByFamily = FragmentGrouper.group(pathFragments, pathColors)

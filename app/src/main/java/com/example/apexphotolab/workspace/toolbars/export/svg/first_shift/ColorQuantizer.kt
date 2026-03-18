@@ -1,7 +1,6 @@
 package com.example.apexphotolab.workspace.toolbars.export.svg.first_shift
 
 import android.graphics.Bitmap
-import com.example.apexphotolab.workspace.toolbars.export.svg._temp_tools.FactoryFloorLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -21,7 +20,6 @@ object ColorQuantizer {
 
         val workSlices = FirstShiftSlicer.createSlices(sourcePixels.size)
 
-        FactoryFloorLogger.logCeoHandoff(workSlices.size)
         WorkDispatcher.dispatch(workSlices, sourcePixels, targetPixels)
 
         return@withContext Bitmap.createBitmap(targetPixels, width, height, Bitmap.Config.ARGB_8888)

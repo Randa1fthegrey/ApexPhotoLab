@@ -18,7 +18,8 @@ object MagentaBlobSanitizer {
         val vram = VRAM_Garage.getSlotForManager(ID)
         
         val cleaned = filterNoise(blob, vram, width, height)
-        return BlobHealer.healHolesVRAM(cleaned, width, height, vram)
+        BlobHealer.healInPlaceVRAM(width, height, vram)
+        return cleaned
     }
 
     private fun filterNoise(blob: HashSet<Point>, vram: ByteBuffer, width: Int, height: Int): HashSet<Point> {

@@ -29,7 +29,8 @@ object AlphaFillGenerator {
         alphaInfos.forEach { info ->
             // Use the VRAM-powered EdgeFindingCrew to keep heap usage near zero
             val edges = EdgeFindingCrew.findEdges(info.blob, info.width, info.height, vram)
-            val paths = AlphaPathTracer.trace(edges, info.blob)
+            // Fixed: Pass correct parameters to trace (edges, vram, width)
+            val paths = AlphaPathTracer.trace(edges, vram, info.width)
 
             if (paths.isNotEmpty()) {
                 val gradientId = "alphaGrad${gradientIdCounter++}"
