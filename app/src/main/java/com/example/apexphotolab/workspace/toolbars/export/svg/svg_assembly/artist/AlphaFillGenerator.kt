@@ -2,13 +2,13 @@ package com.example.apexphotolab.workspace.toolbars.export.svg.svg_assembly.arti
 
 import android.graphics.Point
 import com.example.apexphotolab.workspace.toolbars.export.svg.second_shift.EdgeFindingCrew
+import com.example.apexphotolab.workspace.toolbars.export.svg.second_shift.VRAM_BlobConverter
 import com.example.apexphotolab.workspace.toolbars.export.svg.second_shift.tracers.AlphaPathTracer
 import com.example.apexphotolab.workspace.toolbars.export.svg.utils.VRAM_Garage
 
 /**
  * File 9 (Artist Phase): The Alpha Fill Generator.
  * Takes alpha gradient reports and generates the final drawable SVG paths with transparency.
- * VRAM-Optimized: Uses a dedicated VRAM slot for edge detection to prevent OOM.
  */
 object AlphaFillGenerator {
 
@@ -16,20 +16,21 @@ object AlphaFillGenerator {
 
     /**
      * Generates SVG elements for all detected transparency regions.
-     * @param alphaInfos The list of reports from the AlphaGradientDetector.
-     * @return A list of strings, each containing a complete SVG snippet (<defs> and <path>).
      */
     fun generate(alphaInfos: List<AlphaGradientDetector.AlphaGradientInfo>): List<String> {
         val svgSnippets = mutableListOf<String>()
         var gradientIdCounter = 0
         
-        // Grab a dedicated VRAM slot for safe edge finding
-        val vram = VRAM_Garage.getSlotForManager(VRAM_SLOT_ID)
-
         alphaInfos.forEach { info ->
-            // Use the VRAM-powered EdgeFindingCrew to keep heap usage near zero
+            // POWER WASH: Wipe the slot for every transparency region to prevent "Ghost Gradients"
+            VRAM_Garage.wipeSlot(VRAM_SLOT_ID)
+            val vram = VRAM_Garage.getSlotForManager(VRAM_SLOT_ID)
+
+            // 1. POPULATE: Move the transparency blob into VRAM so the crew can see it
+            VRAM_BlobConverter.convertToVRAM(info.blob, vram, info.width)
+
+            // 2. TRACE: Use the VRAM-powered crew to find high-fidelity edges
             val edges = EdgeFindingCrew.findEdges(info.blob, info.width, info.height, vram)
-            // Fixed: Pass correct parameters to trace (edges, vram, width)
             val paths = AlphaPathTracer.trace(edges, vram, info.width)
 
             if (paths.isNotEmpty()) {
@@ -88,7 +89,6 @@ object AlphaFillGenerator {
             }
             if (openPathData.isNotEmpty()) {
                 if (isNotEmpty()) append("\n")
-                // Open paths get stroke with the gradient and NO fill to prevent chords.
                 append("<path d=\"${openPathData.toString().trim()}\" fill=\"none\" stroke=\"url(#$gradientId)\" stroke-width=\"1.2\" stroke-linecap=\"round\" />")
             }
         }

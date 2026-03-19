@@ -22,6 +22,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Apex Photo Resizer"
+rootProject.name = "ApexPhotoLab"
 include(":app")
  

@@ -1,7 +1,8 @@
 package com.example.apexphotolab.workspace.toolbars.export.svg.second_shift
 
 import android.graphics.Point
-import com.example.apexphotolab.workspace.toolbars.export.svg.second_shift.sanitizers.AlphaBlobSanitizer
+import com.example.apexphotolab.workspace.toolbars.export._temp_tools.SanitizerObserver
+import com.example.apexphotolab.workspace.toolbars.export.svg.second_shift.sanitizers.*
 import com.example.apexphotolab.workspace.toolbars.export.svg.utils.CoreHighwayFactory
 import com.example.apexphotolab.workspace.toolbars.export.svg.utils.VRAM_Garage
 import kotlinx.coroutines.Dispatchers
@@ -12,7 +13,7 @@ import kotlinx.coroutines.withContext
 /**
  * Job #1: The Team Manager.
  * Final VRAM-Optimized Version: Orchestrates 100% off-heap blob processing.
- * Heap usage is now independent of image size.
+ * Updated: Now includes the "Power Wash" protocol to stop memory pollution.
  */
 object SecondShiftDispatcher {
 
@@ -34,30 +35,49 @@ object SecondShiftDispatcher {
             val dispatcher = if (highways.isNotEmpty()) highways[index % highways.size] else Dispatchers.Default
 
             async(dispatcher) {
+                // POWER WASH: Erase any ghost data from previous runs
+                VRAM_Garage.wipeSlot(index)
+
                 val vram = VRAM_Garage.getSlotForManager(index)
 
-                // 1. Convert to VRAM Bitmask (Zero Heap)
+                // 1. Convert to VRAM Bitmask (Zero Heap) - RAW DATA
                 VRAM_BlobConverter.convertToVRAM(indices, vram)
 
-                // 2. Sanitize in VRAM (Zero Heap)
-                if (index == 7) {
-                    AlphaBlobSanitizer.sanitizeInPlace(indices, width, height, vram)
-                } else {
-                    // Universal Noise Filter & Healing logic entirely in VRAM
-                    BlobHealer.healInPlaceVRAM(width, height, vram)
-                }
-
-                // 3. Edge Finding from VRAM Bitmask (Low Heap - Edges only)
+                // 2. Edge Finding from RAW VRAM Bitmask (No detail loss yet!)
                 val edges = VRAM_EdgeFinder.findEdgesVRAM(vram, width, height)
 
-                // 4. Tracing (Routing to specialist)
-                val paths = TracingRouter.route(index, edges, vram, width)
+                // 3. Tracing (Routing to specialist) - Captured high-fidelity paths
+                val rawPaths = TracingRouter.route(index, edges, vram, width)
 
-                Pair(paths, edges)
+                // 4. PATH-BASED SANITIZATION: Clean up loose ends AFTER shapes are made
+                SanitizerObserver.logPathInput(index, rawPaths)
+                val cleanPaths = routeToPathSanitizer(index, rawPaths)
+                SanitizerObserver.logPathOutput(index, cleanPaths)
+
+                Pair(cleanPaths, edges)
             }
         }.filterNotNull()
 
         val results = jobs.awaitAll()
         return@withContext ResultAggregator.aggregate(results)
+    }
+
+    /**
+     * Routes the completed paths to specialized cleaning teams.
+     */
+    private fun routeToPathSanitizer(index: Int, paths: List<List<Point>>): List<List<Point>> {
+        return when (index) {
+            0 -> RedBlobSanitizer.sanitizePaths(paths)
+            1 -> GreenBlobSanitizer.sanitizePaths(paths)
+            2 -> BlueBlobSanitizer.sanitizePaths(paths)
+            3 -> YellowBlobSanitizer.sanitizePaths(paths)
+            4 -> CyanBlobSanitizer.sanitizePaths(paths)
+            5 -> MagentaBlobSanitizer.sanitizePaths(paths)
+            6 -> WhiteBlobSanitizer.sanitizePaths(paths)
+            7 -> AlphaBlobSanitizer.sanitizePaths(paths)
+            8 -> BlackBlobSanitizer.sanitizePaths(paths)
+            9 -> GreyBlobSanitizer.sanitizePaths(paths)
+            else -> paths
+        }
     }
 }

@@ -2,6 +2,7 @@ package com.example.apexphotolab.workspace.toolbars.export.svg.svg_assembly
 
 import android.graphics.Bitmap
 import com.example.apexphotolab.workspace.toolbars.export._temp_tools.HandoffLogger
+import com.example.apexphotolab.workspace.toolbars.export._temp_tools.SvgInspector
 import com.example.apexphotolab.workspace.toolbars.export.data.TransparencyCrewOrchestrator
 import com.example.apexphotolab.workspace.toolbars.export.svg.first_shift.ColorQuantizer
 import com.example.apexphotolab.workspace.toolbars.export.svg.second_shift.SecondShiftOrchestrator
@@ -51,6 +52,10 @@ object SvgGenerator {
 
             onProgress(0.9f)
             val finalSvg = SVGAssembler.assemble(allSvgElements, image.width, image.height)
+            
+            // DIAGNOSTIC: Inspect the final string for glitches and color data
+            SvgInspector.inspect(finalSvg)
+
             return@withContext finalSvg
         }
 }

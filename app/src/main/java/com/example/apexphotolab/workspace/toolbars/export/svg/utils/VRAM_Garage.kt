@@ -6,16 +6,19 @@ import java.nio.ByteOrder
 
 /**
  * The "Reserved Parking Garage" for our custom dispatch engine.
- * Updated: Supports 1-based Manager IDs (1-30) safely.
+ * Updated: Now includes a Power Wash protocol to prevent memory pollution.
  */
 object VRAM_Garage {
 
     private const val TAG = "VRAM_Garage"
-    private const val TOTAL_MANAGERS = 31 // Increased to 31 to safely map 1-based IDs
+    private const val TOTAL_MANAGERS = 31 // Supports 1-based Manager IDs (1-30)
     private const val SLOT_SIZE_BYTES = 512 * 1024 // 0.5 MB
     private const val GARAGE_SIZE_BYTES = TOTAL_MANAGERS * SLOT_SIZE_BYTES
 
     private val garage: ByteBuffer = ByteBuffer.allocateDirect(GARAGE_SIZE_BYTES)
+    
+    // A reusable "Master Zero" array for high-speed memory wiping
+    private val powerWashBuffer = ByteArray(SLOT_SIZE_BYTES)
 
     init {
         garage.order(ByteOrder.LITTLE_ENDIAN)
@@ -24,10 +27,8 @@ object VRAM_Garage {
 
     /**
      * Returns a sandboxed, private ByteBuffer slice for a specific manager.
-     * Uses managerId as the direct index.
      */
     fun getSlotForManager(managerId: Int): ByteBuffer {
-        // Safety check to prevent out-of-bounds access
         val safeId = managerId.coerceIn(0, TOTAL_MANAGERS - 1)
         val offset = safeId * SLOT_SIZE_BYTES
         
@@ -35,5 +36,16 @@ object VRAM_Garage {
             position(offset)
             limit(offset + SLOT_SIZE_BYTES)
         }).slice()
+    }
+
+    /**
+     * Truly erases all data in a manager's slot to prevent "Ghost Pixels".
+     * position and limit are reset to 0 and capacity respectively.
+     */
+    fun wipeSlot(managerId: Int) {
+        val slot = getSlotForManager(managerId)
+        slot.clear()
+        slot.put(powerWashBuffer)
+        slot.clear()
     }
 }

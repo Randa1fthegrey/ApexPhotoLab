@@ -32,7 +32,9 @@ object ColoringDispatcher {
                 val vramSlot = VRAM_Garage.getSlotForManager(censusTaker.id)
                 val results = mutableListOf<Pair<Int, Int>>()
                 slice.forEach { (originalIndex, pathData) ->
-                    // This is fast, so we won't log every single path.
+                    // POWER WASH: Wipe the slot before every shape analysis to prevent "Ghost Fills"
+                    VRAM_Garage.wipeSlot(censusTaker.id)
+
                     val color = censusTaker.analyzePath(pathData, quantizedImage, vramSlot)
                     results.add(originalIndex to color)
                 }
