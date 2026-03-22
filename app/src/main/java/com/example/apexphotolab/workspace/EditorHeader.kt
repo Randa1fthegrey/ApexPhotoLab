@@ -16,8 +16,7 @@ import java.util.Locale
 
 /**
  * The Project Dashboard header.
- * Displays the Pull-Tab, Metadata, and the "Overdue" Save Timer.
- * Now handles Status Bar padding natively.
+ * Displays the Pull-Tab, Metadata, and the "Overdue" Save Timer with Quick Save.
  */
 @Composable
 fun EditorHeader(
@@ -27,7 +26,8 @@ fun EditorHeader(
     activeLayerName: String,
     lastSaveTime: Long, // Epoch timestamp
     activeToolIcon: ImageVector,
-    onTabClick: () -> Unit
+    onTabClick: () -> Unit,
+    onQuickSaveClick: () -> Unit // Callback for the floppy disk button
 ) {
     var currentTime by remember { mutableStateOf(System.currentTimeMillis()) }
 
@@ -48,13 +48,13 @@ fun EditorHeader(
     val isOverdue = minutes >= 5
 
     Surface(
-        modifier = modifier.fillMaxWidth(), // Height is now determined by content + padding
+        modifier = modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surface,
         tonalElevation = 3.dp
     ) {
         Row(
             modifier = Modifier
-                .statusBarsPadding() // Pushes content below status bar, but keeps background behind it
+                .statusBarsPadding()
                 .height(56.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -96,13 +96,30 @@ fun EditorHeader(
                 )
             }
 
-            // WARNING TIMER: Turns red after 5 minutes
-            Text(
-                text = timerText,
-                style = MaterialTheme.typography.titleMedium,
-                color = if (isOverdue) Color.Red else MaterialTheme.colorScheme.onSurface,
+            // QUICK SAVE AND TIMER: 💾 = 00:00
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(end = 16.dp)
-            )
+            ) {
+                IconButton(
+                    onClick = onQuickSaveClick,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Text(text = "💾", fontSize = 18.sp)
+                }
+                
+                Text(
+                    text = "=",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(horizontal = 4.dp)
+                )
+
+                Text(
+                    text = timerText,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = if (isOverdue) Color.Red else MaterialTheme.colorScheme.onSurface
+                )
+            }
         }
     }
 }

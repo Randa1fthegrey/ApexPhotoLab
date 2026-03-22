@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.documentfile.provider.DocumentFile
-import com.example.apexphotolab.ProjectManager
+import com.example.apexphotolab.workspace.tool_panel.save.ProjectManager
 import com.example.apexphotolab.welcome_screen.delete_project.DeleteConfirmDialog
 import com.example.apexphotolab.welcome_screen.delete_project.deleteProject
 import kotlinx.coroutines.launch

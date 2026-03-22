@@ -1,6 +1,5 @@
 package com.example.apexphotolab.welcome_screen
 
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.widget.Toast
@@ -24,11 +23,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.apexphotolab.ProjectManager
+import com.example.apexphotolab.workspace.tool_panel.save.ProjectManager
 import com.example.apexphotolab.SettingsManager
 import com.example.apexphotolab.welcome_screen.new_project.CopyConfirmDialog
 import com.example.apexphotolab.welcome_screen.new_project.ProjectNameDialog
-import com.example.apexphotolab.ui.ThemeSwitcher
+import com.example.apexphotolab.welcome_screen.theme.ThemeSwitcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

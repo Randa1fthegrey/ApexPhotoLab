@@ -17,11 +17,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.example.apexphotolab.ui.theme.ApexPhotoLabTheme
+import com.example.apexphotolab.welcome_screen.theme.ApexPhotoLabTheme
 import com.example.apexphotolab.welcome_screen.WelcomeScreen
 import com.example.apexphotolab.welcome_screen.continue_project.ProjectFileExplorer
 import com.example.apexphotolab.workspace.MainEditorScreen
-import com.example.apexphotolab.workspace.toolbars.export.svg.utils.EngineInitializer
+import com.example.apexphotolab.workspace.tool_panel.export.svg.utils.EngineInitializer
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

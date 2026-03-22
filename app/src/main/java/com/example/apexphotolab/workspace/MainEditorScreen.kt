@@ -19,18 +19,22 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.documentfile.provider.DocumentFile
-import com.example.apexphotolab.*
-import com.example.apexphotolab.ui.dialogs.LayerNameDialog
-import com.example.apexphotolab.ui.dialogs.SaveConfirmDialog
-import com.example.apexphotolab.ui.dialogs.SnapshotNameDialog
-import com.example.apexphotolab.workspace.toolbars.export.data.ExportJobManager
-import com.example.apexphotolab.workspace.toolbars.export.ui.ExportProgressDialog
-import com.example.apexphotolab.workspace.toolbars.export.ui.ExportScreen
-import com.example.apexphotolab.workspace.toolbars.export.data.ExportType
-import com.example.apexphotolab.workspace.toolbars.filters.FilterPanel
-import com.example.apexphotolab.workspace.toolbars.layers.Layer
-import com.example.apexphotolab.workspace.toolbars.layers.LayersPanel
-import com.example.apexphotolab.workspace.toolbars.history.HistoryPanel
+import com.example.apexphotolab.workspace.tool_panel.ToolDrawer
+import com.example.apexphotolab.workspace.tool_panel.layers.ui.LayerNameDialog
+import com.example.apexphotolab.workspace.tool_panel.save.ui.SaveConfirmDialog
+import com.example.apexphotolab.workspace.tool_panel.save.ui.SnapshotNameDialog
+import com.example.apexphotolab.workspace.tool_panel.export.data.ExportJobManager
+import com.example.apexphotolab.workspace.tool_panel.export.ui.ExportProgressDialog
+import com.example.apexphotolab.workspace.tool_panel.export.ui.ExportScreen
+import com.example.apexphotolab.workspace.tool_panel.export.data.ExportType
+import com.example.apexphotolab.workspace.tool_panel.filters.FilterPanel
+import com.example.apexphotolab.workspace.tool_panel.layers.Layer
+import com.example.apexphotolab.workspace.tool_panel.layers.LayersPanel
+import com.example.apexphotolab.workspace.tool_panel.save.HistoryPanel
+import com.example.apexphotolab.workspace.tool_panel.layers.NewLayerManager
+import com.example.apexphotolab.workspace.tool_panel.save.ProjectLoadManager
+import com.example.apexphotolab.workspace.tool_panel.save.ProjectManager
+import com.example.apexphotolab.workspace.tool_panel.save.ProjectSaveManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
@@ -62,7 +66,7 @@ fun MainEditorScreen(
     var colorFilter: ColorFilter? by remember { mutableStateOf(null) }
     var showSaveConfirmDialog by remember { mutableStateOf(false) }
     var showLayerNameDialog by remember { mutableStateOf<Uri?>(null) }
-    var showSnapshotNameDialog by remember { mutableStateOf(false) } // New dialog state
+    var showSnapshotNameDialog by remember { mutableStateOf(false) }
     
     // Export Execution State
     var pendingExportType by remember { mutableStateOf<ExportType?>(null) }
@@ -74,6 +78,23 @@ fun MainEditorScreen(
     val onToolSelected: (ImageVector, () -> Unit) -> Unit = { icon, action ->
         activeToolIcon = icon
         action()
+    }
+
+    // --- QUICK SAVE LOGIC ---
+    val performQuickSave: () -> Unit = {
+        scope.launch {
+            val history = ProjectManager.getHistory(DocumentFile.fromTreeUri(context, projectDirUri)!!)
+            // Filter history to find existing quick saves with the same project name
+            val quickSaveCount = history.count { snapshot ->
+                snapshot.name?.contains(projectDirName) == true && !snapshot.name!!.contains("Project Birth")
+            }
+            
+            val autoTitle = if (quickSaveCount == 0) projectDirName else "$projectDirName ($quickSaveCount)"
+            
+            ProjectSaveManager.saveProject(context, projectDirUri, layers.toList(), autoTitle)
+            lastSaveTime = System.currentTimeMillis()
+            Toast.makeText(context, "Saved project!", Toast.LENGTH_SHORT).show()
+        }
     }
 
     // --- LOAD LOGIC ---
@@ -184,8 +205,14 @@ fun MainEditorScreen(
                 ToolDrawer(
                     onToolClick = onToolSelected,
                     onFilterClick = { showFilterPanel = true },
-                    onAddImageClick = { pickImageLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
-                    onSaveClick = { showSnapshotNameDialog = true }, // Opens the note dialog
+                    onAddImageClick = {
+                        pickImageLauncher.launch(
+                            PickVisualMediaRequest(
+                                ActivityResultContracts.PickVisualMedia.ImageOnly
+                            )
+                        )
+                    },
+                    onSaveClick = { showSnapshotNameDialog = true },
                     onLayersClick = { showLayersPanel = true },
                     onExportClick = { showExportScreen = true },
                     onHistoryClick = { showHistoryPanel = true },
@@ -203,7 +230,8 @@ fun MainEditorScreen(
                     activeLayerName = activeLayerName,
                     lastSaveTime = lastSaveTime,
                     activeToolIcon = activeToolIcon,
-                    onTabClick = { scope.launch { if (drawerState.isClosed) drawerState.open() else drawerState.close() } }
+                    onTabClick = { scope.launch { if (drawerState.isClosed) drawerState.open() else drawerState.close() } },
+                    onQuickSaveClick = performQuickSave // Connected Quick Save button
                 )
             }
         ) { padding ->
@@ -217,7 +245,6 @@ fun MainEditorScreen(
         }
     }
 
-    // Dialogs
     if (showSaveConfirmDialog) { SaveConfirmDialog(onDismiss = { showSaveConfirmDialog = false }, onConfirm = { showSaveConfirmDialog = false; scope.launch { ProjectSaveManager.saveProject(context, projectDirUri, layers.toList(), "Return Home Save"); onNavigateBack() } }) }
     showLayerNameDialog?.let { uri -> LayerNameDialog(onDismiss = { showLayerNameDialog = null }, onConfirm = { title -> showLayerNameDialog = null; scope.launch { val newLayer = NewLayerManager.addNewLayer(context, projectDirUri, uri, title); newLayer?.let { layers.add(it) } } }) }
     
