@@ -13,11 +13,17 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import java.util.UUID
+import java.text.SimpleDateFormat
+import java.util.*
 
+/**
+ * The core engine for project persistence.
+ * Implements a Snapshot-based History system for rollbacks.
+ */
 object ProjectManager {
     const val PROJECT_FILE_NAME = "project.json"
     private const val IMAGES_DIR_NAME = "images"
+    private const val SAVES_DIR_NAME = "saves"
 
     private fun getProjectsDir(context: Context): DocumentFile? {
         val customDirUri = SettingsManager.getCustomProjectDir(context)
@@ -41,8 +47,10 @@ object ProjectManager {
             }
 
             val newProjectDir = projectsDir.createDirectory(projectName)!!
-            val imagesDir = newProjectDir.createDirectory(IMAGES_DIR_NAME)!!
+            newProjectDir.createDirectory(IMAGES_DIR_NAME)!!
+            newProjectDir.createDirectory(SAVES_DIR_NAME)!!
 
+            val imagesDir = newProjectDir.findFile(IMAGES_DIR_NAME)!!
             val baseImageFile = imagesDir.createFile("image/png", "base_image.png")!!
             context.contentResolver.openOutputStream(baseImageFile.uri)?.use { output ->
                 baseImageBitmap.compress(Bitmap.CompressFormat.PNG, 100, output)
@@ -54,15 +62,9 @@ object ProjectManager {
                 imageUri = baseImageFile.uri
             )
 
-            val projectFile = newProjectDir.createFile("application/json", PROJECT_FILE_NAME)!!
-            context.contentResolver.openOutputStream(projectFile.uri)?.use { outputStream ->
-                val layersJson = JSONArray()
-                layersJson.put(LayerSerializer.toJson(baseLayer))
-                val json = JSONObject().apply {
-                    put("layers", layersJson)
-                }
-                outputStream.write(json.toString(4).toByteArray())
-            }
+            // Perform initial save to create the birth of the project
+            saveProject(context, newProjectDir, listOf(baseLayer), "Project Birth")
+            
             newProjectDir
         } catch (e: Exception) {
             e.printStackTrace()
@@ -113,26 +115,111 @@ object ProjectManager {
         }
     } ?: emptyList()
 
-    suspend fun saveProject(context: Context, projectDir: DocumentFile, layers: List<Layer>) = withContext(Dispatchers.IO) {
+    /**
+     * Saves the project and creates a unique snapshot point in the history log.
+     * @param title A user-provided note describing this save point.
+     */
+    suspend fun saveProject(context: Context, projectDir: DocumentFile, layers: List<Layer>, title: String) = withContext(Dispatchers.IO) {
         try {
-            val projectFile = projectDir.findFile(PROJECT_FILE_NAME) ?: projectDir.createFile("application/json", PROJECT_FILE_NAME)!!
-            
-            context.contentResolver.openOutputStream(projectFile.uri)?.use { outputStream ->
-                val layersJson = JSONArray()
-                layers.forEach { layer -> layersJson.put(LayerSerializer.toJson(layer)) }
-                val json = JSONObject().apply {
-                    put("layers", layersJson)
-                }
-                outputStream.write(json.toString(4).toByteArray())
+            val layersJson = JSONArray()
+            layers.forEach { layer -> layersJson.put(LayerSerializer.toJson(layer)) }
+            val json = JSONObject().apply {
+                put("layers", layersJson)
+                put("timestamp", System.currentTimeMillis())
+                put("note", title)
             }
+            val jsonString = json.toString(4)
+
+            // 1. Write the snapshot to the project-specific history directory
+            val savesDir = projectDir.findFile(SAVES_DIR_NAME) ?: projectDir.createDirectory(SAVES_DIR_NAME)!!
+            val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+            
+            // Enforce 17 char limit and permit punctuation (except strictly forbidden file chars)
+            val notePart = title.take(17).trim()
+            val fileSafeNote = notePart.replace(Regex("[\\\\/:*?\"<>|]"), "_")
+            val saveFileName = if (fileSafeNote.isEmpty()) "save_$timeStamp.json" else "save_${timeStamp}_$fileSafeNote.json"
+            
+            val snapshotFile = savesDir.createFile("application/json", saveFileName)!!
+            context.contentResolver.openOutputStream(snapshotFile.uri)?.use { it.write(jsonString.toByteArray()) }
+
+            // 2. Update the main project.json file (The "Active" state)
+            val projectFile = projectDir.findFile(PROJECT_FILE_NAME) ?: projectDir.createFile("application/json", PROJECT_FILE_NAME)!!
+            context.contentResolver.openOutputStream(projectFile.uri)?.use { it.write(jsonString.toByteArray()) }
+
             withContext(Dispatchers.Main) {
-                Toast.makeText(context, "Project Saved!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Snapshot Created: $notePart", Toast.LENGTH_SHORT).show()
             }
         } catch (e: Exception) {
             e.printStackTrace()
             withContext(Dispatchers.Main) {
-                Toast.makeText(context, "Error saving project", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Error creating snapshot", Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+
+    /**
+     * Renames a snapshot file and updates the note inside its JSON content.
+     */
+    suspend fun renameSnapshot(context: Context, snapshot: DocumentFile, newTitle: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            // 1. Read existing content to update the "note" inside the JSON
+            val content = context.contentResolver.openInputStream(snapshot.uri)?.use { 
+                it.bufferedReader().readText() 
+            } ?: return@withContext false
+            
+            val json = JSONObject(content)
+            val notePart = newTitle.take(17).trim()
+            json.put("note", notePart)
+            val updatedContent = json.toString(4)
+            
+            // 2. Overwrite the file with updated JSON
+            context.contentResolver.openOutputStream(snapshot.uri)?.use {
+                it.write(updatedContent.toByteArray())
+            }
+
+            // 3. Rename the actual file
+            val nameParts = snapshot.name?.split("_") ?: return@withContext false
+            if (nameParts.size < 3) return@withContext false
+            val timeStampPart = "${nameParts[1]}_${nameParts[2].substringBefore(".json")}"
+            
+            val fileSafeNote = notePart.replace(Regex("[\\\\/:*?\"<>|]"), "_")
+            val newFileName = "save_${timeStampPart}_$fileSafeNote.json"
+            
+            snapshot.renameTo(newFileName)
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    /**
+     * Retrieves the history of snapshots for this project.
+     * Sorted chronologically: Oldest (Project Birth) at the top.
+     */
+    fun getHistory(projectDir: DocumentFile): List<DocumentFile> {
+        val savesDir = projectDir.findFile(SAVES_DIR_NAME)
+        return savesDir?.listFiles()
+            ?.filter { it.name?.startsWith("save_") == true }
+            ?.sortedBy { it.name } ?: emptyList()
+    }
+
+    /**
+     * Rolls the project back to a specific snapshot point.
+     */
+    suspend fun rollback(context: Context, projectDir: DocumentFile, snapshot: DocumentFile): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val projectFile = projectDir.findFile(PROJECT_FILE_NAME) ?: projectDir.createFile("application/json", PROJECT_FILE_NAME)!!
+            
+            context.contentResolver.openInputStream(snapshot.uri)?.use { input ->
+                context.contentResolver.openOutputStream(projectFile.uri)?.use { output ->
+                    input.copyTo(output)
+                }
+            }
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
         }
     }
 

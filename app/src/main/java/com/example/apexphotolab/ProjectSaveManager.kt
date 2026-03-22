@@ -10,11 +10,10 @@ import com.example.apexphotolab.workspace.toolbars.layers.Layer
  */
 object ProjectSaveManager {
 
-    suspend fun saveProject(context: Context, projectDirUri: Uri, layers: List<Layer>) {
+    suspend fun saveProject(context: Context, projectDirUri: Uri, layers: List<Layer>, title: String) {
         val projectDir = DocumentFile.fromTreeUri(context, projectDirUri)
         projectDir?.let {
-            // This calls the existing, lower-level ProjectManager
-            ProjectManager.saveProject(context, it, layers)
+            ProjectManager.saveProject(context, it, layers, title)
         }
     }
 }

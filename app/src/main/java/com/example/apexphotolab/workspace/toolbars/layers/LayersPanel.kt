@@ -1,26 +1,13 @@
 package com.example.apexphotolab.workspace.toolbars.layers
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -31,46 +18,56 @@ fun LayersPanel(
     layers: List<Layer>,
     onAddLayer: () -> Unit,
     onLayerVisibilityChange: (Layer) -> Unit,
-    onLayersRemoved: (Set<String>) -> Unit
+    onLayersRemoved: (Set<String>) -> Unit,
+    onDismiss: () -> Unit
 ) {
     var isInRemoveMode by remember { mutableStateOf(false) }
 
-    if (isInRemoveMode) {
-        RemoveLayersScreen(
-            layers = layers,
-            onCancel = { isInRemoveMode = false },
-            onConfirm = { ids ->
-                onLayersRemoved(ids)
-                isInRemoveMode = false
-            }
-        )
-    } else {
-        Column(
-            modifier = modifier
-                .padding(8.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("Layers")
-                Row {
-                    IconButton(onClick = onAddLayer) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Layer")
+    Surface(
+        modifier = modifier
+            .fillMaxHeight()
+            .statusBarsPadding(), // Ensures content starts below the status bar
+        color = MaterialTheme.colorScheme.surface
+    ) {
+        if (isInRemoveMode) {
+            RemoveLayersScreen(
+                layers = layers,
+                onCancel = { isInRemoveMode = false },
+                onConfirm = { ids ->
+                    onLayersRemoved(ids)
+                    isInRemoveMode = false
+                }
+            )
+        } else {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = onDismiss) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back to Tools")
                     }
-                    IconButton(onClick = { isInRemoveMode = true }) {
-                        Icon(Icons.Default.Remove, contentDescription = "Remove Layer")
+                    Text("Layer Manager", style = MaterialTheme.typography.titleMedium)
+                    Row {
+                        IconButton(onClick = onAddLayer) {
+                            Icon(Icons.Default.Add, contentDescription = "Add Layer")
+                        }
+                        IconButton(onClick = { isInRemoveMode = true }) {
+                            Icon(Icons.Default.Delete, contentDescription = "Remove Layer")
+                        }
                     }
                 }
-            }
 
-            LazyColumn {
-                items(layers) { layer ->
-                    LayerRow(
-                        layer = layer,
-                        onVisibilityClick = { onLayerVisibilityChange(layer) }
-                    )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                LazyColumn(modifier = Modifier.weight(1f)) {
+                    items(layers) { layer ->
+                        LayerRow(
+                            layer = layer,
+                            onVisibilityClick = { onLayerVisibilityChange(layer) }
+                        )
+                    }
                 }
             }
         }
@@ -78,68 +75,51 @@ fun LayersPanel(
 }
 
 @Composable
-fun LayerRow(
-    layer: Layer,
-    onVisibilityClick: () -> Unit
-) {
+fun LayerRow(layer: Layer, onVisibilityClick: () -> Unit) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(layer.title, modifier = Modifier.weight(1f))
         IconButton(onClick = onVisibilityClick) {
             Icon(
                 if (layer.isVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                contentDescription = "Toggle Layer Visibility"
+                contentDescription = "Toggle Visibility"
             )
         }
         if (layer.id != "base") {
-            IconButton(onClick = { /* TODO: Implement Reordering */ }) {
-                Icon(Icons.Default.DragHandle, contentDescription = "Reorder Layer")
+            IconButton(onClick = { /* Reorder placeholder */ }) {
+                Icon(Icons.Default.DragHandle, contentDescription = "Reorder")
             }
         }
     }
 }
 
 @Composable
-fun RemoveLayersScreen(
-    layers: List<Layer>,
-    onCancel: () -> Unit,
-    onConfirm: (Set<String>) -> Unit
-) {
+fun RemoveLayersScreen(layers: List<Layer>, onCancel: () -> Unit, onConfirm: (Set<String>) -> Unit) {
     val selectedLayerIds = remember { mutableStateOf(setOf<String>()) }
 
-    Column(modifier = Modifier.padding(8.dp)) {
+    Column(modifier = Modifier.padding(16.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Button(onClick = onCancel) {
-                Text("Cancel")
-            }
-            Text("Remove Layers")
-            Button(onClick = { onConfirm(selectedLayerIds.value) }) {
-                Text("Confirm")
-            }
+            TextButton(onClick = onCancel) { Text("Cancel") }
+            Text("Delete Layers", style = MaterialTheme.typography.titleMedium)
+            Button(onClick = { onConfirm(selectedLayerIds.value) }) { Text("Confirm") }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         LazyColumn {
             items(layers.filter { it.id != "base" }) { layer ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
                     Checkbox(
                         checked = selectedLayerIds.value.contains(layer.id),
                         onCheckedChange = { isChecked ->
                             val currentIds = selectedLayerIds.value.toMutableSet()
-                            if (isChecked) {
-                                currentIds.add(layer.id)
-                            } else {
-                                currentIds.remove(layer.id)
-                            }
+                            if (isChecked) currentIds.add(layer.id) else currentIds.remove(layer.id)
                             selectedLayerIds.value = currentIds
                         }
                     )

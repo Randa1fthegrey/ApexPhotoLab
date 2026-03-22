@@ -1,10 +1,9 @@
 package com.example.apexphotolab.workspace.toolbars.export.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,20 +16,53 @@ fun ExportScreen(
     onDismiss: () -> Unit,
     onExport: (ExportType) -> Unit
 ) {
-    Column(
-        modifier = modifier.padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+    Surface(
+        modifier = modifier
+            .fillMaxHeight()
+            .statusBarsPadding(), // Ensures content starts below the status bar
+        color = MaterialTheme.colorScheme.surface
     ) {
-        Text("Choose Export Format")
-        Button(onClick = { onExport(ExportType.PNG) }) {
-            Text("Export to PNG")
-        }
-        Button(onClick = { onExport(ExportType.SVG) }) {
-            Text("Export to SVG")
-        }
-        Button(onClick = onDismiss) {
-            Text("Cancel")
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onDismiss) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back to Tools")
+                }
+                Text(
+                    text = "Export Project",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Text(
+                "Choose Export Format",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            Button(
+                onClick = { onExport(ExportType.PNG) },
+                modifier = Modifier.fillMaxWidth().height(56.dp)
+            ) {
+                Text("Export to PNG")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = { onExport(ExportType.SVG) },
+                modifier = Modifier.fillMaxWidth().height(56.dp)
+            ) {
+                Text("Export to SVG")
+            }
         }
     }
 }
