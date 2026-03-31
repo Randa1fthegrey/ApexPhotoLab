@@ -4,29 +4,27 @@ import android.graphics.Color
 
 /**
  * The "Color Group Sorter".
- * High-Fidelity Update: Corrected Hue Ranges to prevent color capture and hangs.
+ * Precision Update: Absolute White Sovereignty. 
+ * Only 100% pure white is White. This eliminates "clipping" and "dusting" on outlines.
  */
 object ColorGroupSorter {
 
     private const val ALPHA_THRESHOLD = 100
-    private const val BLACK_VALUE_FLOOR = 0.25f // Sync'd with ColorSorter
+    private const val BLACK_VALUE_FLOOR = 0.15f
+    private const val WHITE_VALUE_CEILING = 1.0f // Only pure #FFFFFF is White.
 
-    fun groupPixelIndices(pixels: IntArray): List<List<Int>> {
+    fun groupPixelIndices(pixels: IntArray, width: Int, height: Int): List<List<Int>> {
         val groups = List(10) { mutableListOf<Int>() }
-
+        
         pixels.forEachIndexed { index, pixel ->
             val groupIndex = getGroupIndexForPixel(pixel)
             if (groupIndex in 0..9) {
                 groups[groupIndex].add(index)
             }
         }
-
         return groups
     }
 
-    /**
-     * Determines the group index for a given pixel color.
-     */
     fun getGroupIndexForPixel(pixel: Int): Int {
         val a = Color.alpha(pixel)
         val r = Color.red(pixel)
@@ -39,19 +37,16 @@ object ColorGroupSorter {
         val sat = hsv[1]
         val val_ = hsv[2]
 
-        // 1. Alpha Check
         if (a < ALPHA_THRESHOLD) return 7
 
-        // 2. Neutral Check (with Luminosity Floor)
-        if (sat < 0.15f || val_ < BLACK_VALUE_FLOOR) {
-            return when {
-                val_ > 0.9f -> 6 // White
-                val_ < BLACK_VALUE_FLOOR -> 8 // Black
-                else -> 9         // Grey
-            }
-        }
+        // ABSOLUTE NEUTRAL LOGIC
+        // If it's pure white, it's White. If it's very dark, it's Black.
+        if (val_ >= WHITE_VALUE_CEILING && sat < 0.01f) return 6
+        if (val_ < BLACK_VALUE_FLOOR) return 8
 
-        // 3. Opaque Color Check
+        // If it's low saturation, it's Grey (captures the circle outline perfectly)
+        if (sat < 0.15f) return 9
+
         return when (hue) {
             in 0f..20f, in 335f..360f -> 0 // Red
             in 20f..75f -> 3               // Yellow

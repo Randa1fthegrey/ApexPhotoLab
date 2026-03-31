@@ -1,7 +1,7 @@
 package com.example.apexphotolab.workspace.tool_panel.export.svg.second_shift
 
 import android.graphics.Point
-import com.example.apexphotolab.workspace.tool_panel.export._temp_tools.SanitizerObserver
+import com.example.apexphotolab.workspace.tool_panel.export.svg._temp_tools.SanitizerObserver
 import com.example.apexphotolab.workspace.tool_panel.export.svg.second_shift.sanitizers.*
 import com.example.apexphotolab.workspace.tool_panel.export.svg.utils.CoreHighwayFactory
 import com.example.apexphotolab.workspace.tool_panel.export.svg.utils.VRAM_Garage
@@ -13,7 +13,7 @@ import kotlinx.coroutines.withContext
 /**
  * Job #1: The Team Manager.
  * Final VRAM-Optimized Version: Orchestrates 100% off-heap blob processing.
- * Updated: Now includes the "Power Wash" protocol to stop memory pollution.
+ * Updated: Now accepts raw pixels for gradient intelligence reporting.
  */
 object SecondShiftDispatcher {
 
@@ -24,7 +24,8 @@ object SecondShiftDispatcher {
     suspend fun traceInParallel(
         pixelGroups: List<List<Int>>,
         width: Int,
-        height: Int
+        height: Int,
+        pixels: IntArray // Added for gradient reporting
     ): Pair<List<List<Point>>, HashSet<Point>> = withContext(Dispatchers.Default) {
 
         val highways = CoreHighwayFactory.coreHighways
@@ -35,21 +36,15 @@ object SecondShiftDispatcher {
             val dispatcher = if (highways.isNotEmpty()) highways[index % highways.size] else Dispatchers.Default
 
             async(dispatcher) {
-                // POWER WASH: Erase any ghost data from previous runs
                 VRAM_Garage.wipeSlot(index)
-
                 val vram = VRAM_Garage.getSlotForManager(index)
 
-                // 1. Convert to VRAM Bitmask (Zero Heap) - RAW DATA
                 VRAM_BlobConverter.convertToVRAM(indices, vram)
-
-                // 2. Edge Finding from RAW VRAM Bitmask (No detail loss yet!)
                 val edges = VRAM_EdgeFinder.findEdgesVRAM(vram, width, height)
 
-                // 3. Tracing (Routing to specialist) - Captured high-fidelity paths
-                val rawPaths = TracingRouter.route(index, edges, vram, width)
+                // Pass pixels to the router and specialists
+                val rawPaths = TracingRouter.route(index, edges, vram, width, height, pixels)
 
-                // 4. PATH-BASED SANITIZATION: Clean up loose ends AFTER shapes are made
                 SanitizerObserver.logPathInput(index, rawPaths)
                 val cleanPaths = routeToPathSanitizer(index, rawPaths)
                 SanitizerObserver.logPathOutput(index, cleanPaths)
@@ -62,9 +57,6 @@ object SecondShiftDispatcher {
         return@withContext ResultAggregator.aggregate(results)
     }
 
-    /**
-     * Routes the completed paths to specialized cleaning teams.
-     */
     private fun routeToPathSanitizer(index: Int, paths: List<List<Point>>): List<List<Point>> {
         return when (index) {
             0 -> RedBlobSanitizer.sanitizePaths(paths)

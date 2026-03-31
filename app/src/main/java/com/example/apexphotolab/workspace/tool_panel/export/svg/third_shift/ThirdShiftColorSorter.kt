@@ -4,13 +4,13 @@ import android.graphics.Color
 
 /**
  * A dedicated, private Color Sorter for the Third Shift.
- * Unified Robust Build: Perfectly synced with First Shift and Groupers.
- * Reset Thresholds to prevent "Alpha Capture" of colored shapes.
+ * Updated: Precision thresholds synced with ColorGroupSorter to prevent fill spill.
  */
 object ThirdShiftColorSorter {
 
-    private const val ALPHA_THRESHOLD = 100 // Lowered from 250
-    private const val SATURATION_THRESHOLD = 0.15f
+    private const val ALPHA_THRESHOLD = 100
+    private const val BLACK_VALUE_FLOOR = 0.15f
+    private const val WHITE_VALUE_CEILING = 0.95f
 
     fun getNearestColor(pixel: Int): Int {
         val a = Color.alpha(pixel)
@@ -28,14 +28,10 @@ object ThirdShiftColorSorter {
             // 1. Alpha Range
             a < ALPHA_THRESHOLD -> ThirdShiftColorPalette.getAlphaRange()
 
-            // 2. Neutral Range
-            sat < SATURATION_THRESHOLD -> {
-                when {
-                    val_ > 0.9f -> ThirdShiftColorPalette.getWhiteRange()
-                    val_ < 0.15f -> ThirdShiftColorPalette.getBlackRange()
-                    else -> ThirdShiftColorPalette.getGreyRange()
-                }
-            }
+            // 2. Neutral Range (Synchronized with ColorGroupSorter)
+            val_ > WHITE_VALUE_CEILING && sat < 0.05f -> ThirdShiftColorPalette.getWhiteRange()
+            val_ < BLACK_VALUE_FLOOR -> ThirdShiftColorPalette.getBlackRange()
+            sat < 0.15f -> ThirdShiftColorPalette.getGreyRange()
 
             // 3. Opaque Color Ranges
             else -> getOpaqueColorSearchRange(hue)
@@ -52,7 +48,7 @@ object ThirdShiftColorSorter {
             in 160f..195f -> ThirdShiftColorPalette.getCyanRange()
             in 195f..265f -> ThirdShiftColorPalette.getBlueRange()
             in 265f..335f -> ThirdShiftColorPalette.getMagentaRange()
-            else -> ThirdShiftColorPalette.getGreyRange() // Fallback
+            else -> ThirdShiftColorPalette.getGreyRange()
         }
     }
 

@@ -5,13 +5,13 @@ import com.example.apexphotolab.workspace.tool_panel.export.svg.first_shift.colo
 
 /**
  * The "Color Sorting Hat" - High-Fidelity Build
- * Optimized: Uses a Luminosity Floor to prevent "Color Seepage" into black shapes.
+ * Updated: Precision thresholds synchronized with ColorGroupSorter.
  */
 object ColorSorter {
 
     private const val ALPHA_THRESHOLD = 100
-    private const val SATURATION_THRESHOLD = 0.15f 
-    private const val BLACK_VALUE_FLOOR = 0.25f // Captured as Black regardless of saturation
+    private const val BLACK_VALUE_FLOOR = 0.15f
+    private const val WHITE_VALUE_CEILING = 0.80f
 
     fun getNearestColor(pixel: Int): Int {
         val a = Color.alpha(pixel)
@@ -29,14 +29,10 @@ object ColorSorter {
             // 1. Alpha Range
             a < ALPHA_THRESHOLD -> ColorPalette.getAlphaRange()
 
-            // 2. Neutral Check (with Luminosity Floor for Black)
-            sat < SATURATION_THRESHOLD || val_ < BLACK_VALUE_FLOOR -> {
-                when {
-                    val_ > 0.9f -> ColorPalette.getWhiteRange()
-                    val_ < BLACK_VALUE_FLOOR -> ColorPalette.getBlackRange()
-                    else -> ColorPalette.getGreyRange()
-                }
-            }
+            // 2. Neutral Check (Synchronized with ColorGroupSorter)
+            val_ > WHITE_VALUE_CEILING && sat < 0.25f -> ColorPalette.getWhiteRange()
+            val_ < BLACK_VALUE_FLOOR -> ColorPalette.getBlackRange()
+            sat < 0.12f -> ColorPalette.getGreyRange()
 
             // 3. Opaque Color Ranges
             else -> getOpaqueColorSearchRange(hue)

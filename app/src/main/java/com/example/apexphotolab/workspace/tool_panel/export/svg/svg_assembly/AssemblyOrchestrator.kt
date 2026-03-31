@@ -1,5 +1,6 @@
 package com.example.apexphotolab.workspace.tool_panel.export.svg.svg_assembly
 
+import android.graphics.Bitmap
 import android.graphics.Point
 import com.example.apexphotolab.workspace.tool_panel.export.svg.svg_assembly.artist.SolidFillGenerator
 import com.example.apexphotolab.workspace.tool_panel.export.svg.utils.CoreHighwayFactory
@@ -8,54 +9,55 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 
 /**
- * The main orchestrator for the new Assembly Shift.
- * Takes clean path fragments and groups them into final SVG shapes.
+ * The main orchestrator for the Assembly Shift.
+ * Standardized Version: Renders all shapes as solid fills to establish 
+ * structural bedrock before applying visual effects.
  */
 object AssemblyOrchestrator {
 
-    /**
-     * Receives path fragments from the Third Shift and coordinates the final painting.
-     * Final Fix: Sorts by pixel count DESCENDING to ensure backgrounds are at the BOTTOM.
-     */
     suspend fun run(
         pathFragments: List<List<Point>>,
         pathColors: List<Int>,
-        allEdges: HashSet<Point>
+        sourceImage: Bitmap
     ): List<String> = coroutineScope {
-
-        // 1. Group the fragments by their color family.
-        val fragmentsByFamily = FragmentGrouper.group(pathFragments, pathColors)
-
-        // 2. Sort families by total pixel count (DESCENDING).
-        // This is the most reliable way to ensure the largest shapes (backgrounds) are drawn first.
-        val sortedFamilies = fragmentsByFamily.toList().sortedByDescending { it.second.originalColors.size }
 
         val highways = CoreHighwayFactory.coreHighways
 
-        // 3. Process each color family in parallel.
-        val jobs = sortedFamilies.mapIndexed { index, (groupIndex, groupData) ->
-            val (fragments, originalColors) = groupData
+        // 1. Group fragments by their EXACT color
+        val groupsByExactColor = pathFragments.indices.groupBy { pathColors[it] }
+
+        // 2. LAYERED Z-ORDER
+        // Priority: 0 (Vibrant Fills) -> 1 (White Fill) -> 2 (Grey Outline) -> 3 (Black Detail)
+        val sortedColors = groupsByExactColor.keys.sortedWith(compareBy<Int> { color ->
+            val r = android.graphics.Color.red(color); val g = android.graphics.Color.green(color); val b = android.graphics.Color.blue(color)
+            val isWhite = r > 240 && g > 240 && b > 240
+            val isBlack = r < 20 && g < 20 && b < 20
+            val isGrey = !isWhite && !isBlack && r == g && g == b
+
+            when {
+                isBlack -> 3
+                isGrey -> 2
+                isWhite -> 1
+                else -> 0
+            }
+        }.thenByDescending { color ->
+            groupsByExactColor[color]?.sumOf { pathFragments[it].size } ?: 0
+        })
+
+        // 3. Parallel Painting
+        val jobs = sortedColors.mapIndexed { index, color ->
+            val fragmentIndices = groupsByExactColor[color] ?: emptyList()
             val highway = if (highways.isNotEmpty()) highways[index % highways.size] else coroutineContext
 
             async(highway) {
-                if (fragments.isNotEmpty()) {
-                    val finalColor = findDominantColor(originalColors)
-                    val svgElement = SolidFillGenerator.generate(fragments, finalColor)
-                    svgElement
-                } else {
-                    ""
-                }
+                if (fragmentIndices.isNotEmpty()) {
+                    val colorFragments = fragmentIndices.map { pathFragments[it] }
+                    // Render everything as solid to ensure border and shape integrity
+                    SolidFillGenerator.generate(colorFragments, color)
+                } else ""
             }
         }
 
         return@coroutineScope jobs.awaitAll().filter { it.isNotEmpty() }
-    }
-
-    private fun findDominantColor(colors: List<Int>): Int {
-        if (colors.isEmpty()) return 0
-        val validColors = colors.filter { android.graphics.Color.alpha(it) > 0 }
-        if (validColors.isEmpty()) return colors.first()
-
-        return validColors.groupingBy { it }.eachCount().maxByOrNull { it.value }?.key ?: validColors.first()
     }
 }

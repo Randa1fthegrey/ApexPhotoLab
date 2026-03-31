@@ -1,8 +1,8 @@
 package com.example.apexphotolab.workspace.tool_panel.export.svg.svg_assembly
 
 import android.graphics.Bitmap
-import com.example.apexphotolab.workspace.tool_panel.export._temp_tools.HandoffLogger
-import com.example.apexphotolab.workspace.tool_panel.export._temp_tools.SvgInspector
+import com.example.apexphotolab.workspace.tool_panel.export.svg._temp_tools.HandoffLogger
+import com.example.apexphotolab.workspace.tool_panel.export.svg._temp_tools.ShapeCounter
 import com.example.apexphotolab.workspace.tool_panel.export.data.TransparencyCrewOrchestrator
 import com.example.apexphotolab.workspace.tool_panel.export.svg.first_shift.ColorQuantizer
 import com.example.apexphotolab.workspace.tool_panel.export.svg.second_shift.SecondShiftOrchestrator
@@ -15,7 +15,6 @@ import kotlinx.coroutines.withContext
 
 /**
  * The Master Orchestrator (CEO) of the SVG Generation process.
- * Corrected: Ensures transparency/backgrounds are at the bottom of the Z-order.
  */
 object SvgGenerator {
 
@@ -26,25 +25,22 @@ object SvgGenerator {
             HandoffLogger.logShift1to2(quantizedImage.width, quantizedImage.height)
 
             val allSvgElements = coroutineScope {
-                // Run crews in parallel
                 val solidColorCrewJob = async {
                     onProgress(0.4f)
                     val (pathFragments, allEdges) = SecondShiftOrchestrator.run(quantizedImage)
                     HandoffLogger.logShift2to3(pathFragments.size, allEdges.size)
 
                     onProgress(0.7f)
-                    val pathColors = ThirdShiftOrchestrator.run(pathFragments, quantizedImage)
-                    HandoffLogger.logShift3toAssembly(pathColors.size)
+                    val (consolidatedPaths, consolidatedColors) = ThirdShiftOrchestrator.run(pathFragments, quantizedImage)
+                    HandoffLogger.logShift3toAssembly(consolidatedColors.size)
 
-                    AssemblyOrchestrator.run(pathFragments, pathColors, allEdges)
+                    AssemblyOrchestrator.run(consolidatedPaths, consolidatedColors, image)
                 }
 
                 val transparencyCrewJob = async {
                     TransparencyCrewOrchestrator.run(quantizedImage)
                 }
 
-                // IMPORTANT: Transparency/Background results MUST come first in the list
-                // so they are written to the SVG first (at the bottom).
                 transparencyCrewJob.await() + solidColorCrewJob.await()
             }
 
@@ -53,8 +49,8 @@ object SvgGenerator {
             onProgress(0.9f)
             val finalSvg = SVGAssembler.assemble(allSvgElements, image.width, image.height)
             
-            // DIAGNOSTIC: Inspect the final string for glitches and color data
-            SvgInspector.inspect(finalSvg)
+            // SHUT OFF OLD DIAGNOSTICS - ACTIVATE SHAPE COUNTER
+            ShapeCounter.log(finalSvg)
 
             return@withContext finalSvg
         }

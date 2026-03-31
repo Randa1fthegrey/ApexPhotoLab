@@ -7,13 +7,10 @@ import java.util.LinkedList
 
 /**
  * A single-responsibility utility for detecting all transparent regions in an image.
+ * Updated: Strict Alpha Shield. Prevents "leakage" into semi-transparent edges of solid shapes.
  */
 object AlphaGradientDetector {
 
-    /**
-     * Defines the results of an alpha gradient analysis.
-     * Now includes width and height for edge detection.
-     */
     data class AlphaGradientInfo(
         val blob: HashSet<Point>,
         val startAlpha: Int,
@@ -23,9 +20,8 @@ object AlphaGradientDetector {
         val height: Int
     )
 
-    /**
-     * Finds and analyzes all transparent regions in the image.
-     */
+    private const val STRICT_ALPHA_THRESHOLD = 50 // Only capture very low alpha (background)
+
     fun detect(image: Bitmap): List<AlphaGradientInfo> {
         val width = image.width
         val height = image.height
@@ -36,8 +32,6 @@ object AlphaGradientDetector {
         val reports = mutableListOf<AlphaGradientInfo>()
 
         for (blob in transparentBlobs) {
-            // Delegate the analysis job to the single-responsibility analyzer.
-            // Pass the image height as well to match the new signature.
             val report = AlphaSlopeAnalyzer.analyze(blob, pixels, width, height)
             reports.add(report)
         }
@@ -45,17 +39,17 @@ object AlphaGradientDetector {
         return reports
     }
 
-    /**
-     * Scans the image to find all contiguous blobs of semi-transparent pixels.
-     */
     private fun findTransparentBlobs(pixels: IntArray, width: Int, height: Int): List<HashSet<Point>> {
         val blobs = mutableListOf<HashSet<Point>>()
         val visited = BooleanArray(pixels.size)
+        val borderBuffer = 50 
 
-        for (y in 0 until height) {
-            for (x in 0 until width) {
+        for (y in borderBuffer until height - borderBuffer) {
+            for (x in borderBuffer until width - borderBuffer) {
                 val index = y * width + x
-                if (Color.alpha(pixels[index]) < 255 && !visited[index]) {
+                
+                // 1. Initial trigger: Must be very transparent
+                if (Color.alpha(pixels[index]) < STRICT_ALPHA_THRESHOLD && !visited[index]) {
                     val newBlob = HashSet<Point>()
                     val queue = LinkedList<Point>()
 
@@ -74,7 +68,9 @@ object AlphaGradientDetector {
                         for (neighbor in neighbors) {
                             if (neighbor.x in 0 until width && neighbor.y in 0 until height) {
                                 val neighborIndex = neighbor.y * width + neighbor.x
-                                if (Color.alpha(pixels[neighborIndex]) < 255 && !visited[neighborIndex]) {
+                                // 2. Expansion trigger: Must ALSO be very transparent
+                                // This prevents the crew from flowing into vibrant, semi-aliased shapes
+                                if (Color.alpha(pixels[neighborIndex]) < STRICT_ALPHA_THRESHOLD && !visited[neighborIndex]) {
                                     visited[neighborIndex] = true
                                     queue.add(neighbor)
                                 }

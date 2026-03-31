@@ -2,11 +2,11 @@ package com.example.apexphotolab.workspace.tool_panel.export.svg.second_shift
 
 import android.graphics.Bitmap
 import android.graphics.Point
+import com.example.apexphotolab.workspace.tool_panel.export.svg.second_shift.gradient_scouts.GradientScoutOrchestrator
 
 /**
  * The Master Orchestrator for the Second Shift (Path Tracing).
- * It coordinates the sorting of pixels into color groups and dispatches
- * them to specialized teams for surgical edge tracing.
+ * High-Fidelity Update: Gradient Scouts run first to map out smears before tracing.
  */
 object SecondShiftOrchestrator {
 
@@ -19,14 +19,17 @@ object SecondShiftOrchestrator {
         val pixels = IntArray(width * height)
         quantizedImage.getPixels(pixels, 0, width, 0, 0, width, height)
 
-        // 1. Sort all pixels into their respective color groups (0-7)
-        val colorGroups = ColorGroupSorter.groupPixelIndices(pixels)
+        // 1. TEAM 0: GRADIENT SCOUTS
+        // They go first, scanning the image for color smears and populating the Intelligence Agency.
+        GradientScoutOrchestrator.run(quantizedImage)
 
-        // 2. Dispatch each group to its own "Team" for edge finding and tracing.
-        // The dispatcher handles the parallel "Lonely Walkers".
-        val (pathFragments, allEdges) = SecondShiftDispatcher.traceInParallel(colorGroups, width, height)
+        // 2. Initial Sorting
+        val colorGroups = ColorGroupSorter.groupPixelIndices(pixels, width, height)
 
-        // 3. Return the clean paths and the master edge blueprint for the Assembly Shift.
-        return Pair(pathFragments, allEdges)
+        // 3. Dispatch all groups to specialized tracer teams.
+        // Tracers will now have access to the GradientIntelligenceAgency reports.
+        val (allPaths, allEdges) = SecondShiftDispatcher.traceInParallel(colorGroups, width, height, pixels)
+
+        return Pair(allPaths, allEdges)
     }
 }

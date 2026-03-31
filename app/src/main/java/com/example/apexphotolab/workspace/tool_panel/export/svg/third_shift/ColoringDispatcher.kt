@@ -10,7 +10,7 @@ import kotlinx.coroutines.withContext
 
 /**
  * The "Factory Floor Dispatcher" for the Third Shift (Path Coloring).
- * Clones the First Shift's successful "equal slices" model.
+ * Updated: Returns the raw resolved colors for the orchestrator to consolidate.
  */
 object ColoringDispatcher {
 
@@ -22,6 +22,7 @@ object ColoringDispatcher {
         val hiredCrew = ThirdShiftHiringDepartment.hireCensusTakers()
         if (hiredCrew.isEmpty()) return@withContext emptyList()
 
+        // Create slices of the 51 path fragments
         val workSlices = ThirdShiftPathSlicer.createSlices(paths)
 
         val jobs = workSlices.mapIndexed { index, slice ->
@@ -32,9 +33,8 @@ object ColoringDispatcher {
                 val vramSlot = VRAM_Garage.getSlotForManager(censusTaker.id)
                 val results = mutableListOf<Pair<Int, Int>>()
                 slice.forEach { (originalIndex, pathData) ->
-                    // POWER WASH: Wipe the slot before every shape analysis to prevent "Ghost Fills"
                     VRAM_Garage.wipeSlot(censusTaker.id)
-
+                    // Each census taker finds the ground-truth color for its fragment
                     val color = censusTaker.analyzePath(pathData, quantizedImage, vramSlot)
                     results.add(originalIndex to color)
                 }
@@ -43,8 +43,8 @@ object ColoringDispatcher {
         }
 
         val unorderedResults = jobs.awaitAll().flatten()
-
         val orderedResults = unorderedResults.sortedBy { it.first }.map { it.second }
+
         return@withContext orderedResults
     }
 }
