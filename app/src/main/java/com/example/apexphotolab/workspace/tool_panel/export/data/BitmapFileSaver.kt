@@ -8,20 +8,25 @@ import kotlinx.coroutines.withContext
 import java.io.IOException
 
 /**
- * A simple, single-responsibility utility for saving a bitmap to a file.
+ * A flexible utility for saving bitmaps with specific formats and quality.
  */
 object BitmapFileSaver {
 
     /**
-     * Writes the given bitmap to the specified URI as a PNG.
-     * This function will throw an [java.io.IOException] if the file cannot be written.
+     * Writes the given bitmap to the specified URI.
+     * Updated: Supports dynamic formats and quality for file-size targeting.
      */
-    suspend fun saveBitmap(context: Context, bitmap: Bitmap, uri: Uri) =
-        withContext(Dispatchers.IO) {
-            context.contentResolver.openOutputStream(uri)?.use { outputStream ->
-                if (!bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)) {
-                    throw IOException("Failed to compress bitmap for URI: $uri")
-                }
-            } ?: throw IOException("Failed to open output stream for URI: $uri")
-        }
+    suspend fun saveBitmap(
+        context: Context, 
+        bitmap: Bitmap, 
+        uri: Uri,
+        format: Bitmap.CompressFormat = Bitmap.CompressFormat.PNG,
+        quality: Int = 100
+    ) = withContext(Dispatchers.IO) {
+        context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+            if (!bitmap.compress(format, quality, outputStream)) {
+                throw IOException("Failed to compress bitmap for URI: $uri")
+            }
+        } ?: throw IOException("Failed to open output stream for URI: $uri")
+    }
 }

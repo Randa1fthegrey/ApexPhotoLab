@@ -7,53 +7,58 @@ import android.util.Log
 import com.example.apexphotolab.workspace.tool_panel.layers.Layer
 
 /**
- * A single-responsibility utility for loading a list of layers from disk into bitmaps.
+ * A single-responsibility utility for loading and flattening layers.
+ * Updated: Supports high-quality image resizing for export.
  */
 object ImageFlattener {
 
     /**
-     * Takes a list of layers, loads them into Bitmaps, and then flattens them into a single Bitmap.
+     * Flattens layers and resizes the result to the target dimensions.
      */
-    fun flattenLayers(context: Context, layers: List<Layer>, applyGreyscale: Boolean = false): Bitmap? {
-        Log.d("ImageFlattener", "Received ${layers.size} total layers for flattening.")
+    fun flattenLayers(
+        context: Context, 
+        layers: List<Layer>, 
+        applyGreyscale: Boolean = false,
+        targetWidth: Int = 1024,
+        targetHeight: Int = 1024
+    ): Bitmap? {
+        Log.d("ImageFlattener", "Resizing export to $targetWidth x $targetHeight")
         
         val visibleLayers = layers.filter { it.isVisible }.sortedBy { it.zOrder }
-        Log.d("ImageFlattener", "Found ${visibleLayers.size} visible layers.")
+        if (visibleLayers.isEmpty()) return null
 
-        if (visibleLayers.isEmpty()) {
-            Log.e("ImageFlattener", "Flattening failed: No visible layers found in the list.")
-            return null
-        }
-
-        var maxWidth = 0
-        var maxHeight = 0
+        var sourceMaxWidth = 0
+        var sourceMaxHeight = 0
 
         val bitmaps = visibleLayers.mapNotNull { layer ->
             try {
-                Log.d("ImageFlattener", "Loading layer: ${layer.title} (URI: ${layer.imageUri})")
                 context.contentResolver.openInputStream(layer.imageUri)?.use { inputStream ->
                     val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
                     BitmapFactory.decodeStream(inputStream, null, options)
-                    if (options.outWidth > maxWidth) maxWidth = options.outWidth
-                    if (options.outHeight > maxHeight) maxHeight = options.outHeight
+                    if (options.outWidth > sourceMaxWidth) sourceMaxWidth = options.outWidth
+                    if (options.outHeight > sourceMaxHeight) sourceMaxHeight = options.outHeight
                     
                     context.contentResolver.openInputStream(layer.imageUri)?.use { fullInputStream ->
                         BitmapFactory.decodeStream(fullInputStream)
                     }
                 }
             } catch (e: Exception) {
-                Log.e("ImageFlattener", "Failed to load layer ${layer.title}: ${e.message}")
-                e.printStackTrace()
                 null
             }
         }
 
-        if (bitmaps.isEmpty() || maxWidth == 0 || maxHeight == 0) {
-            Log.e("ImageFlattener", "Flattening failed: Bitmaps list is empty after loading.")
-            return null
-        }
+        if (bitmaps.isEmpty() || sourceMaxWidth == 0 || sourceMaxHeight == 0) return null
 
-        Log.d("ImageFlattener", "Successfully loaded ${bitmaps.size} bitmaps. Drawing final image...")
-        return BitmapDrawer.draw(bitmaps, maxWidth, maxHeight, applyGreyscale)
+        // 1. Draw the flattened image at its original maximum resolution first
+        val flattened = BitmapDrawer.draw(bitmaps, sourceMaxWidth, sourceMaxHeight, applyGreyscale) ?: return null
+
+        // 2. Perform the high-quality resize
+        return if (sourceMaxWidth == targetWidth && sourceMaxHeight == targetHeight) {
+            flattened
+        } else {
+            val scaled = Bitmap.createScaledBitmap(flattened, targetWidth, targetHeight, true)
+            flattened.recycle() // Clean up the original
+            scaled
+        }
     }
 }

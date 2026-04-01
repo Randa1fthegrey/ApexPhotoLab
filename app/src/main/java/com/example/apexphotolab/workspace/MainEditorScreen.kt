@@ -26,6 +26,7 @@ import com.example.apexphotolab.workspace.tool_panel.save.ui.SnapshotNameDialog
 import com.example.apexphotolab.workspace.tool_panel.export.data.ExportJobManager
 import com.example.apexphotolab.workspace.tool_panel.export.ui.ExportProgressDialog
 import com.example.apexphotolab.workspace.tool_panel.export.ui.ExportScreen
+import com.example.apexphotolab.workspace.tool_panel.export.ui.ResolutionCategory
 import com.example.apexphotolab.workspace.tool_panel.export.data.ExportType
 import com.example.apexphotolab.workspace.tool_panel.filters.FilterPanel
 import com.example.apexphotolab.workspace.tool_panel.layers.Layer
@@ -50,6 +51,17 @@ fun MainEditorScreen(
     val layers = remember { mutableStateListOf<Layer>() }
     var projectDirName by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(true) }
+
+    // --- PERSISTENT EXPORT STATE ---
+    var exportResolution by remember { mutableStateOf("1024 x 1024") }
+    var exportCategory by remember { mutableStateOf(ResolutionCategory.STANDARD) }
+    var widescreenIndex by remember { mutableIntStateOf(1) }
+    var standardIndex by remember { mutableIntStateOf(0) }
+    var customWidth by remember { mutableStateOf("1024") }
+    var customHeight by remember { mutableStateOf("1024") }
+    
+    var targetFileSize by remember { mutableStateOf("500") }
+    var fileSizeUnit by remember { mutableStateOf("KB") }
 
     // --- UI STATE ---
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -84,13 +96,10 @@ fun MainEditorScreen(
     val performQuickSave: () -> Unit = {
         scope.launch {
             val history = ProjectManager.getHistory(DocumentFile.fromTreeUri(context, projectDirUri)!!)
-            // Filter history to find existing quick saves with the same project name
             val quickSaveCount = history.count { snapshot ->
                 snapshot.name?.contains(projectDirName) == true && !snapshot.name!!.contains("Project Birth")
             }
-            
             val autoTitle = if (quickSaveCount == 0) projectDirName else "$projectDirName ($quickSaveCount)"
-            
             ProjectSaveManager.saveProject(context, projectDirUri, layers.toList(), autoTitle)
             lastSaveTime = System.currentTimeMillis()
             Toast.makeText(context, "Saved project!", Toast.LENGTH_SHORT).show()
@@ -123,7 +132,16 @@ fun MainEditorScreen(
             showExportProgress = true
             exportJob = scope.launch {
                 try {
-                    ExportJobManager.runExportJob(context, exportType, directoryUri, projectDirName, layers, colorFilter != null) { exportProgress = it }
+                    ExportJobManager.runExportJob(
+                        context = context,
+                        exportType = exportType,
+                        directoryUri = directoryUri,
+                        projectName = projectDirName,
+                        layers = layers,
+                        isGreyscale = colorFilter != null,
+                        resolution = exportResolution,
+                        onProgress = { exportProgress = it }
+                    )
                     Toast.makeText(context, "Export Finished", Toast.LENGTH_SHORT).show()
                 } catch (e: Exception) {
                     if (e !is CancellationException) Toast.makeText(context, "Export Failed", Toast.LENGTH_SHORT).show()
@@ -165,13 +183,28 @@ fun MainEditorScreen(
             } else if (showExportScreen) {
                 ExportScreen(
                     modifier = Modifier.fillMaxHeight().width(320.dp),
+                    category = exportCategory,
+                    widescreenIndex = widescreenIndex,
+                    standardIndex = standardIndex,
+                    customW = customWidth,
+                    customH = customHeight,
+                    targetFileSize = targetFileSize,
+                    fileSizeUnit = fileSizeUnit,
+                    onCategoryChange = { exportCategory = it },
+                    onWidescreenIndexChange = { widescreenIndex = it },
+                    onStandardIndexChange = { standardIndex = it },
+                    onCustomWidthChange = { customWidth = it },
+                    onCustomHeightChange = { customHeight = it },
+                    onTargetFileSizeChange = { targetFileSize = it },
+                    onFileSizeUnitChange = { fileSizeUnit = it },
                     onDismiss = { showExportScreen = false },
                     onExport = { exportType -> 
                         showExportScreen = false
                         pendingExportType = exportType
                         exportLauncher.launch(null)
                         scope.launch { drawerState.close() }
-                    }
+                    },
+                    onResolutionChange = { exportResolution = it }
                 )
             } else if (showFilterPanel) {
                 FilterPanel(
@@ -226,12 +259,12 @@ fun MainEditorScreen(
             topBar = {
                 EditorHeader(
                     projectName = projectDirName,
-                    resolution = "1024 x 1024",
+                    resolution = exportResolution,
                     activeLayerName = activeLayerName,
                     lastSaveTime = lastSaveTime,
                     activeToolIcon = activeToolIcon,
                     onTabClick = { scope.launch { if (drawerState.isClosed) drawerState.open() else drawerState.close() } },
-                    onQuickSaveClick = performQuickSave // Connected Quick Save button
+                    onQuickSaveClick = performQuickSave
                 )
             }
         ) { padding ->
@@ -239,7 +272,16 @@ fun MainEditorScreen(
                 if (isLoading) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 } else {
-                    EditorWorkspace(layers = layers, colorFilter = colorFilter)
+                    EditorWorkspace(
+                        layers = layers, 
+                        colorFilter = colorFilter,
+                        onLayerTransform = { updatedLayer ->
+                            val index = layers.indexOfFirst { it.id == updatedLayer.id }
+                            if (index != -1) {
+                                layers[index] = updatedLayer
+                            }
+                        }
+                    )
                 }
             }
         }
