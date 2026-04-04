@@ -30,15 +30,11 @@ fun ExportScreen(
     standardIndex: Int,
     customW: String,
     customH: String,
-    targetFileSize: String,
-    fileSizeUnit: String,
     onCategoryChange: (ResolutionCategory) -> Unit,
     onWidescreenIndexChange: (Int) -> Unit,
     onStandardIndexChange: (Int) -> Unit,
     onCustomWidthChange: (String) -> Unit,
     onCustomHeightChange: (String) -> Unit,
-    onTargetFileSizeChange: (String) -> Unit,
-    onFileSizeUnitChange: (String) -> Unit,
     onDismiss: () -> Unit,
     onExport: (ExportType) -> Unit,
     onResolutionChange: (String) -> Unit
@@ -55,34 +51,13 @@ fun ExportScreen(
         "4096 x 4096" to "4K Ultra (1:1)"
     )
 
-    val sizeUnits = listOf("B", "KB", "MB")
-    var unitMenuExpanded by remember { mutableStateOf(false) }
-    var useFileSizeTarget by remember { mutableStateOf(false) }
+    var showWebpDialog by remember { mutableStateOf(false) }
 
-    val targetBytes = remember(targetFileSize, fileSizeUnit) {
-        val value = targetFileSize.toDoubleOrNull() ?: 0.0
-        val multiplier = when (fileSizeUnit) {
-            "MB" -> 1024 * 1024
-            "KB" -> 1024
-            else -> 1
-        }
-        (value * multiplier).toLong()
-    }
-
-    val isPngFeasible = !useFileSizeTarget || targetBytes >= 5120
-    val isSvgFeasible = !useFileSizeTarget || targetBytes >= 20480
-    val isJpgFeasible = !useFileSizeTarget || targetBytes >= 1024
-    val isWebpFeasible = !useFileSizeTarget || targetBytes >= 1024
-
-    LaunchedEffect(category, widescreenIndex, standardIndex, customW, customH, targetFileSize, fileSizeUnit, useFileSizeTarget) {
-        val resolution = if (useFileSizeTarget) {
-            "$targetFileSize $fileSizeUnit (Target)"
-        } else {
-            when (category) {
-                ResolutionCategory.WIDESCREEN -> widescreenPresets[widescreenIndex].first
-                ResolutionCategory.STANDARD -> standardPresets[standardIndex].first
-                ResolutionCategory.CUSTOM -> "$customW x $customH"
-            }
+    LaunchedEffect(category, widescreenIndex, standardIndex, customW, customH) {
+        val resolution = when (category) {
+            ResolutionCategory.WIDESCREEN -> widescreenPresets[widescreenIndex].first
+            ResolutionCategory.STANDARD -> standardPresets[standardIndex].first
+            ResolutionCategory.CUSTOM -> "$customW x $customH"
         }
         onResolutionChange(resolution)
     }
@@ -90,7 +65,7 @@ fun ExportScreen(
     Surface(
         modifier = modifier
             .fillMaxHeight()
-            .safeDrawingPadding(), // AUTOMATICALLY HANDLES STATUS AND NAVIGATION BARS
+            .safeDrawingPadding(),
         color = MaterialTheme.colorScheme.surface
     ) {
         Column(
@@ -99,7 +74,7 @@ fun ExportScreen(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.Start
         ) {
-            Spacer(modifier = Modifier.height(16.dp)) // Top margin
+            Spacer(modifier = Modifier.height(16.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -121,18 +96,18 @@ fun ExportScreen(
             ExportSectionTitle("Resolution")
             SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                 SegmentedButton(
-                    selected = (!useFileSizeTarget && category == ResolutionCategory.WIDESCREEN),
-                    onClick = { useFileSizeTarget = false; onCategoryChange(ResolutionCategory.WIDESCREEN) },
+                    selected = category == ResolutionCategory.WIDESCREEN,
+                    onClick = { onCategoryChange(ResolutionCategory.WIDESCREEN) },
                     shape = SegmentedButtonDefaults.itemShape(index = 0, count = 3)
                 ) { Text("Wide") }
                 SegmentedButton(
-                    selected = (!useFileSizeTarget && category == ResolutionCategory.STANDARD),
-                    onClick = { useFileSizeTarget = false; onCategoryChange(ResolutionCategory.STANDARD) },
+                    selected = category == ResolutionCategory.STANDARD,
+                    onClick = { onCategoryChange(ResolutionCategory.STANDARD) },
                     shape = SegmentedButtonDefaults.itemShape(index = 1, count = 3)
                 ) { Text("Square") }
                 SegmentedButton(
-                    selected = (!useFileSizeTarget && category == ResolutionCategory.CUSTOM),
-                    onClick = { useFileSizeTarget = false; onCategoryChange(ResolutionCategory.CUSTOM) },
+                    selected = category == ResolutionCategory.CUSTOM,
+                    onClick = { onCategoryChange(ResolutionCategory.CUSTOM) },
                     shape = SegmentedButtonDefaults.itemShape(index = 2, count = 3)
                 ) { Text("Custom") }
             }
@@ -140,54 +115,32 @@ fun ExportScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Column(modifier = Modifier.fillMaxWidth().height(160.dp).selectableGroup()) {
-                if (!useFileSizeTarget) {
-                    when (category) {
-                        ResolutionCategory.WIDESCREEN -> {
-                            widescreenPresets.forEachIndexed { index, pair ->
-                                ResolutionOption(text = "${pair.first} = ${pair.second}", selected = (index == widescreenIndex), onClick = { onWidescreenIndexChange(index) })
-                            }
-                        }
-                        ResolutionCategory.STANDARD -> {
-                            standardPresets.forEachIndexed { index, pair ->
-                                ResolutionOption(text = "${pair.first} = ${pair.second}", selected = (index == standardIndex), onClick = { onStandardIndexChange(index) })
-                            }
-                        }
-                        ResolutionCategory.CUSTOM -> {
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                OutlinedTextField(value = customW, onValueChange = { onCustomWidthChange(it.filter { c -> c.isDigit() }) }, label = { Text("Width") }, modifier = Modifier.weight(1f), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true)
-                                OutlinedTextField(value = customH, onValueChange = { onCustomHeightChange(it.filter { c -> c.isDigit() }) }, label = { Text("Height") }, modifier = Modifier.weight(1f), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true)
-                            }
+                when (category) {
+                    ResolutionCategory.WIDESCREEN -> {
+                        widescreenPresets.forEachIndexed { index, pair ->
+                            ResolutionOption(
+                                text = "${pair.first} = ${pair.second}", 
+                                selected = (index == widescreenIndex), 
+                                onClick = { onWidescreenIndexChange(index) }
+                            )
                         }
                     }
-                } else {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("Resolution auto-fit active.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    ResolutionCategory.STANDARD -> {
+                        standardPresets.forEachIndexed { index, pair ->
+                            ResolutionOption(
+                                text = "${pair.first} = ${pair.second}", 
+                                selected = (index == standardIndex), 
+                                onClick = { onStandardIndexChange(index) }
+                            )
+                        }
                     }
-                }
-            }
-
-            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
-
-            // --- FILE SIZE SECTION ---
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                ExportSectionTitle("File Size", Modifier.weight(1f))
-                Switch(checked = useFileSizeTarget, onCheckedChange = { useFileSizeTarget = it })
-            }
-            
-            if (useFileSizeTarget) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(value = targetFileSize, onValueChange = { onTargetFileSizeChange(it.filter { c -> c.isDigit() }) }, label = { Text("Limit") }, modifier = Modifier.weight(1f), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true)
-                    Box {
-                        OutlinedButton(onClick = { unitMenuExpanded = true }, modifier = Modifier.height(56.dp).padding(top = 8.dp)) { Text(fileSizeUnit) }
-                        DropdownMenu(expanded = unitMenuExpanded, onDismissRequest = { unitMenuExpanded = false }) {
-                            sizeUnits.forEach { unit ->
-                                DropdownMenuItem(text = { Text(unit) }, onClick = { onFileSizeUnitChange(unit); unitMenuExpanded = false })
-                            }
+                    ResolutionCategory.CUSTOM -> {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            OutlinedTextField(value = customW, onValueChange = { onCustomWidthChange(it.filter { c -> c.isDigit() }) }, label = { Text("Width") }, modifier = Modifier.weight(1f), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true)
+                            OutlinedTextField(value = customH, onValueChange = { onCustomHeightChange(it.filter { c -> c.isDigit() }) }, label = { Text("Height") }, modifier = Modifier.weight(1f), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true)
                         }
                     }
                 }
-            } else {
-                Text("Disabled. Using resolution settings.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
@@ -195,39 +148,37 @@ fun ExportScreen(
             // --- FILE TYPE SECTION ---
             ExportSectionTitle("Format")
             
-            // WEB & MOBILE
             Text("Web & Mobile", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
-            ExportButton(text = "PNG (High Quality)", enabled = isPngFeasible, onClick = { onExport(ExportType.PNG) })
-            ExportButton(text = "JPG (Optimized)", enabled = isJpgFeasible, onClick = { onExport(ExportType.JPG) })
-            ExportButton(text = "WebP (Ultra Compact)", enabled = isWebpFeasible, onClick = { onExport(ExportType.WEBP) })
-            ExportButton(text = "SVG (Vector Shape)", enabled = isSvgFeasible, onClick = { onExport(ExportType.SVG) })
+            ExportButton(text = "PNG (High Quality)", enabled = true, onClick = { onExport(ExportType.PNG) })
+            ExportButton(text = "JPG (Optimized)", enabled = true, onClick = { onExport(ExportType.JPG) })
+            ExportButton(text = "WebP (Ultra Compact)", enabled = true, onClick = { showWebpDialog = true })
+            ExportButton(text = "SVG (Vector Shape)", enabled = true, onClick = { onExport(ExportType.SVG) })
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // PROFESSIONAL
             Text("Professional & Print", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
-            ExportButton(text = "TIFF (Lossless Print)", enabled = !useFileSizeTarget, onClick = { onExport(ExportType.TIFF) })
-            ExportButton(text = "BMP (Uncompressed)", enabled = !useFileSizeTarget, onClick = { onExport(ExportType.BMP) })
+            ExportButton(text = "TIFF (Lossless Print)", enabled = true, onClick = { onExport(ExportType.TIFF) })
+            ExportButton(text = "BMP (Uncompressed)", enabled = true, onClick = { onExport(ExportType.BMP) })
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // PROJECT DATA
             Text("External Editors", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
-            ExportButton(text = "PSD (Photoshop)", enabled = !useFileSizeTarget, onClick = { onExport(ExportType.PSD) })
-            ExportButton(text = "XCF (GIMP Project)", enabled = !useFileSizeTarget, onClick = { onExport(ExportType.XCF) })
+            ExportButton(text = "PSD (Photoshop)", enabled = true, onClick = { onExport(ExportType.PSD) })
+            ExportButton(text = "XCF (GIMP Project)", enabled = true, onClick = { onExport(ExportType.XCF) })
             
-            if (!isPngFeasible || !isSvgFeasible) {
-                Text(
-                    text = "Some formats disabled: Target size too small.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(top = 16.dp)
-                )
-            }
-
-            // EXTRA PADDING AT BOTTOM TO PREVENT BAR CLIPPING
             Spacer(modifier = Modifier.height(64.dp))
         }
+    }
+
+    if (showWebpDialog) {
+        WebPFormatDialog(
+            onDismiss = { showWebpDialog = false },
+            onConfirm = { type ->
+                showWebpDialog = false
+                val exportType = if (type == WebPType.LOSSY) ExportType.WEBP_LOSSY else ExportType.WEBP_LOSSLESS
+                onExport(exportType)
+            }
+        )
     }
 }
 

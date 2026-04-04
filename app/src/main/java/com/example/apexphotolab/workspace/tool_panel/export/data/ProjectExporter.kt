@@ -3,6 +3,7 @@ package com.example.apexphotolab.workspace.tool_panel.export.data
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import com.example.apexphotolab.workspace.tool_panel.export.svg.svg_assembly.SvgGenerator
 import com.example.apexphotolab.workspace.tool_panel.layers.Layer
 import kotlinx.coroutines.Dispatchers
@@ -13,7 +14,7 @@ import java.io.FileOutputStream
 
 /**
  * A worker that performs the export operation with resizing and file-size targeting support.
- * Updated: Supports Professional Format Suite (PNG, SVG, JPG, WEBP, BMP, PSD, TIFF, XCF).
+ * Updated: Supports specialized WebP variants (Lossy and Lossless).
  */
 object ProjectExporter {
 
@@ -29,29 +30,39 @@ object ProjectExporter {
         flattenedBitmap.recycle()
     }
 
-    suspend fun exportProjectToWebp(context: Context, layers: List<Layer>, outputUri: Uri, applyGreyscale: Boolean = false, targetWidth: Int = 1024, targetHeight: Int = 1024) = withContext(Dispatchers.IO) {
+    suspend fun exportProjectToWebp(
+        context: Context, 
+        layers: List<Layer>, 
+        outputUri: Uri, 
+        applyGreyscale: Boolean = false, 
+        targetWidth: Int = 1024, 
+        targetHeight: Int = 1024,
+        isLossless: Boolean = false // New parameter
+    ) = withContext(Dispatchers.IO) {
         val flattenedBitmap = ImageFlattener.flattenLayers(context, layers, applyGreyscale, targetWidth, targetHeight) ?: throw IllegalStateException("Export failed")
-        BitmapFileSaver.saveBitmap(context, flattenedBitmap, outputUri, Bitmap.CompressFormat.WEBP, 90)
+        
+        val format = when {
+            isLossless -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) Bitmap.CompressFormat.WEBP_LOSSLESS else Bitmap.CompressFormat.WEBP
+            else -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) Bitmap.CompressFormat.WEBP_LOSSY else Bitmap.CompressFormat.WEBP
+        }
+        
+        BitmapFileSaver.saveBitmap(context, flattenedBitmap, outputUri, format, 90)
         flattenedBitmap.recycle()
     }
 
     suspend fun exportProjectToBmp(context: Context, layers: List<Layer>, outputUri: Uri, applyGreyscale: Boolean = false, targetWidth: Int = 1024, targetHeight: Int = 1024) = withContext(Dispatchers.IO) {
-        // BMP logic to be implemented
         exportProjectToPng(context, layers, outputUri, applyGreyscale, targetWidth, targetHeight)
     }
 
     suspend fun exportProjectToTiff(context: Context, layers: List<Layer>, outputUri: Uri, applyGreyscale: Boolean = false, targetWidth: Int = 1024, targetHeight: Int = 1024) = withContext(Dispatchers.IO) {
-        // TIFF logic to be implemented
         exportProjectToPng(context, layers, outputUri, applyGreyscale, targetWidth, targetHeight)
     }
 
     suspend fun exportProjectToPsd(context: Context, layers: List<Layer>, outputUri: Uri, applyGreyscale: Boolean = false, targetWidth: Int = 1024, targetHeight: Int = 1024) = withContext(Dispatchers.IO) {
-        // Multi-layer PSD logic to be implemented
         exportProjectToPng(context, layers, outputUri, applyGreyscale, targetWidth, targetHeight)
     }
 
     suspend fun exportProjectToXcf(context: Context, layers: List<Layer>, outputUri: Uri, applyGreyscale: Boolean = false, targetWidth: Int = 1024, targetHeight: Int = 1024) = withContext(Dispatchers.IO) {
-        // Multi-layer XCF logic to be implemented
         exportProjectToPng(context, layers, outputUri, applyGreyscale, targetWidth, targetHeight)
     }
 

@@ -16,8 +16,7 @@ import androidx.compose.ui.unit.dp
 
 /**
  * The slide-out tool panel.
- * Combines all toolbar into a single organized list.
- * Now respects system bar padding and includes a close button.
+ * Updated: Renamed Recenter to Reset Canvas.
  */
 @Composable
 fun ToolDrawer(
@@ -27,7 +26,8 @@ fun ToolDrawer(
     onSaveClick: () -> Unit,
     onLayersClick: () -> Unit,
     onExportClick: () -> Unit,
-    onHistoryClick: () -> Unit, // New callback for Rollback
+    onHistoryClick: () -> Unit,
+    onResetClick: () -> Unit, // Renamed callback
     onHomeClick: () -> Unit,
     onClose: () -> Unit
 ) {
@@ -46,7 +46,6 @@ fun ToolDrawer(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Header Row with Close Button
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -66,12 +65,10 @@ fun ToolDrawer(
                 }
             }
 
-            // PROJECT ACTIONS
             DrawerItem(Icons.Default.Home, "Return Home", onHomeClick)
             DrawerItem(Icons.Default.Save, "Save Project") {
                 onToolClick(Icons.Default.Save, onSaveClick)
             }
-            // ROLLBACK TOOL: Uses an analogue clock icon
             DrawerItem(Icons.Default.AccessTime, "Rollback History") {
                 onToolClick(Icons.Default.AccessTime, onHistoryClick)
             }
@@ -81,7 +78,10 @@ fun ToolDrawer(
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-            // EDITING TOOLS
+            // RENAMED TOOL
+            DrawerItem(Icons.Default.CenterFocusStrong, "Reset Canvas") {
+                onToolClick(Icons.Default.CenterFocusStrong, onResetClick)
+            }
             DrawerItem(Icons.Default.Tonality, "Image Filters") {
                 onToolClick(Icons.Default.Tonality, onFilterClick)
             }
@@ -94,7 +94,6 @@ fun ToolDrawer(
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-            // MISC TOOLS (Placeholders)
             DrawerItem(Icons.Default.Search, "Search Assets") { onToolClick(Icons.Default.Search) {} }
             DrawerItem(Icons.Default.Settings, "App Settings") { onToolClick(Icons.Default.Settings) {} }
             DrawerItem(Icons.Default.Info, "Project Info") { onToolClick(Icons.Default.Info) {} }

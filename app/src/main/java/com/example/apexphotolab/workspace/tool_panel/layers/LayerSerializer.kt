@@ -15,6 +15,7 @@ object LayerSerializer {
             put("yPosition", layer.yPosition)
             put("scale", layer.scale)
             put("rotation", layer.rotation)
+            put("isLocked", layer.isLocked)
         }
     }
 
@@ -27,8 +28,9 @@ object LayerSerializer {
             zOrder = json.getInt("zOrder"),
             xPosition = json.getDouble("xPosition").toFloat(),
             yPosition = json.getDouble("yPosition").toFloat(),
-            scale = json.getDouble("scale").toFloat(),
-            rotation = json.getDouble("rotation").toFloat()
+            scale = json.optDouble("scale", 1.0).toFloat(),
+            rotation = json.optDouble("rotation", 0.0).toFloat(),
+            isLocked = json.optBoolean("isLocked", false)
         )
     }
 }

@@ -6,17 +6,8 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,6 +18,8 @@ import com.example.apexphotolab.workspace.tool_panel.save.ProjectManager
 import com.example.apexphotolab.SettingsManager
 import com.example.apexphotolab.welcome_screen.new_project.CopyConfirmDialog
 import com.example.apexphotolab.welcome_screen.new_project.ProjectNameDialog
+import com.example.apexphotolab.welcome_screen.new_project.ProjectType
+import com.example.apexphotolab.welcome_screen.new_project.ProjectTypeDialog
 import com.example.apexphotolab.welcome_screen.theme.ThemeSwitcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -45,8 +38,12 @@ fun WelcomeScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    
+    // --- DIALOG STATES ---
+    var showProjectTypeDialog by remember { mutableStateOf(false) }
     var showProjectNameDialog by remember { mutableStateOf(false) }
     var showCopyConfirmDialog by remember { mutableStateOf(false) }
+    
     var projectName by remember { mutableStateOf("") }
 
     val pickImageLauncher = rememberLauncherForActivityResult(
@@ -75,6 +72,20 @@ fun WelcomeScreen(
         }
     )
 
+    // 1. SELECT TYPE
+    if (showProjectTypeDialog) {
+        ProjectTypeDialog(
+            onDismiss = { showProjectTypeDialog = false },
+            onConfirm = { type ->
+                showProjectTypeDialog = false
+                if (type == ProjectType.STATIC) {
+                    showProjectNameDialog = true
+                }
+            }
+        )
+    }
+
+    // 2. NAME PROJECT
     if (showProjectNameDialog) {
         ProjectNameDialog(
             onDismiss = { showProjectNameDialog = false },
@@ -86,6 +97,7 @@ fun WelcomeScreen(
         )
     }
 
+    // 3. CONFIRM & PICK IMAGE
     if (showCopyConfirmDialog) {
         CopyConfirmDialog(
             projectName = projectName,
@@ -113,7 +125,7 @@ fun WelcomeScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .statusBarsPadding(), // Ensures WelcomeScreen content starts below status bar
+            .statusBarsPadding(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
@@ -128,9 +140,14 @@ fun WelcomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Button(onClick = { showProjectNameDialog = true }, enabled = hasValidProjectDir) {
+            // TRIGGER FLOW
+            Button(
+                onClick = { showProjectTypeDialog = true }, 
+                enabled = hasValidProjectDir
+            ) {
                 Text("Start New Project")
             }
+
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = onContinueProject, enabled = hasValidProjectDir) {
                 Text("Continue Project")

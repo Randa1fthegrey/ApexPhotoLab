@@ -24,6 +24,7 @@ fun EditorHeader(
     projectName: String,
     resolution: String,
     activeLayerName: String,
+    isLayerLocked: Boolean,
     lastSaveTime: Long, // Epoch timestamp
     activeToolIcon: ImageVector,
     onTabClick: () -> Unit,
@@ -88,7 +89,7 @@ fun EditorHeader(
                     maxLines = 1
                 )
                 Text(
-                    text = "$resolution | $activeLayerName",
+                    text = "$resolution | $activeLayerName ${if (isLayerLocked) "🔒" else ""}",
                     style = MaterialTheme.typography.bodySmall,
                     fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

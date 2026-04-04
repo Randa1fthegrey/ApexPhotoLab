@@ -7,7 +7,7 @@ import java.io.File
 
 /**
  * A manager dedicated to running the export process with safe temp files.
- * Updated: Supports the full Professional Format Suite.
+ * Updated: Supports dynamic filename suffixes for specialized formats like WebP.
  */
 object ExportJobManager {
 
@@ -29,7 +29,7 @@ object ExportJobManager {
                 ExportType.SVG -> Triple("export", "svg", "image/svg+xml")
                 ExportType.PNG -> Triple("export", "png", "image/png")
                 ExportType.JPG -> Triple("export", "jpg", "image/jpeg")
-                ExportType.WEBP -> Triple("export", "webp", "image/webp")
+                ExportType.WEBP_LOSSY, ExportType.WEBP_LOSSLESS -> Triple("export", "webp", "image/webp")
                 ExportType.BMP -> Triple("export", "bmp", "image/bmp")
                 ExportType.PSD -> Triple("export", "psd", "image/vnd.adobe.photoshop")
                 ExportType.TIFF -> Triple("export", "tiff", "image/tiff")
@@ -51,7 +51,8 @@ object ExportJobManager {
                     ExportType.SVG -> ProjectExporter.exportProjectToSvg(context, layers, Uri.fromFile(tempFile), isGreyscale, targetW, targetH, onProgress)
                     ExportType.PNG -> ProjectExporter.exportProjectToPng(context, layers, Uri.fromFile(tempFile), isGreyscale, targetW, targetH)
                     ExportType.JPG -> ProjectExporter.exportProjectToJpg(context, layers, Uri.fromFile(tempFile), isGreyscale, targetW, targetH)
-                    ExportType.WEBP -> ProjectExporter.exportProjectToWebp(context, layers, Uri.fromFile(tempFile), isGreyscale, targetW, targetH)
+                    ExportType.WEBP_LOSSY -> ProjectExporter.exportProjectToWebp(context, layers, Uri.fromFile(tempFile), isGreyscale, targetW, targetH, isLossless = false)
+                    ExportType.WEBP_LOSSLESS -> ProjectExporter.exportProjectToWebp(context, layers, Uri.fromFile(tempFile), isGreyscale, targetW, targetH, isLossless = true)
                     ExportType.BMP -> ProjectExporter.exportProjectToBmp(context, layers, Uri.fromFile(tempFile), isGreyscale, targetW, targetH)
                     ExportType.PSD -> ProjectExporter.exportProjectToPsd(context, layers, Uri.fromFile(tempFile), isGreyscale, targetW, targetH)
                     ExportType.TIFF -> ProjectExporter.exportProjectToTiff(context, layers, Uri.fromFile(tempFile), isGreyscale, targetW, targetH)
@@ -59,7 +60,14 @@ object ExportJobManager {
                 }
             }
 
-            val finalFileName = "${projectName}_export.$ext"
+            // DYNAMIC FILENAME LOGIC: Append suffix for specialized WebP formats
+            val suffix = when (exportType) {
+                ExportType.WEBP_LOSSY -> "_Lossy"
+                ExportType.WEBP_LOSSLESS -> "_Lossless"
+                else -> "_export"
+            }
+            
+            val finalFileName = "${projectName}${suffix}.$ext"
             ExportOrchestrator.finalizeExport(context, tempFile, directoryUri, finalFileName, mime)
 
         } catch (e: Exception) {

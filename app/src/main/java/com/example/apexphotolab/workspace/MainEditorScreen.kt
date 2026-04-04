@@ -31,6 +31,7 @@ import com.example.apexphotolab.workspace.tool_panel.export.data.ExportType
 import com.example.apexphotolab.workspace.tool_panel.filters.FilterPanel
 import com.example.apexphotolab.workspace.tool_panel.layers.Layer
 import com.example.apexphotolab.workspace.tool_panel.layers.LayersPanel
+import com.example.apexphotolab.workspace.tool_panel.layers.ui.ResetCanvasDialog
 import com.example.apexphotolab.workspace.tool_panel.save.HistoryPanel
 import com.example.apexphotolab.workspace.tool_panel.layers.NewLayerManager
 import com.example.apexphotolab.workspace.tool_panel.save.ProjectLoadManager
@@ -38,6 +39,7 @@ import com.example.apexphotolab.workspace.tool_panel.save.ProjectManager
 import com.example.apexphotolab.workspace.tool_panel.save.ProjectSaveManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import java.util.Collections
 import kotlin.coroutines.cancellation.CancellationException
 
 @Composable
@@ -52,6 +54,9 @@ fun MainEditorScreen(
     var projectDirName by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(true) }
 
+    // --- SELECTION STATE ---
+    var selectedLayerId by remember { mutableStateOf("base") }
+
     // --- PERSISTENT EXPORT STATE ---
     var exportResolution by remember { mutableStateOf("1024 x 1024") }
     var exportCategory by remember { mutableStateOf(ResolutionCategory.STANDARD) }
@@ -59,21 +64,20 @@ fun MainEditorScreen(
     var standardIndex by remember { mutableIntStateOf(0) }
     var customWidth by remember { mutableStateOf("1024") }
     var customHeight by remember { mutableStateOf("1024") }
-    
-    var targetFileSize by remember { mutableStateOf("500") }
-    var fileSizeUnit by remember { mutableStateOf("KB") }
 
     // --- UI STATE ---
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     var activeToolIcon by remember { mutableStateOf(Icons.Default.Build) }
     var lastSaveTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
-    val activeLayerName by remember { derivedStateOf { layers.lastOrNull { it.isVisible }?.title ?: "Background" } }
+    val activeLayerName by remember { derivedStateOf { layers.find { it.id == selectedLayerId }?.title ?: "Background" } }
+    val isLayerLocked by remember { derivedStateOf { layers.find { it.id == selectedLayerId }?.isLocked ?: false } }
     
     // Panel/Screen States
     var showLayersPanel by remember { mutableStateOf(false) }
     var showExportScreen by remember { mutableStateOf(false) }
     var showFilterPanel by remember { mutableStateOf(false) }
     var showHistoryPanel by remember { mutableStateOf(false) }
+    var showResetDialog by remember { mutableStateOf(false) }
     
     var colorFilter: ColorFilter? by remember { mutableStateOf(null) }
     var showSaveConfirmDialog by remember { mutableStateOf(false) }
@@ -90,6 +94,67 @@ fun MainEditorScreen(
     val onToolSelected: (ImageVector, () -> Unit) -> Unit = { icon, action ->
         activeToolIcon = icon
         action()
+    }
+
+    // --- REORDER LOGIC ---
+    val moveLayer = { layer: Layer, up: Boolean ->
+        val index = layers.indexOfFirst { it.id == layer.id }
+        if (index != -1) {
+            val targetIndex = if (up) index + 1 else index - 1
+            if (targetIndex in layers.indices && layers[targetIndex].id != "base") {
+                Collections.swap(layers, index, targetIndex)
+            }
+        }
+    }
+
+    // --- RESET LOGIC ---
+    val recenterLayers: (String?) -> Unit = { name ->
+        if (name == null) {
+            layers.indices.forEach { i -> 
+                layers[i] = layers[i].copy(xPosition = 0f, yPosition = 0f, rotation = 0f) 
+            }
+            Toast.makeText(context, "All layers recentered & leveled", Toast.LENGTH_SHORT).show()
+        } else {
+            val index = layers.indexOfFirst { it.title.equals(name, ignoreCase = true) }
+            if (index != -1) {
+                layers[index] = layers[index].copy(xPosition = 0f, yPosition = 0f, rotation = 0f)
+                Toast.makeText(context, "Layer '$name' recentered & leveled", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "Layer '$name' not found", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    val reshapeLayers: (String?) -> Unit = { name ->
+        if (name == null) {
+            layers.indices.forEach { i -> layers[i] = layers[i].copy(scale = 1f) }
+            Toast.makeText(context, "All layers reshaped", Toast.LENGTH_SHORT).show()
+        } else {
+            val index = layers.indexOfFirst { it.title.equals(name, ignoreCase = true) }
+            if (index != -1) {
+                layers[index] = layers[index].copy(scale = 1f)
+                Toast.makeText(context, "Layer '$name' reshaped", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "Layer '$name' not found", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    val totalResetLayers: (String?) -> Unit = { name ->
+        if (name == null) {
+            layers.indices.forEach { i -> 
+                layers[i] = layers[i].copy(xPosition = 0f, yPosition = 0f, scale = 1f, rotation = 0f) 
+            }
+            Toast.makeText(context, "Total reset for all layers", Toast.LENGTH_SHORT).show()
+        } else {
+            val index = layers.indexOfFirst { it.title.equals(name, ignoreCase = true) }
+            if (index != -1) {
+                layers[index] = layers[index].copy(xPosition = 0f, yPosition = 0f, scale = 1f, rotation = 0f)
+                Toast.makeText(context, "Total reset for '$name'", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "Layer '$name' not found", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     // --- QUICK SAVE LOGIC ---
@@ -113,7 +178,11 @@ fun MainEditorScreen(
         if (result != null) {
             projectDirName = result.projectName
             layers.clear()
-            layers.addAll(result.layers)
+            // Default "base" to locked if it's a new or existing project
+            val initializedLayers = result.layers.map { layer ->
+                if (layer.id == "base") layer.copy(isLocked = true) else layer
+            }
+            layers.addAll(initializedLayers)
             lastSaveTime = System.currentTimeMillis()
         } else {
             onNavigateBack()
@@ -172,12 +241,23 @@ fun MainEditorScreen(
                 LayersPanel(
                     modifier = Modifier.fillMaxHeight().width(320.dp),
                     layers = layers,
+                    selectedLayerId = selectedLayerId,
+                    onLayerSelected = { layer -> selectedLayerId = layer.id },
+                    onMoveLayerUp = { layer -> moveLayer(layer, true) },
+                    onMoveLayerDown = { layer -> moveLayer(layer, false) },
                     onAddLayer = { pickImageLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
                     onLayerVisibilityChange = { layer -> 
                         val index = layers.indexOfFirst { it.id == layer.id }
                         if (index != -1) { layers[index] = layer.copy(isVisible = !layer.isVisible) }
                     },
-                    onLayersRemoved = { ids -> layers.removeAll { ids.contains(it.id) } },
+                    onLayerLockChange = { layer ->
+                        val index = layers.indexOfFirst { it.id == layer.id }
+                        if (index != -1) { layers[index] = layer.copy(isLocked = !layer.isLocked) }
+                    },
+                    onLayersRemoved = { ids -> 
+                        layers.removeAll { ids.contains(it.id) }
+                        if (ids.contains(selectedLayerId)) selectedLayerId = "base"
+                    },
                     onDismiss = { showLayersPanel = false }
                 )
             } else if (showExportScreen) {
@@ -188,15 +268,11 @@ fun MainEditorScreen(
                     standardIndex = standardIndex,
                     customW = customWidth,
                     customH = customHeight,
-                    targetFileSize = targetFileSize,
-                    fileSizeUnit = fileSizeUnit,
                     onCategoryChange = { exportCategory = it },
                     onWidescreenIndexChange = { widescreenIndex = it },
                     onStandardIndexChange = { standardIndex = it },
                     onCustomWidthChange = { customWidth = it },
                     onCustomHeightChange = { customHeight = it },
-                    onTargetFileSizeChange = { targetFileSize = it },
-                    onFileSizeUnitChange = { fileSizeUnit = it },
                     onDismiss = { showExportScreen = false },
                     onExport = { exportType -> 
                         showExportScreen = false
@@ -249,6 +325,7 @@ fun MainEditorScreen(
                     onLayersClick = { showLayersPanel = true },
                     onExportClick = { showExportScreen = true },
                     onHistoryClick = { showHistoryPanel = true },
+                    onResetClick = { showResetDialog = true },
                     onHomeClick = onNavigateBack,
                     onClose = { scope.launch { drawerState.close() } }
                 )
@@ -261,6 +338,7 @@ fun MainEditorScreen(
                     projectName = projectDirName,
                     resolution = exportResolution,
                     activeLayerName = activeLayerName,
+                    isLayerLocked = isLayerLocked,
                     lastSaveTime = lastSaveTime,
                     activeToolIcon = activeToolIcon,
                     onTabClick = { scope.launch { if (drawerState.isClosed) drawerState.open() else drawerState.close() } },
@@ -276,9 +354,12 @@ fun MainEditorScreen(
                         layers = layers, 
                         colorFilter = colorFilter,
                         onLayerTransform = { updatedLayer ->
-                            val index = layers.indexOfFirst { it.id == updatedLayer.id }
-                            if (index != -1) {
-                                layers[index] = updatedLayer
+                            // Only allow transformation if it's the selected layer
+                            if (updatedLayer.id == selectedLayerId) {
+                                val index = layers.indexOfFirst { it.id == updatedLayer.id }
+                                if (index != -1) {
+                                    layers[index] = updatedLayer
+                                }
                             }
                         }
                     )
@@ -287,8 +368,27 @@ fun MainEditorScreen(
         }
     }
 
+    if (showResetDialog) {
+        ResetCanvasDialog(
+            layers = layers,
+            onDismiss = { showResetDialog = false },
+            onRecenter = { name: String? ->
+                recenterLayers(name)
+                scope.launch { drawerState.close() }
+            },
+            onReshape = { name: String? ->
+                reshapeLayers(name)
+                scope.launch { drawerState.close() }
+            },
+            onBoth = { name: String? ->
+                totalResetLayers(name)
+                scope.launch { drawerState.close() }
+            }
+        )
+    }
+
     if (showSaveConfirmDialog) { SaveConfirmDialog(onDismiss = { showSaveConfirmDialog = false }, onConfirm = { showSaveConfirmDialog = false; scope.launch { ProjectSaveManager.saveProject(context, projectDirUri, layers.toList(), "Return Home Save"); onNavigateBack() } }) }
-    showLayerNameDialog?.let { uri -> LayerNameDialog(onDismiss = { showLayerNameDialog = null }, onConfirm = { title -> showLayerNameDialog = null; scope.launch { val newLayer = NewLayerManager.addNewLayer(context, projectDirUri, uri, title); newLayer?.let { layers.add(it) } } }) }
+    showLayerNameDialog?.let { uri -> LayerNameDialog(onDismiss = { showLayerNameDialog = null }, onConfirm = { title -> showLayerNameDialog = null; scope.launch { val newLayer = NewLayerManager.addNewLayer(context, projectDirUri, uri, title); newLayer?.let { layers.add(it); selectedLayerId = it.id } } }) }
     
     if (showSnapshotNameDialog) {
         SnapshotNameDialog(
