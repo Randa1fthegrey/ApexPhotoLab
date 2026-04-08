@@ -18,11 +18,12 @@ object GradientScoutOrchestrator {
 
     /**
      * Runs all scouts to populate the GradientIntelligenceAgency.
+     * Scans both images to find the "True North" of color gradients.
      */
-    fun run(image: Bitmap) {
+    fun run(quantizedImage: Bitmap, originalImage: Bitmap) {
         GradientIntelligenceAgency.clear()
         scouts.forEach { scout ->
-            val reports = scout.scout(image)
+            val reports = scout.scout(quantizedImage, originalImage)
             reports.forEach { GradientIntelligenceAgency.record(it) }
         }
     }

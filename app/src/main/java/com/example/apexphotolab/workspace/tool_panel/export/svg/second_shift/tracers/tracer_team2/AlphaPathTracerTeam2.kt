@@ -12,8 +12,8 @@ import kotlin.math.abs
  */
 object AlphaPathTracerTeam2 {
 
-    private const val STITCH_RADIUS = 5 
-    private const val CLOSURE_RADIUS = 50 
+    private const val STITCH_RADIUS = 25
+    private const val CLOSURE_RADIUS = 100
     private const val MIN_PATH_SIZE = 10 
 
     fun solidify(
@@ -92,7 +92,7 @@ object AlphaPathTracerTeam2 {
                 if (isBorder) {
                     val startColor = pixels[start.y * width + start.x]
                     val endColor = pixels[end.y * width + end.x]
-                    GradientIntelligenceAgency.record(GradientReport(currentPath, startColor, endColor, true))
+                    GradientIntelligenceAgency.record(GradientReport(7, currentPath, startColor, endColor, true))
                 }
                 
                 stitchedPaths.add(currentPath)

@@ -49,7 +49,7 @@ object BluePathTracer {
                 }
 
                 if (nextPoint != null) {
-                    if (nextPoint == home && path.size > 2) {
+                    if (nextPoint == home && path.size > 10) {
                         allPaths.add(path)
                         break
                     }
@@ -105,7 +105,7 @@ object BluePathTracer {
             val offset = OFFSETS[idx]
             val nx = current.x + offset.x
             val ny = current.y + offset.y
-            if (nx == home.x && ny == home.y && pathSize > 2) return home
+            if (nx == home.x && ny == home.y && pathSize > 10) return home
             if (remaining.contains(Point(nx, ny)) && getBit(vram, ny * width + nx)) return Point(nx, ny)
         }
 
@@ -115,7 +115,7 @@ object BluePathTracer {
             val offset = OFFSETS[idx]
             val nx = current.x + offset.x
             val ny = current.y + offset.y
-            if (nx == home.x && ny == home.y && pathSize > 2) return home
+            if (nx == home.x && ny == home.y && pathSize > 10) return home
             if (remaining.contains(Point(nx, ny)) && getBit(vram, ny * width + nx)) return Point(nx, ny)
         }
         return null

@@ -63,7 +63,7 @@ object EngineInitializer {
             // --- Shift Tools & Orchestrators ---
             ColorQuantizer.quantize(dummyBitmap)
             ColorSorter.getNearestColor(0)
-            SecondShiftOrchestrator.run(dummyBitmap)
+            SecondShiftOrchestrator.run(dummyBitmap, dummyBitmap)
             
             // Warm up all 10 specialized tracers with current signatures
             val dummyVram = VRAM_Garage.getSlotForManager(0)

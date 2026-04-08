@@ -74,7 +74,7 @@ object GradientFillGenerator {
             if (closedPathData.isNotEmpty()) {
                 append("<path d=\"${closedPathData.toString().trim()}\" fill=\"url(#$gradientId)\" fill-rule=\"evenodd\" />")
             }
-            
+
             // Open paths get fill="none" and a stroke to prevent the chord jump.
             if (openPathData.isNotEmpty()) {
                 if (isNotEmpty()) append("\n")

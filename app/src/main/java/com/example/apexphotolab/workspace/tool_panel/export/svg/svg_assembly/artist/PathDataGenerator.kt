@@ -19,7 +19,7 @@ object PathDataGenerator {
         val pathData = StringBuilder()
         var isFirstPointInSegment = true
         var segmentCount = 0
-        
+
         val hasSentinels = path.any { it.x == -1 }
         // Simplification is only safe for simple paths without sentinels
         val points = if (hasSentinels) path else simplify(path)

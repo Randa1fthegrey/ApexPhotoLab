@@ -4,7 +4,7 @@ import android.graphics.Color
 
 /**
  * The "Color Group Sorter".
- * Precision Update: Absolute White Sovereignty. 
+ * Precision Update: Absolute White Sovereignty.
  * Only 100% pure white is White. This eliminates "clipping" and "dusting" on outlines.
  */
 object ColorGroupSorter {

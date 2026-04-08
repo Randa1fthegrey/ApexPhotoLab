@@ -11,8 +11,8 @@ import kotlin.math.abs
  */
 object BlackPathTracerTeam2 {
 
-    private const val STITCH_RADIUS = 25 
-    private const val CLOSURE_RADIUS = 100 
+    private const val STITCH_RADIUS = 25
+    private const val CLOSURE_RADIUS = 100
     private const val MIN_PATH_SIZE = 10 
 
     fun solidify(

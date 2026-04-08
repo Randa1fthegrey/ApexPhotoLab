@@ -13,15 +13,15 @@ object SecondShiftOrchestrator {
     /**
      * Takes a quantized image and performs the team-based path tracing pipeline.
      */
-    suspend fun run(quantizedImage: Bitmap): Pair<List<List<Point>>, HashSet<Point>> {
+    suspend fun run(quantizedImage: Bitmap, originalImage: Bitmap): Pair<List<List<Point>>, HashSet<Point>> {
         val width = quantizedImage.width
         val height = quantizedImage.height
         val pixels = IntArray(width * height)
         quantizedImage.getPixels(pixels, 0, width, 0, 0, width, height)
 
         // 1. TEAM 0: GRADIENT SCOUTS
-        // They go first, scanning the image for color smears and populating the Intelligence Agency.
-        GradientScoutOrchestrator.run(quantizedImage)
+        // They go first, scanning BOTH images for color smears and populating the Intelligence Agency.
+        GradientScoutOrchestrator.run(quantizedImage, originalImage)
 
         // 2. Initial Sorting
         val colorGroups = ColorGroupSorter.groupPixelIndices(pixels, width, height)

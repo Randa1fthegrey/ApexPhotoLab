@@ -10,7 +10,7 @@ import kotlinx.coroutines.coroutineScope
 
 /**
  * The main orchestrator for the Assembly Shift.
- * Standardized Version: Renders all shapes as solid fills to establish 
+ * Standardized Version: Renders all shapes as solid fills to establish
  * structural bedrock before applying visual effects.
  */
 object AssemblyOrchestrator {

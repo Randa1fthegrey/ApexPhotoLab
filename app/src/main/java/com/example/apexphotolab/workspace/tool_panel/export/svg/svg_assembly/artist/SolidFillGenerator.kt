@@ -2,11 +2,14 @@ package com.example.apexphotolab.workspace.tool_panel.export.svg.svg_assembly.ar
 
 import android.graphics.Color
 import android.graphics.Point
+import com.example.apexphotolab.workspace.tool_panel.export.svg._temp_tools.PathLabeller
+import com.example.apexphotolab.workspace.tool_panel.export.svg._temp_tools.XRayControl
 
 /**
  * File 6 (Artist Phase): The Solid Shape Fill Generator.
- * Updated: Precision Choking Protocol. Ensures fills stay inside outlines by using 
+ * Updated: Precision Choking Protocol. Ensures fills stay inside outlines by using
  * a wider overhang for Grey/Black structural frames.
+ * Updated with X-Ray Diagnostic Support.
  */
 object SolidFillGenerator {
 
@@ -18,7 +21,10 @@ object SolidFillGenerator {
         val g = Color.green(color)
         val b = Color.blue(color)
         val colorHex = String.format("#%06X", 0xFFFFFF and color)
-        val opacity = alpha / 255.0
+        
+        // X-RAY TOGGLE: Force transparency if diagnostics are on
+        val opacity = if (XRayControl.IS_XRAY_ENABLED) 1.0 else alpha / 255.0
+        val fillAttr = if (XRayControl.IS_XRAY_ENABLED) "none" else colorHex
 
         // Identification: Is this a Fill (White) or a Structural Outline (Grey/Black)?
         val isWhiteFill = r > 240 && g > 240 && b > 240
@@ -33,6 +39,7 @@ object SolidFillGenerator {
 
         val closedPathData = StringBuilder()
         val openPathData = StringBuilder()
+        val diagnosticLabels = StringBuilder()
 
         paths.forEach { path ->
             val (data, isClosed) = PathDataGenerator.generateWithStatus(path)
@@ -41,15 +48,25 @@ object SolidFillGenerator {
             } else {
                 openPathData.append(data).append(" ")
             }
+            
+            // Generate corner labels if X-Ray is on
+            if (XRayControl.IS_XRAY_ENABLED) {
+                diagnosticLabels.append(PathLabeller.label(path, color))
+            }
         }
 
         return buildString {
             if (closedPathData.isNotEmpty()) {
-                append("<path d=\"${closedPathData.toString().trim()}\" fill=\"$colorHex\" fill-opacity=\"$opacity\" stroke=\"$colorHex\" stroke-opacity=\"$opacity\" stroke-width=\"$strokeWidth\" stroke-linejoin=\"round\" stroke-linecap=\"round\" fill-rule=\"evenodd\" />")
+                append("<path d=\"${closedPathData.toString().trim()}\" fill=\"$fillAttr\" fill-opacity=\"$opacity\" stroke=\"$colorHex\" stroke-opacity=\"$opacity\" stroke-width=\"$strokeWidth\" stroke-linejoin=\"round\" stroke-linecap=\"round\" fill-rule=\"evenodd\" />")
             }
             if (openPathData.isNotEmpty()) {
                 if (isNotEmpty()) append("\n")
                 append("<path d=\"${openPathData.toString().trim()}\" fill=\"none\" stroke=\"$colorHex\" stroke-opacity=\"$opacity\" stroke-width=\"1.2\" stroke-linejoin=\"round\" stroke-linecap=\"round\" />")
+            }
+            
+            // Add the numbered labels on top of the paths
+            if (diagnosticLabels.isNotEmpty()) {
+                append("\n").append(diagnosticLabels.toString())
             }
         }
     }

@@ -27,7 +27,7 @@ object SvgGenerator {
             val allSvgElements = coroutineScope {
                 val solidColorCrewJob = async {
                     onProgress(0.4f)
-                    val (pathFragments, allEdges) = SecondShiftOrchestrator.run(quantizedImage)
+                    val (pathFragments, allEdges) = SecondShiftOrchestrator.run(quantizedImage, image)
                     HandoffLogger.logShift2to3(pathFragments.size, allEdges.size)
 
                     onProgress(0.7f)

@@ -1,25 +1,38 @@
 package com.example.apexphotolab.workspace.tool_panel.export.svg.second_shift.gradient_scouts
 
 import android.graphics.Bitmap
-import android.graphics.Color
-import android.graphics.Point
 import com.example.apexphotolab.workspace.tool_panel.export.svg.second_shift.GradientReport
 
 /**
  * Team 0 Scout for the RED color group.
- * Job: Pre-scans the image for Red color smears (gradients).
+ * Job: Pre-scans the image for Red color smears (gradients) within the shape.
  */
 object RedGradientScout : GradientScout {
     override val id = 0
 
-    override fun scout(image: Bitmap): List<GradientReport> {
-        val reports = mutableListOf<GradientReport>()
-        val width = image.width
-        val height = image.height
-        val borderBuffer = 50
+    override fun scout(quantizedImage: Bitmap, originalImage: Bitmap): List<GradientReport> {
+        val width = quantizedImage.width
+        val height = quantizedImage.height
+        
+        // Find the "True North" spines within the Red quantized shape
+        val spines = SpineLogic.findSpine(quantizedImage, originalImage, id)
+        
+        return spines.map { path ->
+            val start = path.first()
+            val end = path.last()
+            
+            GradientReport(
+                scoutId = id,
+                path = path,
+                startColor = originalImage.getPixel(start.x, start.y),
+                endColor = originalImage.getPixel(end.x, end.y),
+                isBorder = isOnBorder(path, width, height)
+            )
+        }
+    }
 
-        // Example: Scanning specifically for border-based gradients
-        // In a real run, this would be more complex logic to detect smears.
-        return reports
+    private fun isOnBorder(path: List<android.graphics.Point>, w: Int, h: Int): Boolean {
+        val buffer = 50
+        return path.any { it.x < buffer || it.x > w - buffer || it.y < buffer || it.y > h - buffer }
     }
 }

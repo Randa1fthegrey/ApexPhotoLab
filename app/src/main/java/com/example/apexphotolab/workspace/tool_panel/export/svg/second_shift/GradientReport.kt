@@ -7,6 +7,7 @@ import android.graphics.Point
  * This "Intelligence Report" is handed off to the Gradient Smearing Team.
  */
 data class GradientReport(
+    val scoutId: Int,
     val path: List<Point>,
     val startColor: Int,
     val endColor: Int,
@@ -23,8 +24,8 @@ object GradientIntelligenceAgency {
         reports.add(report)
     }
 
-    fun getReports(): List<GradientReport> {
-        return reports.toList()
+    fun getReportsForScout(scoutId: Int): List<GradientReport> {
+        return reports.filter { it.scoutId == scoutId }
     }
 
     fun clear() {

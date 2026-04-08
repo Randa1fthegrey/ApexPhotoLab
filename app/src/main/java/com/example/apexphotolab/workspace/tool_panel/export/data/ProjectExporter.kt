@@ -51,19 +51,27 @@ object ProjectExporter {
     }
 
     suspend fun exportProjectToBmp(context: Context, layers: List<Layer>, outputUri: Uri, applyGreyscale: Boolean = false, targetWidth: Int = 1024, targetHeight: Int = 1024) = withContext(Dispatchers.IO) {
-        exportProjectToPng(context, layers, outputUri, applyGreyscale, targetWidth, targetHeight)
+        context.contentResolver.openOutputStream(outputUri)?.use { outputStream ->
+            BmpSaver.saveFlattenedBmp(context, layers, outputStream, targetWidth, targetHeight)
+        } ?: throw IllegalStateException("Could not open output stream for BMP")
     }
 
     suspend fun exportProjectToTiff(context: Context, layers: List<Layer>, outputUri: Uri, applyGreyscale: Boolean = false, targetWidth: Int = 1024, targetHeight: Int = 1024) = withContext(Dispatchers.IO) {
-        exportProjectToPng(context, layers, outputUri, applyGreyscale, targetWidth, targetHeight)
+        context.contentResolver.openOutputStream(outputUri)?.use { outputStream ->
+            TiffSaver.saveFlattenedTiff(context, layers, outputStream, targetWidth, targetHeight)
+        } ?: throw IllegalStateException("Could not open output stream for TIFF")
     }
 
     suspend fun exportProjectToPsd(context: Context, layers: List<Layer>, outputUri: Uri, applyGreyscale: Boolean = false, targetWidth: Int = 1024, targetHeight: Int = 1024) = withContext(Dispatchers.IO) {
-        exportProjectToPng(context, layers, outputUri, applyGreyscale, targetWidth, targetHeight)
+        context.contentResolver.openOutputStream(outputUri)?.use { outputStream ->
+            PsdLayeredSaver.saveLayeredPsd(context, layers, outputStream, targetWidth, targetHeight)
+        } ?: throw IllegalStateException("Could not open output stream for PSD")
     }
 
     suspend fun exportProjectToXcf(context: Context, layers: List<Layer>, outputUri: Uri, applyGreyscale: Boolean = false, targetWidth: Int = 1024, targetHeight: Int = 1024) = withContext(Dispatchers.IO) {
-        exportProjectToPng(context, layers, outputUri, applyGreyscale, targetWidth, targetHeight)
+        context.contentResolver.openOutputStream(outputUri)?.use { outputStream ->
+            XcfSaver.saveLayeredXcf(context, layers, outputStream, targetWidth, targetHeight)
+        } ?: throw IllegalStateException("Could not open output stream for XCF")
     }
 
     suspend fun exportProjectToSvg(context: Context, layers: List<Layer>, outputUri: Uri, applyGreyscale: Boolean = false, targetWidth: Int = 1024, targetHeight: Int = 1024, onProgress: (Float) -> Unit) = withContext(Dispatchers.IO) {

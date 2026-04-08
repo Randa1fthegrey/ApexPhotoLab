@@ -9,5 +9,5 @@ import com.example.apexphotolab.workspace.tool_panel.export.svg.second_shift.Gra
  */
 interface GradientScout {
     val id: Int
-    fun scout(image: Bitmap): List<GradientReport>
+    fun scout(quantizedImage: Bitmap, originalImage: Bitmap): List<GradientReport>
 }

@@ -18,7 +18,7 @@ import kotlinx.coroutines.withContext
 object SecondShiftDispatcher {
 
     /**
-     * Traces all color groups. 
+     * Traces all color groups.
      * Uses VRAM bitmasks to handle millions of pixels with near-zero heap overhead.
      */
     suspend fun traceInParallel(
@@ -40,6 +40,14 @@ object SecondShiftDispatcher {
                 val vram = VRAM_Garage.getSlotForManager(index)
 
                 VRAM_BlobConverter.convertToVRAM(indices, vram)
+                
+                // --- STEP: PAVE GOLDEN RAILS ---
+                // Before finding edges, we burn the "True North" spines into the VRAM.
+                val reports = GradientIntelligenceAgency.getReportsForScout(index)
+                reports.forEach { report ->
+                    VRAM_Paver.pave(report.path, vram, width, height)
+                }
+
                 val edges = VRAM_EdgeFinder.findEdgesVRAM(vram, width, height)
 
                 // Pass pixels to the router and specialists
