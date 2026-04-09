@@ -16,6 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.apexphotolab.workspace.tool_panel.save.ProjectManager
 import com.example.apexphotolab.SettingsManager
+import com.example.apexphotolab.workspace.util.BitmapUtils
 import com.example.apexphotolab.welcome_screen.new_project.CopyConfirmDialog
 import com.example.apexphotolab.welcome_screen.new_project.ProjectNameDialog
 import com.example.apexphotolab.welcome_screen.new_project.ProjectType
@@ -52,14 +53,7 @@ fun WelcomeScreen(
              uri?.let {
                 scope.launch {
                     val bitmap = withContext(Dispatchers.IO) {
-                        try {
-                            context.contentResolver.openInputStream(it)?.use {
-                                BitmapFactory.decodeStream(it)
-                            }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            null
-                        }
+                        BitmapUtils.decodeCorrectedBitmap(context, it)
                     }
                     val newProjectDir = bitmap?.let { bm ->
                         ProjectManager.createProject(context, projectName, bm)

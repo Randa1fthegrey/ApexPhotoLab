@@ -3,6 +3,9 @@ package com.example.apexphotolab.workspace
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,6 +31,7 @@ fun EditorHeader(
     lastSaveTime: Long, // Epoch timestamp
     activeToolIcon: ImageVector,
     onTabClick: () -> Unit,
+    onLockToggle: () -> Unit,
     onQuickSaveClick: () -> Unit // Callback for the floppy disk button
 ) {
     var currentTime by remember { mutableStateOf(System.currentTimeMillis()) }
@@ -88,13 +92,27 @@ fun EditorHeader(
                     style = MaterialTheme.typography.labelLarge,
                     maxLines = 1
                 )
-                Text(
-                    text = "$resolution | $activeLayerName ${if (isLayerLocked) "🔒" else ""}",
-                    style = MaterialTheme.typography.bodySmall,
-                    fontSize = 10.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "$resolution | $activeLayerName",
+                        style = MaterialTheme.typography.bodySmall,
+                        fontSize = 10.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    IconButton(
+                        onClick = onLockToggle,
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isLayerLocked) Icons.Default.Lock else Icons.Default.LockOpen,
+                            contentDescription = "Toggle Lock",
+                            tint = if (isLayerLocked) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
             }
 
             // QUICK SAVE AND TIMER: 💾 = 00:00

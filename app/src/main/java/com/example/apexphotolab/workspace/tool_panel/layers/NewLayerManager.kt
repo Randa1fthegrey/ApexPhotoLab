@@ -1,10 +1,10 @@
 package com.example.apexphotolab.workspace.tool_panel.layers
 
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
 import com.example.apexphotolab.workspace.tool_panel.save.ProjectManager
+import com.example.apexphotolab.workspace.util.BitmapUtils
 
 /**
  * A manager dedicated to the single job of adding a new image layer to a project.
@@ -21,14 +21,7 @@ object NewLayerManager {
         imageUri: Uri,
         title: String
     ): Layer? {
-        val bitmap = try {
-            context.contentResolver.openInputStream(imageUri)?.use {
-                BitmapFactory.decodeStream(it)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
+        val bitmap = BitmapUtils.decodeCorrectedBitmap(context, imageUri)
 
         if (bitmap == null) {
             return null

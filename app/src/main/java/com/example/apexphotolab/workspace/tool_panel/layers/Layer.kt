@@ -13,6 +13,10 @@ data class Layer(
     var isVisible: Boolean = true,
     var zOrder: Int = 0, // Z-Axis, Frame Index, or Page Number
     
+    // Intrinsic Dimensions
+    val width: Int = 0,
+    val height: Int = 0,
+
     // Layout Intelligence
     var xPosition: Float = 0f,
     var yPosition: Float = 0f,

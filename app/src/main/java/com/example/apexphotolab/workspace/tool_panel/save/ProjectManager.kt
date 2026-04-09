@@ -66,7 +66,9 @@ object ProjectManager {
                 val baseLayer = Layer(
                     id = "base",
                     title = "Base Image",
-                    imageUri = baseImageFile.uri
+                    imageUri = baseImageFile.uri,
+                    width = baseImageBitmap.width,
+                    height = baseImageBitmap.height
                 )
 
                 // Perform initial save to create the birth of the project
@@ -97,7 +99,9 @@ object ProjectManager {
                 Layer(
                     id = UUID.randomUUID().toString(),
                     title = layerTitle,
-                    imageUri = newImageFile.uri
+                    imageUri = newImageFile.uri,
+                    width = imageBitmap.width,
+                    height = imageBitmap.height
                 )
             } catch (e: Exception) {
                 e.printStackTrace()

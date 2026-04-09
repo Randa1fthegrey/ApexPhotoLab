@@ -6,6 +6,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -69,8 +70,9 @@ fun MainEditorScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     var activeToolIcon by remember { mutableStateOf(Icons.Default.Build) }
     var lastSaveTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
-    val activeLayerName by remember { derivedStateOf { layers.find { it.id == selectedLayerId }?.title ?: "Background" } }
-    val isLayerLocked by remember { derivedStateOf { layers.find { it.id == selectedLayerId }?.isLocked ?: false } }
+    val currentLayer = layers.find { it.id == selectedLayerId }
+    val activeLayerName = currentLayer?.title ?: "Background"
+    val isLayerLocked = currentLayer?.isLocked ?: false
     
     // Panel/Screen States
     var showLayersPanel by remember { mutableStateOf(false) }
@@ -89,6 +91,16 @@ fun MainEditorScreen(
     var showExportProgress by remember { mutableStateOf(false) }
     var exportProgress by remember { mutableStateOf(0f) }
     var exportJob by remember { mutableStateOf<Job?>(null) }
+
+    // --- DRAWER CLEANUP LOGIC ---
+    LaunchedEffect(drawerState.isClosed) {
+        if (drawerState.isClosed) {
+            showLayersPanel = false
+            showExportScreen = false
+            showFilterPanel = false
+            showHistoryPanel = false
+        }
+    }
 
     // Helper to update tool and keep drawer open if options are needed
     val onToolSelected: (ImageVector, () -> Unit) -> Unit = { icon, action ->
@@ -237,97 +249,116 @@ fun MainEditorScreen(
         drawerState = drawerState,
         gesturesEnabled = false,
         drawerContent = {
-            if (showLayersPanel) {
-                LayersPanel(
-                    modifier = Modifier.fillMaxHeight().width(320.dp),
-                    layers = layers,
-                    selectedLayerId = selectedLayerId,
-                    onLayerSelected = { layer -> selectedLayerId = layer.id },
-                    onMoveLayerUp = { layer -> moveLayer(layer, true) },
-                    onMoveLayerDown = { layer -> moveLayer(layer, false) },
-                    onAddLayer = { pickImageLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
-                    onLayerVisibilityChange = { layer -> 
-                        val index = layers.indexOfFirst { it.id == layer.id }
-                        if (index != -1) { layers[index] = layer.copy(isVisible = !layer.isVisible) }
-                    },
-                    onLayerLockChange = { layer ->
-                        val index = layers.indexOfFirst { it.id == layer.id }
-                        if (index != -1) { layers[index] = layer.copy(isLocked = !layer.isLocked) }
-                    },
-                    onLayersRemoved = { ids -> 
-                        layers.removeAll { ids.contains(it.id) }
-                        if (ids.contains(selectedLayerId)) selectedLayerId = "base"
-                    },
-                    onDismiss = { showLayersPanel = false }
-                )
-            } else if (showExportScreen) {
-                ExportScreen(
-                    modifier = Modifier.fillMaxHeight().width(320.dp),
-                    category = exportCategory,
-                    widescreenIndex = widescreenIndex,
-                    standardIndex = standardIndex,
-                    customW = customWidth,
-                    customH = customHeight,
-                    onCategoryChange = { exportCategory = it },
-                    onWidescreenIndexChange = { widescreenIndex = it },
-                    onStandardIndexChange = { standardIndex = it },
-                    onCustomWidthChange = { customWidth = it },
-                    onCustomHeightChange = { customHeight = it },
-                    onDismiss = { showExportScreen = false },
-                    onExport = { exportType -> 
-                        showExportScreen = false
-                        pendingExportType = exportType
-                        exportLauncher.launch(null)
-                        scope.launch { drawerState.close() }
-                    },
-                    onResolutionChange = { exportResolution = it }
-                )
-            } else if (showFilterPanel) {
-                FilterPanel(
-                    modifier = Modifier.fillMaxHeight().width(320.dp),
-                    onDismiss = { showFilterPanel = false },
-                    onGreyscaleChange = { applyGreyscale -> 
-                        colorFilter = if (applyGreyscale) ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }) else null 
-                    }
-                )
-            } else if (showHistoryPanel) {
-                HistoryPanel(
-                    modifier = Modifier.fillMaxHeight().width(320.dp),
-                    projectDirUri = projectDirUri,
-                    onDismiss = { showHistoryPanel = false },
-                    onRollback = { snapshot ->
-                        scope.launch {
-                            val success = ProjectManager.rollback(context, DocumentFile.fromTreeUri(context, projectDirUri)!!, snapshot)
-                            if (success) {
-                                layers.clear()
-                                layers.addAll(ProjectManager.loadLayers(context, DocumentFile.fromTreeUri(context, projectDirUri)!!))
-                                showHistoryPanel = false
-                                drawerState.close()
-                                Toast.makeText(context, "Project Restored", Toast.LENGTH_SHORT).show()
-                            } else {
-                                Toast.makeText(context, "Rollback Failed", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    }
-                )
-            } else {
-                ToolDrawer(
-                    onToolClick = onToolSelected,
-                    onFilterClick = { showFilterPanel = true },
-                    onAddImageClick = {
-                        pickImageLauncher.launch(
-                            PickVisualMediaRequest(
-                                ActivityResultContracts.PickVisualMedia.ImageOnly
-                            )
+            Row(modifier = Modifier.fillMaxSize()) {
+                // This is the panels content
+                Box(modifier = Modifier.fillMaxHeight().width(320.dp)) {
+                    if (showLayersPanel) {
+                        LayersPanel(
+                            modifier = Modifier.fillMaxSize(),
+                            layers = layers,
+                            selectedLayerId = selectedLayerId,
+                            onLayerSelected = { layer -> selectedLayerId = layer.id },
+                            onMoveLayerUp = { layer -> moveLayer(layer, true) },
+                            onMoveLayerDown = { layer -> moveLayer(layer, false) },
+                            onAddLayer = { pickImageLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
+                            onLayerVisibilityChange = { layer -> 
+                                val index = layers.indexOfFirst { it.id == layer.id }
+                                if (index != -1) { layers[index] = layer.copy(isVisible = !layer.isVisible) }
+                            },
+                            onLayerLockChange = { layer ->
+                                val index = layers.indexOfFirst { it.id == layer.id }
+                                if (index != -1) { layers[index] = layer.copy(isLocked = !layer.isLocked) }
+                            },
+                            onLayersRemoved = { ids -> 
+                                layers.removeAll { ids.contains(it.id) }
+                                if (ids.contains(selectedLayerId)) selectedLayerId = "base"
+                            },
+                            onDismiss = { showLayersPanel = false }
                         )
-                    },
-                    onSaveClick = { showSnapshotNameDialog = true },
-                    onLayersClick = { showLayersPanel = true },
-                    onExportClick = { showExportScreen = true },
-                    onHistoryClick = { showHistoryPanel = true },
-                    onResetClick = { showResetDialog = true },
-                    onHomeClick = onNavigateBack,
-                    onClose = { scope.launch { drawerState.close() } }
+                    } else if (showExportScreen) {
+                        ExportScreen(
+                            modifier = Modifier.fillMaxSize(),
+                            category = exportCategory,
+                            widescreenIndex = widescreenIndex,
+                            standardIndex = standardIndex,
+                            customW = customWidth,
+                            customH = customHeight,
+                            onCategoryChange = { exportCategory = it },
+                            onWidescreenIndexChange = { widescreenIndex = it },
+                            onStandardIndexChange = { standardIndex = it },
+                            onCustomWidthChange = { customWidth = it },
+                            onCustomHeightChange = { customHeight = it },
+                            onDismiss = { showExportScreen = false },
+                            onExport = { exportType -> 
+                                showExportScreen = false
+                                pendingExportType = exportType
+                                exportLauncher.launch(null)
+                                scope.launch { drawerState.close() }
+                            },
+                            onResolutionChange = { exportResolution = it }
+                        )
+                    } else if (showFilterPanel) {
+                        FilterPanel(
+                            modifier = Modifier.fillMaxSize(),
+                            onDismiss = { showFilterPanel = false },
+                            onGreyscaleChange = { applyGreyscale -> 
+                                colorFilter = if (applyGreyscale) ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }) else null 
+                            }
+                        )
+                    } else if (showHistoryPanel) {
+                        HistoryPanel(
+                            modifier = Modifier.fillMaxSize(),
+                            projectDirUri = projectDirUri,
+                            onDismiss = { showHistoryPanel = false },
+                            onRollback = { snapshot ->
+                                scope.launch {
+                                    val success = ProjectManager.rollback(context, DocumentFile.fromTreeUri(context, projectDirUri)!!, snapshot)
+                                    if (success) {
+                                        layers.clear()
+                                        layers.addAll(ProjectManager.loadLayers(context, DocumentFile.fromTreeUri(context, projectDirUri)!!))
+                                        showHistoryPanel = false
+                                        drawerState.close()
+                                        Toast.makeText(context, "Project Restored", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        Toast.makeText(context, "Rollback Failed", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
+                        )
+                    } else {
+                        ToolDrawer(
+                            onToolClick = onToolSelected,
+                            onFilterClick = { showFilterPanel = true },
+                            onAddImageClick = {
+                                pickImageLauncher.launch(
+                                    PickVisualMediaRequest(
+                                        ActivityResultContracts.PickVisualMedia.ImageOnly
+                                    )
+                                )
+                            },
+                            onSaveClick = { showSnapshotNameDialog = true },
+                            onLayersClick = { showLayersPanel = true },
+                            onExportClick = { showExportScreen = true },
+                            onHistoryClick = { showHistoryPanel = true },
+                            onResetClick = { showResetDialog = true },
+                            onHomeClick = onNavigateBack,
+                            onClose = { scope.launch { drawerState.close() } }
+                        )
+                    }
+                }
+                
+                // UNIVERSAL DISMISSAL AREA: Tapping the "empty" space of the drawer
+                // (which overlays the workspace) will close everything.
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .weight(1f)
+                        .clickable(
+                            interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                            indication = null // No ripple, just action
+                        ) {
+                            scope.launch { drawerState.close() }
+                        }
                 )
             }
         }
@@ -342,6 +373,12 @@ fun MainEditorScreen(
                     lastSaveTime = lastSaveTime,
                     activeToolIcon = activeToolIcon,
                     onTabClick = { scope.launch { if (drawerState.isClosed) drawerState.open() else drawerState.close() } },
+                    onLockToggle = {
+                        val index = layers.indexOfFirst { it.id == selectedLayerId }
+                        if (index != -1) {
+                            layers[index] = layers[index].copy(isLocked = !layers[index].isLocked)
+                        }
+                    },
                     onQuickSaveClick = performQuickSave
                 )
             }
@@ -352,6 +389,7 @@ fun MainEditorScreen(
                 } else {
                     EditorWorkspace(
                         layers = layers, 
+                        selectedLayerId = selectedLayerId,
                         colorFilter = colorFilter,
                         onLayerTransform = { updatedLayer ->
                             // Only allow transformation if it's the selected layer

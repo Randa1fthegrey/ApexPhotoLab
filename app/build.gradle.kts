@@ -54,6 +54,7 @@ dependencies {
     implementation(libs.androidx.documentfile)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.palette)
+    implementation(libs.androidx.exifinterface)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

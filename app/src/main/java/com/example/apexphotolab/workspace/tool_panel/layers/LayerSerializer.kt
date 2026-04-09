@@ -11,6 +11,8 @@ object LayerSerializer {
             put("imageUri", layer.imageUri.toString())
             put("isVisible", layer.isVisible)
             put("zOrder", layer.zOrder)
+            put("width", layer.width)
+            put("height", layer.height)
             put("xPosition", layer.xPosition)
             put("yPosition", layer.yPosition)
             put("scale", layer.scale)
@@ -26,6 +28,8 @@ object LayerSerializer {
             imageUri = Uri.parse(json.getString("imageUri")),
             isVisible = json.getBoolean("isVisible"),
             zOrder = json.getInt("zOrder"),
+            width = json.optInt("width", 0),
+            height = json.optInt("height", 0),
             xPosition = json.getDouble("xPosition").toFloat(),
             yPosition = json.getDouble("yPosition").toFloat(),
             scale = json.optDouble("scale", 1.0).toFloat(),

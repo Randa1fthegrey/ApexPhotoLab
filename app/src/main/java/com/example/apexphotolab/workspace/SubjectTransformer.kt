@@ -24,9 +24,6 @@ fun SubjectTransformer(
     colorFilter: ColorFilter?,
     onTransform: (Layer) -> Unit
 ) {
-    // LIVE WIRE: Ensures the gesture block always sees the latest project data
-    val currentLayer by rememberUpdatedState(layer)
-
     Image(
         bitmap = bitmap.asImageBitmap(),
         contentDescription = layer.title,
@@ -39,20 +36,6 @@ fun SubjectTransformer(
                 scaleY = layer.scale
                 rotationZ = layer.rotation
                 transformOrigin = androidx.compose.ui.graphics.TransformOrigin.Center
-            }
-            .pointerInput(layer.id) {
-                detectTransformGestures { _, pan, zoom, rotation ->
-                    if (currentLayer.isLocked) return@detectTransformGestures
-
-                    // Always calculate deltas based on the freshest state
-                    val updatedLayer = currentLayer.copy(
-                        xPosition = currentLayer.xPosition + pan.x,
-                        yPosition = currentLayer.yPosition + pan.y,
-                        scale = (currentLayer.scale * zoom).coerceIn(0.05f, 20f),
-                        rotation = currentLayer.rotation + rotation
-                    )
-                    onTransform(updatedLayer)
-                }
             }
     )
 }

@@ -1,14 +1,16 @@
 package com.example.apexphotolab.workspace
 
-import android.graphics.BitmapFactory
+import android.graphics.Bitmap
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import com.example.apexphotolab.workspace.tool_panel.layers.Layer
+import com.example.apexphotolab.workspace.util.BitmapUtils
 
 /**
  * Job 2: The Data Manager.
  * Orchestrates layer loading, visibility, and Z-order sorting.
+ * Now respects EXIF orientation to keep Landscape/Portrait images in their true state.
  */
 @Composable
 fun WorkspaceOrchestrator(
@@ -25,18 +27,9 @@ fun WorkspaceOrchestrator(
 
     sortedLayers.forEach { layer ->
         if (layer.isVisible) {
-            // High-fidelity image loading
+            // High-fidelity image loading with EXIF orientation fix
             val bitmap by remember(layer.imageUri) {
-                mutableStateOf(
-                    try {
-                        context.contentResolver.openInputStream(layer.imageUri)?.use {
-                            BitmapFactory.decodeStream(it)
-                        }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        null
-                    }
-                )
+                mutableStateOf(BitmapUtils.decodeCorrectedBitmap(context, layer.imageUri))
             }
 
             bitmap?.let {
