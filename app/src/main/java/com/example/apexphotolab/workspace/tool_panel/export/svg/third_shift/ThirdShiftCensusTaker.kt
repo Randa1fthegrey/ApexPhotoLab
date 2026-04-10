@@ -6,6 +6,7 @@ import java.nio.ByteBuffer
 
 /**
  * The blueprint for a VRAM-aware Third Shift worker (a "Census Taker").
+ * Original Version (v1): Returns a single Int for the dominant color.
  */
 interface ThirdShiftCensusTaker {
     val id: Int

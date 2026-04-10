@@ -6,7 +6,7 @@ import android.graphics.Point
 import android.graphics.Rect
 import com.example.apexphotolab.workspace.tool_panel.export.svg.second_shift.ColorGroupSorter
 import com.example.apexphotolab.workspace.tool_panel.export.svg.third_shift.SeedFinder
-import com.example.apexphotolab.workspace.tool_panel.export.svg.third_shift.ThirdShiftCensusTaker
+import com.example.apexphotolab.workspace.tool_panel.export.svg.third_shift.color_blending.ThirdShiftCensusTaker
 import kotlinx.coroutines.ensureActive
 import java.nio.ByteBuffer
 import java.util.LinkedList

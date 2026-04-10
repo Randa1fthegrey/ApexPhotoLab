@@ -1,6 +1,7 @@
 package com.example.apexphotolab.workspace.tool_panel.export.svg.third_shift
 
 import com.example.apexphotolab.workspace.tool_panel.export.svg.third_shift.census_takers.*
+import com.example.apexphotolab.workspace.tool_panel.export.svg.third_shift.color_blending.ThirdShiftCensusTaker
 import com.example.apexphotolab.workspace.tool_panel.export.svg.utils.CoreChecker
 import com.example.apexphotolab.workspace.tool_panel.export.svg.utils.CoreHighwayFactory
 import kotlinx.coroutines.CoroutineDispatcher
