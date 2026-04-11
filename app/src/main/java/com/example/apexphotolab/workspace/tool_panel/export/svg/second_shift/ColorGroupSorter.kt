@@ -11,7 +11,7 @@ object ColorGroupSorter {
 
     private const val ALPHA_THRESHOLD = 100
     private const val BLACK_VALUE_FLOOR = 0.15f
-    private const val WHITE_VALUE_CEILING = 1.0f // Only pure #FFFFFF is White.
+    private const val WHITE_VALUE_CEILING = 0.80f // Synchronized with ColorSorter
 
     fun groupPixelIndices(pixels: IntArray, width: Int, height: Int): List<List<Int>> {
         val groups = List(10) { mutableListOf<Int>() }
@@ -40,12 +40,12 @@ object ColorGroupSorter {
         if (a < ALPHA_THRESHOLD) return 7
 
         // ABSOLUTE NEUTRAL LOGIC
-        // If it's pure white, it's White. If it's very dark, it's Black.
-        if (val_ >= WHITE_VALUE_CEILING && sat < 0.01f) return 6
+        // If it's bright and low saturation, it's White. If it's very dark, it's Black.
+        if (val_ >= WHITE_VALUE_CEILING && sat < 0.25f) return 6
         if (val_ < BLACK_VALUE_FLOOR) return 8
 
-        // If it's low saturation, it's Grey (captures the circle outline perfectly)
-        if (sat < 0.15f) return 9
+        // If it's low saturation, it's Grey
+        if (sat < 0.12f) return 9
 
         return when (hue) {
             in 0f..20f, in 335f..360f -> 0 // Red

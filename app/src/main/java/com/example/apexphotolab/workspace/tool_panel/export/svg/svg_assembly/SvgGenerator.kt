@@ -31,10 +31,10 @@ object SvgGenerator {
                     HandoffLogger.logShift2to3(pathFragments.size, allEdges.size)
 
                     onProgress(0.7f)
-                    val (consolidatedPaths, consolidatedColors) = ThirdShiftOrchestrator.run(pathFragments, quantizedImage)
-                    HandoffLogger.logShift3toAssembly(consolidatedColors.size)
+                    val (consolidatedPaths, censusReports) = ThirdShiftOrchestrator.run(pathFragments, quantizedImage, image)
+                    HandoffLogger.logShift3toAssembly(censusReports.size)
 
-                    AssemblyOrchestrator.run(consolidatedPaths, consolidatedColors, image)
+                    AssemblyOrchestrator.run(consolidatedPaths, censusReports, image)
                 }
 
                 val transparencyCrewJob = async {

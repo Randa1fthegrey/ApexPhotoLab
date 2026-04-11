@@ -22,9 +22,16 @@ object SVGAssembler {
         val paths = mutableListOf<String>()
 
         // Separate definitions from drawable paths
-        svgElements.forEach {
-            val trimmed = it.trim()
-            if (trimmed.startsWith("<linearGradient")) {
+        svgElements.forEach { element ->
+            val trimmed = element.trim()
+            if (trimmed.contains("</linearGradient>")) {
+                // Split it into the definition and the path parts
+                val defPart = trimmed.substringBeforeLast("</linearGradient>") + "</linearGradient>"
+                val pathPart = trimmed.substringAfterLast("</linearGradient>").trim()
+                
+                if (defPart.isNotEmpty()) defs.add(defPart)
+                if (pathPart.isNotEmpty()) paths.add(pathPart)
+            } else if (trimmed.startsWith("<linearGradient")) {
                 defs.add(trimmed)
             } else if (trimmed.startsWith("<path")) {
                 paths.add(trimmed)

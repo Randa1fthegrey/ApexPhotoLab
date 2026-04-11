@@ -6,7 +6,8 @@ import android.graphics.Point
 import android.graphics.Rect
 import com.example.apexphotolab.workspace.tool_panel.export.svg.second_shift.ColorGroupSorter
 import com.example.apexphotolab.workspace.tool_panel.export.svg.third_shift.SeedFinder
-import com.example.apexphotolab.workspace.tool_panel.export.svg.third_shift.color_blending.ThirdShiftCensusTaker
+import com.example.apexphotolab.workspace.tool_panel.export.svg.third_shift.ThirdShiftCensusTaker
+import com.example.apexphotolab.workspace.tool_panel.export.svg.third_shift.CensusReport
 import kotlinx.coroutines.ensureActive
 import java.nio.ByteBuffer
 import java.util.LinkedList
@@ -16,6 +17,7 @@ import kotlin.coroutines.coroutineContext
 /**
  * Census Taker #16 for the Third Shift.
  * Gold Standard Version: Sentinel-Aware & Family-Match Robust.
+ * Statistical Upgrade: Returns a CensusReport for two-desk routing.
  */
 object CensusTaker16 : ThirdShiftCensusTaker {
 
@@ -26,12 +28,12 @@ object CensusTaker16 : ThirdShiftCensusTaker {
         path: List<Point>,
         quantizedImage: Bitmap,
         vramSlot: ByteBuffer
-    ): Int {
-        if (path.isEmpty()) return Color.TRANSPARENT
+    ): CensusReport {
+        if (path.isEmpty()) return CensusReport(Color.TRANSPARENT, Color.TRANSPARENT, 0, 0f, 0)
 
         // 1. Filter out sentinels (-1,-1) once at the start.
         val validPoints = path.filter { it.x >= 0 && it.y >= 0 }
-        if (validPoints.isEmpty()) return Color.TRANSPARENT
+        if (validPoints.isEmpty()) return CensusReport(Color.TRANSPARENT, Color.TRANSPARENT, 0, 0f, 0)
 
         // 2. Identify the color "Family" of the path border.
         val borderColors = mutableListOf<Int>()
@@ -49,14 +51,14 @@ object CensusTaker16 : ThirdShiftCensusTaker {
         val boundingBox = getPathBoundingBox(validPoints)
         val boxWidth = boundingBox.width()
         val boxHeight = boundingBox.height()
-        if (boxWidth == 0 || boxHeight == 0) return identityColor
+        if (boxWidth == 0 || boxHeight == 0) return CensusReport(identityColor, identityColor, 0, 0f, 0)
 
         // 4. Find a "Seed Point" inside the shape to start the fill.
         val seedPoint = SeedFinder.findSeedPoint(validPoints, quantizedImage)
         
         // Ensure the seed point belongs to the same color family.
         if (seedPoint == null || ColorGroupSorter.getGroupIndexForPixel(quantizedImage.getPixel(seedPoint.x, seedPoint.y)) != identityGroup) {
-            return identityColor
+            return CensusReport(identityColor, identityColor, 0, 0f, 0)
         }
 
         val relativeSeedPoint = Point(seedPoint.x - boundingBox.left, seedPoint.y - boundingBox.top)
@@ -64,19 +66,39 @@ object CensusTaker16 : ThirdShiftCensusTaker {
         val localPixels = IntArray(boxWidth * boxHeight)
         quantizedImage.getPixels(localPixels, 0, boxWidth, boundingBox.left, boundingBox.top, boxWidth, boxHeight)
 
-        // 5. Run the Flood Fill to find all interior pixels of this color family.
-        val neededMemory = (boxWidth * boxHeight) / 8
-        val interiorPixels = if (vramSlot.capacity() >= neededMemory) {
+        // 5. Run the Flood Fill to collect ALL colors in the interior.
+        val interiorColors = if (vramSlot.capacity() >= neededMemory(boxWidth, boxHeight)) {
             runFloodFillVRAM(relativeSeedPoint, localPixels, boxWidth, boxHeight, vramSlot)
         } else {
             runFloodFillWithHeap(relativeSeedPoint, localPixels, boxWidth, boxHeight)
         }
 
-        if (interiorPixels.isEmpty()) return identityColor
+        if (interiorColors.isEmpty()) return CensusReport(identityColor, identityColor, 0, 0f, 0)
 
-        // 6. Return the most common color found in the interior.
-        return interiorPixels.groupingBy { it }.eachCount().maxByOrNull { it.value }?.key ?: identityColor
+        // 6. Perform the Census.
+        val colorCounts = interiorColors.groupingBy { it }.eachCount()
+        val sortedEntries = colorCounts.entries.sortedByDescending { it.value }
+        val dominantEntry = sortedEntries[0]
+        val secondaryColor = if (sortedEntries.size > 1) sortedEntries[1].key else dominantEntry.key
+        
+        val dominantColor = dominantEntry.key
+        val dominantCount = dominantEntry.value
+        val totalPixels = interiorColors.size
+
+        // 7. Calculate Complexity.
+        val blendRatio = (totalPixels - dominantCount).toFloat() / totalPixels.toFloat()
+        val complexityScore = (blendRatio * 255).toInt().coerceIn(0, 255)
+
+        return CensusReport(
+            dominantColor = dominantColor,
+            secondaryColor = secondaryColor,
+            totalPixels = totalPixels,
+            blendRatio = blendRatio,
+            complexityScore = complexityScore
+        )
     }
+
+    private fun neededMemory(width: Int, height: Int): Int = (width * height) / 8
 
     private fun getPathBoundingBox(validPoints: List<Point>): Rect {
         var minX = validPoints.first().x
@@ -101,9 +123,9 @@ object CensusTaker16 : ThirdShiftCensusTaker {
         height: Int,
         visitedVram: ByteBuffer
     ): List<Int> {
-        val interiorPixels = mutableListOf<Int>()
-        val targetColor = localPixels[startNode.y * width + startNode.x]
-        val targetGroup = ColorGroupSorter.getGroupIndexForPixel(targetColor)
+        val interiorColors = mutableListOf<Int>()
+        val startColor = localPixels[startNode.y * width + startNode.x]
+        val targetGroup = ColorGroupSorter.getGroupIndexForPixel(startColor)
         val queue: Queue<Point> = LinkedList()
         
         visitedVram.clear()
@@ -118,7 +140,9 @@ object CensusTaker16 : ThirdShiftCensusTaker {
         while (queue.isNotEmpty()) {
             if (iteration++ % CANCELLATION_CHECK_INTERVAL == 0) { coroutineContext.ensureActive() }
             val current = queue.poll()!!
-            interiorPixels.add(targetColor)
+            
+            val pixelIdx = current.y * width + current.x
+            interiorColors.add(localPixels[pixelIdx])
             
             val neighbors = listOf(
                 Point(current.x, current.y - 1), 
@@ -141,7 +165,7 @@ object CensusTaker16 : ThirdShiftCensusTaker {
                 }
             }
         }
-        return interiorPixels
+        return interiorColors
     }
 
     private suspend fun runFloodFillWithHeap(
@@ -150,9 +174,9 @@ object CensusTaker16 : ThirdShiftCensusTaker {
         width: Int,
         height: Int
     ): List<Int> {
-        val interiorPixels = mutableListOf<Int>()
-        val targetColor = localPixels[startNode.y * width + startNode.x]
-        val targetGroup = ColorGroupSorter.getGroupIndexForPixel(targetColor)
+        val interiorColors = mutableListOf<Int>()
+        val startColor = localPixels[startNode.y * width + startNode.x]
+        val targetGroup = ColorGroupSorter.getGroupIndexForPixel(startColor)
         val visited = BooleanArray(localPixels.size)
         val queue: Queue<Point> = LinkedList()
         
@@ -163,7 +187,9 @@ object CensusTaker16 : ThirdShiftCensusTaker {
         while (queue.isNotEmpty()) {
             if (iteration++ % CANCELLATION_CHECK_INTERVAL == 0) { coroutineContext.ensureActive() }
             val current = queue.poll()!!
-            interiorPixels.add(targetColor)
+            
+            val pixelIdx = current.y * width + current.x
+            interiorColors.add(localPixels[pixelIdx])
             
             val neighbors = listOf(
                 Point(current.x, current.y - 1), 
@@ -182,6 +208,6 @@ object CensusTaker16 : ThirdShiftCensusTaker {
                 }
             }
         }
-        return interiorPixels
+        return interiorColors
     }
 }

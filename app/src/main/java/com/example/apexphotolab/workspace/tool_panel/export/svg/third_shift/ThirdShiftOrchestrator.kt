@@ -17,43 +17,44 @@ object ThirdShiftOrchestrator {
      */
     suspend fun run(
         pathFragments: List<List<Point>>, 
-        quantizedImage: Bitmap
-    ): Pair<List<List<Point>>, List<Int>> {
+        quantizedImage: Bitmap,
+        sourceImage: Bitmap
+    ): Pair<List<List<Point>>, List<CensusReport>> {
         
-        // 1. RESOLUTION: Determine the raw colors for every single fragment.
-        val rawColors = ColoringDispatcher.resolveColorsInParallel(pathFragments, quantizedImage)
+        // 1. RESOLUTION: Determine the statistical CensusReport for every single fragment.
+        val reports = ColoringDispatcher.resolveColorsInParallel(pathFragments, quantizedImage)
         
         // 2. GROUPING: Separate fragments by their color families for specialized consolidation.
         val familyGroups = pathFragments.indices.groupBy { index ->
-            ColorGroupSorter.getGroupIndexForPixel(rawColors[index])
+            ColorGroupSorter.getGroupIndexForPixel(reports[index].dominantColor)
         }
 
         val allConsolidatedPaths = mutableListOf<List<Point>>()
-        val allConsolidatedColors = mutableListOf<Int>()
+        val allConsolidatedReports = mutableListOf<CensusReport>()
 
         // 3. SPECIALIZED CONSOLIDATION: Route each family to its dedicated team.
         familyGroups.forEach { (groupIndex, indices) ->
             val familyPaths = indices.map { pathFragments[it] }
-            val familyColors = indices.map { rawColors[it] }
+            val familyReports = indices.map { reports[it] }
 
-            val (resultPaths, resultColors) = when (groupIndex) {
-                0 -> RedConsolidator.consolidate(familyPaths, familyColors)
-                1 -> GreenConsolidator.consolidate(familyPaths, familyColors)
-                2 -> BlueConsolidator.consolidate(familyPaths, familyColors)
-                3 -> YellowConsolidator.consolidate(familyPaths, familyColors)
-                4 -> CyanConsolidator.consolidate(familyPaths, familyColors)
-                5 -> MagentaConsolidator.consolidate(familyPaths, familyColors)
-                6 -> WhiteConsolidator.consolidate(familyPaths, familyColors)
-                7 -> AlphaConsolidator.consolidate(familyPaths, familyColors)
-                8 -> BlackConsolidator.consolidate(familyPaths, familyColors)
-                9 -> GreyConsolidator.consolidate(familyPaths, familyColors)
-                else -> Pair(familyPaths, familyColors)
+            val (resultPaths, resultReports) = when (groupIndex) {
+                0 -> RedConsolidator.consolidate(familyPaths, familyReports)
+                1 -> GreenConsolidator.consolidate(familyPaths, familyReports)
+                2 -> BlueConsolidator.consolidate(familyPaths, familyReports)
+                3 -> YellowConsolidator.consolidate(familyPaths, familyReports)
+                4 -> CyanConsolidator.consolidate(familyPaths, familyReports)
+                5 -> MagentaConsolidator.consolidate(familyPaths, familyReports)
+                6 -> WhiteConsolidator.consolidate(familyPaths, familyReports)
+                7 -> AlphaConsolidator.consolidate(familyPaths, familyReports)
+                8 -> BlackConsolidator.consolidate(familyPaths, familyReports)
+                9 -> GreyConsolidator.consolidate(familyPaths, familyReports)
+                else -> Pair(familyPaths, familyReports)
             }
 
             allConsolidatedPaths.addAll(resultPaths)
-            allConsolidatedColors.addAll(resultColors)
+            allConsolidatedReports.addAll(resultReports)
         }
 
-        return Pair(allConsolidatedPaths, allConsolidatedColors)
+        return Pair(allConsolidatedPaths, allConsolidatedReports)
     }
 }

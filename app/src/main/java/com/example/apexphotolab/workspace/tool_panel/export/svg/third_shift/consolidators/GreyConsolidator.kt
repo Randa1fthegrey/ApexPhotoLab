@@ -3,6 +3,8 @@ package com.example.apexphotolab.workspace.tool_panel.export.svg.third_shift.con
 import android.graphics.Point
 import android.graphics.Rect
 
+import com.example.apexphotolab.workspace.tool_panel.export.svg.third_shift.CensusReport
+
 /**
  * Consolidation specialist for the GREY color group.
  * Tuned for thin outlines and subtle details like the white circle border.
@@ -11,18 +13,18 @@ object GreyConsolidator {
 
     private const val REACH_RADIUS = 15 // Increased reach to ensure thin outlines weld correctly
 
-    fun consolidate(paths: List<List<Point>>, colors: List<Int>): Pair<List<List<Point>>, List<Int>> {
-        if (paths.size <= 1) return Pair(paths, colors)
+    fun consolidate(paths: List<List<Point>>, reports: List<CensusReport>): Pair<List<List<Point>>, List<CensusReport>> {
+        if (paths.size <= 1) return Pair(paths, reports)
 
         val consolidatedPaths = mutableListOf<List<Point>>()
-        val consolidatedColors = mutableListOf<Int>()
+        val consolidatedReports = mutableListOf<CensusReport>()
         val usedIndices = mutableSetOf<Int>()
 
         for (i in paths.indices) {
             if (i in usedIndices) continue
             
             val currentPath = paths[i].toMutableList()
-            val currentColor = colors[i]
+            val currentReport = reports[i]
             val currentBounds = getBoundingBox(paths[i])
             usedIndices.add(i)
 
@@ -39,10 +41,10 @@ object GreyConsolidator {
             }
             
             consolidatedPaths.add(currentPath)
-            consolidatedColors.add(currentColor)
+            consolidatedReports.add(currentReport)
         }
 
-        return Pair(consolidatedPaths, consolidatedColors)
+        return Pair(consolidatedPaths, consolidatedReports)
     }
 
     private fun getBoundingBox(path: List<Point>): Rect {

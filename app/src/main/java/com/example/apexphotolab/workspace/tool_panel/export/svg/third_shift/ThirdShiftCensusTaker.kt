@@ -6,7 +6,7 @@ import java.nio.ByteBuffer
 
 /**
  * The blueprint for a VRAM-aware Third Shift worker (a "Census Taker").
- * Original Version (v1): Returns a single Int for the dominant color.
+ * Updated: Now returns a CensusReport containing color variation data.
  */
 interface ThirdShiftCensusTaker {
     val id: Int
@@ -14,5 +14,16 @@ interface ThirdShiftCensusTaker {
         path: List<Point>,
         quantizedImage: Bitmap,
         vramSlot: ByteBuffer
-    ): Int
+    ): CensusReport
 }
+
+/**
+ * The data structure used to report findings for a single shape.
+ */
+data class CensusReport(
+    val dominantColor: Int,
+    val secondaryColor: Int,
+    val totalPixels: Int,
+    val blendRatio: Float, // 0.0 (Solid) to 1.0 (Pure Gradient)
+    val complexityScore: Int // 0 to 255 based on blendRatio
+)
