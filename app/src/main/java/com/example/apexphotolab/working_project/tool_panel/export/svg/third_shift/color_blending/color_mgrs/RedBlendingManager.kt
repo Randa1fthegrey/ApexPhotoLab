@@ -1,0 +1,39 @@
+package com.example.apexphotolab.working_project.tool_panel.export.svg.third_shift.color_blending.color_mgrs
+
+import android.graphics.Bitmap
+import android.graphics.Point
+import com.example.apexphotolab.working_project.tool_panel.export.svg.third_shift.color_blending.BlenderHiringDepartment
+import com.example.apexphotolab.working_project.tool_panel.export.svg.svg_assembly.artist.SolidFillGenerator
+import com.example.apexphotolab.working_project.tool_panel.export.svg.third_shift.CensusReport
+
+/**
+ * Blending Manager for the RED color family.
+ * Implements Two-Desk Routing: 
+ * - Complexity 0 -> SolidFillGenerator (Hire a specialist)
+ * - Complexity > 0 -> ColorBlender (Hire a generalist)
+ */
+object RedBlendingManager {
+
+    fun process(
+        paths: List<List<Point>>,
+        reports: List<CensusReport>,
+        sourceImage: Bitmap
+    ): List<String> {
+        val svgResults = mutableListOf<String>()
+
+        paths.forEachIndexed { index, path ->
+            val report = reports[index]
+
+            if (report.complexityScore == 0) {
+                // Desk 1: Solid Fill (Standard)
+                svgResults.add(SolidFillGenerator.generate(listOf(path), report.dominantColor))
+            } else {
+                // Desk 2: Blending Team (13-point Ladder)
+                val worker = BlenderHiringDepartment.hireWorker(index)
+                svgResults.add(worker.blend(path, report, sourceImage))
+            }
+        }
+
+        return svgResults
+    }
+}

@@ -8,8 +8,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 
-enum class ProjectType { STATIC, ANIMATED, SEQUENTIAL }
-
+/**
+ * Job: UI Component.
+ * Dialog for selecting the type of project to create.
+ */
 @Composable
 fun ProjectTypeDialog(
     onDismiss: () -> Unit,

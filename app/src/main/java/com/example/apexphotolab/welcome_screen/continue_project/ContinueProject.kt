@@ -1,27 +1,21 @@
 package com.example.apexphotolab.welcome_screen.continue_project
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.documentfile.provider.DocumentFile
-import com.example.apexphotolab.workspace.tool_panel.save.ProjectManager
+import com.example.apexphotolab.working_project.tool_panel.save.ProjectManager
 import com.example.apexphotolab.welcome_screen.delete_project.DeleteConfirmDialog
-import com.example.apexphotolab.welcome_screen.delete_project.deleteProject
+import com.example.apexphotolab.welcome_screen.delete_project.ProjectDeleter
 import kotlinx.coroutines.launch
 
 /**
- * The Organized Project Explorer.
- * Updated: Standardized naming to "Sequential" for multi-page document projects.
+ * Job: Orchestrator.
+ * Manages the state and layout assembly for the Project Explorer.
  */
 @Composable
 fun ProjectFileExplorer(
@@ -46,7 +40,7 @@ fun ProjectFileExplorer(
             onConfirm = {
                 showDeleteConfirmDialog = null
                 scope.launch {
-                    if (deleteProject(context, project)) {
+                    if (ProjectDeleter.delete(context, project)) {
                         projectFiles = ProjectManager.getProjectFiles(context)
                     }
                 }
@@ -95,49 +89,4 @@ fun ProjectFileExplorer(
         
         item { Spacer(modifier = Modifier.height(64.dp)) }
     }
-}
-
-@Composable
-fun ProjectCategoryHeader(title: String) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Bold
-        )
-    }
-}
-
-@Composable
-fun EmptyCategoryNotice() {
-    Text(
-        text = "No projects in this category.",
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(16.dp)
-    )
-}
-
-@Composable
-fun ProjectItemRow(
-    file: DocumentFile,
-    isDeleteMode: Boolean,
-    onProjectSelected: (DocumentFile) -> Unit,
-    onDeleteRequest: (DocumentFile) -> Unit
-) {
-    Text(
-        text = file.name ?: "Unknown Project",
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { 
-                if (isDeleteMode) onDeleteRequest(file) else onProjectSelected(file)
-            }
-            .padding(16.dp)
-    )
 }
