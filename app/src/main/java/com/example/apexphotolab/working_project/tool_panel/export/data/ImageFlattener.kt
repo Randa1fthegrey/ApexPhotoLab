@@ -5,7 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
 import com.example.apexphotolab.working_project.tool_panel.layers.Layer
-import com.example.apexphotolab.working_project.tool_panel.eraser_bkgdremover.BitmapRegistry
+import com.example.apexphotolab.working_project.tool_panel.util.BitmapRegistry
 
 /**
  * A single-responsibility utility for loading and flattening layers.

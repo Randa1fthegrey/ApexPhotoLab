@@ -4,6 +4,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import com.example.apexphotolab.working_project.app.AppEngineInitializer
+import com.example.apexphotolab.working_project.app.AppRouter
+import com.example.apexphotolab.working_project.app.AppSettingsSynchronizer
+import com.example.apexphotolab.working_project.app.rememberAppState
 
 /**
  * The Orchestrator for the entire application.

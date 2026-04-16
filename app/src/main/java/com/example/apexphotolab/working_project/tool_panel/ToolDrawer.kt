@@ -13,15 +13,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.example.apexphotolab.working_project.WorkspaceTool
-import com.example.apexphotolab.working_project.icon
-import com.example.apexphotolab.working_project.label
-import com.example.apexphotolab.working_project.tool_panel.eraser_bkgdremover.EraserMode
-import com.example.apexphotolab.working_project.tool_panel.eraser_bkgdremover.label
+import com.example.apexphotolab.working_project.workspace.WorkspaceTool
+import com.example.apexphotolab.working_project.workspace.icon
+import com.example.apexphotolab.working_project.workspace.label
+import com.example.apexphotolab.working_project.tool_panel.eraser.EraserMode
+import com.example.apexphotolab.working_project.tool_panel.eraser.EraserSettings
 
 /**
- * The slide-out tool panel.
- * Updated: Added Eraser Mode selection.
+ * Job: Navigator (Tool Hub).
+ * Responsibility: Switching between editor tools and high-level actions.
+ * Purified: Tool-Blind; delegates tool-specific parameters to specialized workers.
  */
 @Composable
 fun ToolDrawer(
@@ -91,39 +92,15 @@ fun ToolDrawer(
                 )
             }
 
+            // --- Dynamic Tool Parameters (Eraser) ---
             if (activeTool == WorkspaceTool.ERASER) {
-                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("Brush Size", style = MaterialTheme.typography.labelSmall)
-                        Text("${brushSize.toInt()} px", style = MaterialTheme.typography.labelSmall)
-                    }
-                    Slider(
-                        value = brushSize,
-                        onValueChange = onBrushSizeChange,
-                        valueRange = 5f..200f,
-                        modifier = Modifier.height(24.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-                    
-                    Text("Eraser Mode", style = MaterialTheme.typography.labelSmall)
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        EraserMode.entries.forEach { mode ->
-                            FilterChip(
-                                selected = eraserMode == mode,
-                                onClick = { onEraserModeChange(mode) },
-                                label = { Text(mode.label, style = MaterialTheme.typography.labelSmall) }
-                            )
-                        }
-                    }
-                }
+                EraserSettings(
+                    brushSize = brushSize,
+                    onBrushSizeChange = onBrushSizeChange,
+                    eraserMode = eraserMode,
+                    onEraserModeChange = onEraserModeChange,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
             }
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))

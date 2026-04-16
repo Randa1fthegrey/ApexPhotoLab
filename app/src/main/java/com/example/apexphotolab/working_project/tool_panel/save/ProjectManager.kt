@@ -18,7 +18,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.UUID
 
-import com.example.apexphotolab.working_project.tool_panel.eraser_bkgdremover.BitmapRegistry
+import com.example.apexphotolab.working_project.tool_panel.util.BitmapRegistry
 
 /**
  * The core engine for project persistence.
