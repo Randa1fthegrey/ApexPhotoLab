@@ -9,16 +9,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+/**
+ * Job: UI Specialist (Filter Rack).
+ * Responsibility: Displays a list of available filters and handles selection events.
+ * 
+ * Purified: Filter-Blind. It dynamically generates buttons based on the 
+ * provided list of WorkspaceFilter objects.
+ */
 @Composable
 fun FilterPanel(
-    modifier: Modifier = Modifier,
+    availableFilters: List<WorkspaceFilter>,
+    onFilterSelected: (WorkspaceFilter?) -> Unit,
     onDismiss: () -> Unit,
-    onGreyscaleChange: (Boolean) -> Unit
+    modifier: Modifier = Modifier
 ) {
     Surface(
         modifier = modifier
             .fillMaxHeight()
-            .statusBarsPadding(), // Ensures content starts below the status bar
+            .statusBarsPadding(),
         color = MaterialTheme.colorScheme.surface
     ) {
         Column(
@@ -41,17 +49,20 @@ fun FilterPanel(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            Button(
-                onClick = { onGreyscaleChange(true) },
-                modifier = Modifier.fillMaxWidth().height(56.dp)
-            ) {
-                Text("Apply Greyscale")
+            // Dynamically generate buttons for each available filter
+            availableFilters.forEach { filter ->
+                Button(
+                    onClick = { onFilterSelected(filter) },
+                    modifier = Modifier.fillMaxWidth().height(56.dp)
+                ) {
+                    Text(filter.label)
+                }
+                Spacer(modifier = Modifier.height(16.dp))
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
+            // The "Clear" option is always present
             OutlinedButton(
-                onClick = { onGreyscaleChange(false) },
+                onClick = { onFilterSelected(null) },
                 modifier = Modifier.fillMaxWidth().height(56.dp)
             ) {
                 Text("Clear Filters")

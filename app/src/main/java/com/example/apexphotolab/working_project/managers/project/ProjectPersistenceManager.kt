@@ -1,4 +1,4 @@
-package com.example.apexphotolab.working_project.managers
+package com.example.apexphotolab.working_project.managers.project
 
 import android.content.Context
 import android.net.Uri
@@ -8,10 +8,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.documentfile.provider.DocumentFile
-import com.example.apexphotolab.working_project.tool_panel.layers.Layer
-import com.example.apexphotolab.working_project.tool_panel.save.ProjectLoadManager
-import com.example.apexphotolab.working_project.tool_panel.save.ProjectManager
-import com.example.apexphotolab.working_project.tool_panel.save.ProjectSaveManager
+import com.example.apexphotolab.SettingsPersistence
+import com.example.apexphotolab.working_project.util.layers.Layer
 
 /**
  * Job: Persistence/IO Worker.
@@ -89,5 +87,9 @@ class ProjectPersistenceManager {
 
     fun updateSaveTime() {
         lastSaveTime = System.currentTimeMillis()
+    }
+
+    fun setSaveConfirmationPreference(context: Context, show: Boolean) {
+        SettingsPersistence.setShouldShowSaveConfirmation(context, show)
     }
 }

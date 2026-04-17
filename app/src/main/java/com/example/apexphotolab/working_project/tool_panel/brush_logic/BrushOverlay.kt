@@ -10,8 +10,11 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 
 /**
- * Visual feedback for the Eraser tool.
- * Draws a circle representing the brush size and position.
+ * Job: UI Specialist (Brush Feedback).
+ * Responsibility: Renders a visual indicator of the brush size and position.
+ * 
+ * Purified: Tool-agnostic; provides high-contrast feedback suitable for any 
+ * brush-based interaction (Eraser, Paint, Retouch, etc.).
  */
 @Composable
 fun BrushOverlay(

@@ -5,7 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Matrix
 import android.net.Uri
-import com.example.apexphotolab.working_project.tool_panel.layers.Layer
+import com.example.apexphotolab.working_project.util.layers.Layer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.DataOutputStream

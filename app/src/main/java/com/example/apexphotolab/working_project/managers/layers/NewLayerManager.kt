@@ -1,10 +1,11 @@
-package com.example.apexphotolab.working_project.tool_panel.layers
+package com.example.apexphotolab.working_project.managers.layers
 
 import android.content.Context
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
-import com.example.apexphotolab.working_project.tool_panel.save.ProjectManager
-import com.example.apexphotolab.working_project.util.BitmapLoader
+import com.example.apexphotolab.working_project.managers.project.ProjectManager
+import com.example.apexphotolab.working_project.util.bitmap.BitmapLoader
+import com.example.apexphotolab.working_project.util.layers.Layer
 
 /**
  * A manager dedicated to the single job of adding a new image layer to a project.

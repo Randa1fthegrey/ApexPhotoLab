@@ -9,22 +9,25 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.documentfile.provider.DocumentFile
+import com.example.apexphotolab.working_project.tool_panel.filters.WorkspaceFilter
 import com.example.apexphotolab.working_project.workspace.WorkspaceFilterModel
 import com.example.apexphotolab.working_project.workspace.WorkspaceTool
-import com.example.apexphotolab.working_project.managers.ExportManager
-import com.example.apexphotolab.working_project.managers.LayerListManager
-import com.example.apexphotolab.working_project.managers.LayerTransformManager
+import com.example.apexphotolab.working_project.managers.export.ExportConfigurationManager
+import com.example.apexphotolab.working_project.managers.export.ExportLifecycleManager
+import com.example.apexphotolab.working_project.managers.layers.LayerListManager
+import com.example.apexphotolab.working_project.managers.layers.LayerTransformManager
 import com.example.apexphotolab.working_project.managers.PanelManager
-import com.example.apexphotolab.working_project.managers.ProjectPersistenceManager
+import com.example.apexphotolab.working_project.managers.DialogManager
+import com.example.apexphotolab.working_project.managers.project.ProjectPersistenceManager
+import com.example.apexphotolab.working_project.managers.project.ProjectSaveManager
 import com.example.apexphotolab.working_project.managers.ToolSettingsManager
 import com.example.apexphotolab.working_project.managers.WorkspacePanel
 import com.example.apexphotolab.working_project.tool_panel.eraser.EraserMode
 import com.example.apexphotolab.working_project.tool_panel.export.data.ExportJobManager
 import com.example.apexphotolab.working_project.tool_panel.export.data.ExportType
 import com.example.apexphotolab.working_project.tool_panel.export.ui.ResolutionCategory
-import com.example.apexphotolab.working_project.tool_panel.layers.Layer
-import com.example.apexphotolab.working_project.tool_panel.layers.NewLayerManager
-import com.example.apexphotolab.working_project.tool_panel.save.ProjectSaveManager
+import com.example.apexphotolab.working_project.util.layers.Layer
+import com.example.apexphotolab.working_project.managers.layers.NewLayerManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -40,8 +43,10 @@ class EditorState(
     private val listManager: LayerListManager,
     private val transformManager: LayerTransformManager,
     private val panelManager: PanelManager,
+    private val dialogManager: DialogManager,
     private val toolManager: ToolSettingsManager,
-    private val exportManager: ExportManager
+    private val exportConfig: ExportConfigurationManager,
+    private val exportLifecycle: ExportLifecycleManager
 ) {
     // --- DERIVED UI STATE ---
     val layers: SnapshotStateList<Layer> get() = model.layers
@@ -78,20 +83,20 @@ class EditorState(
 
     // --- PANEL DELEGATION ---
     var showResetDialog: Boolean
-        get() = panelManager.showResetDialog
-        set(value) { panelManager.showResetDialog = value }
+        get() = dialogManager.showResetDialog
+        set(value) { dialogManager.showResetDialog = value }
 
     var showSaveConfirmDialog: Boolean
-        get() = panelManager.showSaveConfirmDialog
-        set(value) { panelManager.showSaveConfirmDialog = value }
+        get() = dialogManager.showSaveConfirmDialog
+        set(value) { dialogManager.showSaveConfirmDialog = value }
 
     var showLayerNameDialog: Uri?
-        get() = panelManager.showLayerNameDialog
-        set(value) { panelManager.showLayerNameDialog = value }
+        get() = dialogManager.showLayerNameDialog
+        set(value) { dialogManager.showLayerNameDialog = value }
 
     var showSnapshotNameDialog: Boolean
-        get() = panelManager.showSnapshotNameDialog
-        set(value) { panelManager.showSnapshotNameDialog = value }
+        get() = dialogManager.showSnapshotNameDialog
+        set(value) { dialogManager.showSnapshotNameDialog = value }
 
     var showLayersPanel: Boolean
         get() = panelManager.showLayersPanel
@@ -111,44 +116,44 @@ class EditorState(
 
     // --- EXPORT DELEGATION ---
     var showExportProgress: Boolean
-        get() = exportManager.showExportProgress
-        set(value) { exportManager.showExportProgress = value }
+        get() = exportLifecycle.showExportProgress
+        set(value) { exportLifecycle.showExportProgress = value }
 
     var exportProgress: Float
-        get() = exportManager.exportProgress
-        set(value) { exportManager.exportProgress = value }
+        get() = exportLifecycle.exportProgress
+        set(value) { exportLifecycle.exportProgress = value }
 
     var exportJob: Job?
-        get() = exportManager.exportJob
-        set(value) { exportManager.exportJob = value }
+        get() = exportLifecycle.exportJob
+        set(value) { exportLifecycle.exportJob = value }
 
     var pendingExportType: ExportType?
-        get() = exportManager.pendingExportType
-        set(value) { exportManager.pendingExportType = value }
+        get() = exportLifecycle.pendingExportType
+        set(value) { exportLifecycle.pendingExportType = value }
 
     var exportResolution: String 
-        get() = exportManager.exportResolution
-        set(value) { exportManager.exportResolution = value }
+        get() = exportConfig.exportResolution
+        set(value) { exportConfig.exportResolution = value }
 
     var exportCategory: ResolutionCategory 
-        get() = exportManager.exportCategory
-        set(value) { exportManager.exportCategory = value }
+        get() = exportConfig.exportCategory
+        set(value) { exportConfig.exportCategory = value }
 
     var widescreenIndex: Int 
-        get() = exportManager.widescreenIndex
-        set(value) { exportManager.widescreenIndex = value }
+        get() = exportConfig.widescreenIndex
+        set(value) { exportConfig.widescreenIndex = value }
 
     var standardIndex: Int 
-        get() = exportManager.standardIndex
-        set(value) { exportManager.standardIndex = value }
+        get() = exportConfig.standardIndex
+        set(value) { exportConfig.standardIndex = value }
 
     var customWidth: String 
-        get() = exportManager.customWidth
-        set(value) { exportManager.customWidth = value }
+        get() = exportConfig.customWidth
+        set(value) { exportConfig.customWidth = value }
 
     var customHeight: String 
-        get() = exportManager.customHeight
-        set(value) { exportManager.customHeight = value }
+        get() = exportConfig.customHeight
+        set(value) { exportConfig.customHeight = value }
 
     fun updateExportResolution(res: String) { exportResolution = res }
     fun updateExportCategory(cat: ResolutionCategory) { exportCategory = cat }
@@ -255,8 +260,8 @@ class EditorState(
         Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
     }
 
-    fun toggleGreyscale(applyGreyscale: Boolean) {
-        transformManager.toggleGreyscale(filterModel, applyGreyscale)
+    fun updateActiveFilter(filter: WorkspaceFilter?) {
+        filterModel.colorFilter = filter?.colorFilter
     }
 
     fun toggleLayerLock() {
@@ -314,6 +319,10 @@ class EditorState(
     fun updateSaveTime() {
         persistenceManager.updateSaveTime()
     }
+
+    fun setSaveConfirmationPreference(context: Context, show: Boolean) {
+        persistenceManager.setSaveConfirmationPreference(context, show)
+    }
 }
 
 @Composable
@@ -324,10 +333,12 @@ fun rememberEditorState(
     listManager: LayerListManager = remember { LayerListManager() },
     transformManager: LayerTransformManager = remember { LayerTransformManager() },
     panelManager: PanelManager = remember { PanelManager() },
+    dialogManager: DialogManager = remember { DialogManager() },
     toolManager: ToolSettingsManager = remember { ToolSettingsManager() },
-    exportManager: ExportManager = remember { ExportManager() }
+    exportConfig: ExportConfigurationManager = remember { ExportConfigurationManager() },
+    exportLifecycle: ExportLifecycleManager = remember { ExportLifecycleManager() }
 ): EditorState {
-    return remember(model, filterModel, persistenceManager, listManager, transformManager, panelManager, toolManager, exportManager) {
-        EditorState(model, filterModel, persistenceManager, listManager, transformManager, panelManager, toolManager, exportManager)
+    return remember(model, filterModel, persistenceManager, listManager, transformManager, panelManager, dialogManager, toolManager, exportConfig, exportLifecycle) {
+        EditorState(model, filterModel, persistenceManager, listManager, transformManager, panelManager, dialogManager, toolManager, exportConfig, exportLifecycle)
     }
 }

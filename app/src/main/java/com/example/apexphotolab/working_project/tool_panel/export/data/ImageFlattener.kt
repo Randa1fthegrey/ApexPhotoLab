@@ -4,7 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
-import com.example.apexphotolab.working_project.tool_panel.layers.Layer
+import com.example.apexphotolab.working_project.util.layers.Layer
 import com.example.apexphotolab.working_project.tool_panel.util.BitmapRegistry
 
 /**

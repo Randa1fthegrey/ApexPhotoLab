@@ -1,4 +1,4 @@
-package com.example.apexphotolab.working_project.tool_panel.save.ui
+package com.example.apexphotolab.working_project.tool_panel.layers.dialogs
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -8,35 +8,38 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+/**
+ * Job: UI Specialist (Dialog).
+ * Responsibility: Provides a transient UI for naming a new layer with length constraints.
+ */
 @Composable
-fun RenameSnapshotDialog(
-    initialName: String,
-    onDismiss: () -> Unit,
+fun LayerNameDialog(
+    onDismiss: () -> Unit, 
     onConfirm: (String) -> Unit
 ) {
-    var name by remember { mutableStateOf(initialName) }
-    val maxChars = 17
+    var text by remember { mutableStateOf("New Layer") }
+    val maxChars = 20
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Rename Snapshot") },
+        title = { Text("Name Your Layer") },
         text = {
             Column {
-                Text("Enter a new note for this save point:")
+                Text("Give this layer a recognizable name:")
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
-                    value = name,
-                    onValueChange = { if (it.length <= maxChars) name = it },
-                    label = { Text("Note ($maxChars chars max)") },
+                    value = text,
+                    onValueChange = { if (it.length <= maxChars) text = it },
+                    label = { Text("Layer Name ($maxChars chars max)") },
                     singleLine = true
                 )
             }
         },
         confirmButton = {
             TextButton(
-                onClick = { onConfirm(name.ifBlank { "Manual Save" }) }
+                onClick = { onConfirm(text.ifBlank { "New Layer" }) }
             ) {
-                Text("Rename")
+                Text("Continue")
             }
         },
         dismissButton = {

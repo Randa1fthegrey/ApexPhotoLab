@@ -1,7 +1,7 @@
 package com.example.apexphotolab.working_project.workspace
 
 import androidx.compose.ui.unit.IntSize
-import com.example.apexphotolab.working_project.tool_panel.layers.Layer
+import com.example.apexphotolab.working_project.util.layers.Layer
 
 /**
  * Job: Geometry Logic.

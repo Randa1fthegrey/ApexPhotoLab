@@ -5,13 +5,19 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 
 /**
- * The "Color Matcher".
- * Implements Euclidean distance math with Universal Luma Neutralization Zones.
+ * Job: Mathematical Worker (Color Comparison).
+ * Responsibility: Determines if two colors are "similar enough" based on Euclidean distance
+ * and specialized neutralization zones for shadows and highlights.
+ *
+ * Purified: Pure logic; tool-agnostic. Implements high-performance math for 
+ * selection-based tools (Magic Eraser, BG Remover, etc.).
  *
  * Logic:
- * 1. Deep Black Zone (< 18%): All colors match (Hue doesn't matter).
- * 2. Pure White Zone (> 82%): All pale colors match (High brightness, Low Saturation).
- * 3. Vibrant Zone: Strict Euclidean distance math.
+ * 1. THE BLACK ZONE (Neutralization): If both colors are dark enough (< 18% brightness),
+ *    they are considered a match regardless of hue.
+ * 2. THE WHITE ZONE (Neutralization): If both colors are bright (> 82%) and pale,
+ *    they are considered a match.
+ * 3. THE VIBRANT ZONE (Euclidean Distance): Standard RGB distance calculation.
  */
 object ColorMatcher {
 

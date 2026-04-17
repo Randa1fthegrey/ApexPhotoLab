@@ -9,8 +9,12 @@ import android.graphics.PorterDuffXfermode
 import androidx.compose.ui.geometry.Offset
 
 /**
- * The Eraser Implementation.
- * Uses PorterDuff.Mode.CLEAR to "punch holes" in the bitmap's alpha channel.
+ * Job: Execution Worker (Destructive Mutation).
+ * Responsibility: Performs the physical "erasing" of pixels on a bitmap using
+ * PorterDuff.Mode.CLEAR to manipulate the alpha channel.
+ *
+ * Purified: Identity-locked to the Eraser tool. Does not handle coordinate 
+ * mapping or input detection—only the execution of the mutation.
  */
 object EraserBrush {
 

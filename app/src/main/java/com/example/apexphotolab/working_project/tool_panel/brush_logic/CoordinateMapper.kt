@@ -2,13 +2,17 @@ package com.example.apexphotolab.working_project.tool_panel.brush_logic
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
-import com.example.apexphotolab.working_project.tool_panel.layers.Layer
+import com.example.apexphotolab.working_project.util.layers.Layer
 import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * The Math Engine for the Workspace.
- * Maps screen-space touch coordinates to bitmap-space pixel coordinates.
+ * Job: Mechanical Worker (Geometric Mapping).
+ * Responsibility: Translates screen-space touch coordinates into bitmap-space pixel 
+ * coordinates by inverting the layer's transformation matrix.
+ * 
+ * Purified: Pure mathematical worker. Tool-agnostic; used by any system that needs
+ * to pinpoint a specific pixel on a transformed layer.
  */
 object CoordinateMapper {
 

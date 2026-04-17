@@ -11,7 +11,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.example.apexphotolab.working_project.tool_panel.layers.Layer
+import com.example.apexphotolab.working_project.util.layers.Layer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

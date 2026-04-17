@@ -1,25 +1,14 @@
-package com.example.apexphotolab.working_project.managers
+package com.example.apexphotolab.working_project.managers.layers
 
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.ColorMatrix
-import com.example.apexphotolab.working_project.workspace.WorkspaceFilterModel
-import com.example.apexphotolab.working_project.tool_panel.layers.Layer
+import com.example.apexphotolab.working_project.util.layers.Layer
 
 /**
  * Job: Property Logic Worker.
  * Handles resetting layer transforms and toggling workspace-level properties.
  */
 class LayerTransformManager {
-
-    fun toggleGreyscale(filterModel: WorkspaceFilterModel, applyGreyscale: Boolean) {
-        filterModel.colorFilter = if (applyGreyscale) {
-            ColorFilter.Companion.colorMatrix(ColorMatrix().apply { setToSaturation(0f) })
-        } else {
-            null
-        }
-    }
 
     fun toggleLayerLock(layers: SnapshotStateList<Layer>, layerId: String) {
         val index = layers.indexOfFirst { it.id == layerId }

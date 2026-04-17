@@ -8,9 +8,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.documentfile.provider.DocumentFile
-import com.example.apexphotolab.working_project.tool_panel.save.ProjectManager
 import com.example.apexphotolab.welcome_screen.delete_project.DeleteConfirmDialog
 import com.example.apexphotolab.welcome_screen.delete_project.ProjectDeleter
+import com.example.apexphotolab.working_project.managers.project.ProjectManager
 import kotlinx.coroutines.launch
 
 /**

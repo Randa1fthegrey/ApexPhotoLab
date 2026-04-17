@@ -18,11 +18,11 @@ import com.example.apexphotolab.working_project.tool_panel.export.ui.ExportProgr
 import com.example.apexphotolab.working_project.tool_panel.export.ui.ExportScreen
 import com.example.apexphotolab.working_project.tool_panel.filters.FilterPanel
 import com.example.apexphotolab.working_project.tool_panel.layers.LayersPanel
-import com.example.apexphotolab.working_project.tool_panel.layers.ui.LayerNameDialog
+import com.example.apexphotolab.working_project.tool_panel.layers.dialogs.LayerNameDialog
 import com.example.apexphotolab.working_project.tool_panel.layers.ui.ResetCanvasDialog
 import com.example.apexphotolab.working_project.tool_panel.save.HistoryPanel
-import com.example.apexphotolab.working_project.tool_panel.save.ui.SaveConfirmDialog
-import com.example.apexphotolab.working_project.tool_panel.save.ui.SnapshotNameDialog
+import com.example.apexphotolab.working_project.tool_panel.save.dialogs.SaveConfirmDialog
+import com.example.apexphotolab.working_project.tool_panel.save.dialogs.SnapshotNameDialog
 import com.example.apexphotolab.working_project.workspace.EditorWorkspace
 import kotlinx.coroutines.launch
 import android.net.Uri
@@ -112,8 +112,11 @@ fun MainEditorScreen(
                         state.showFilterPanel -> {
                             FilterPanel(
                                 modifier = Modifier.fillMaxSize(),
-                                onDismiss = { state.showFilterPanel = false },
-                                onGreyscaleChange = { state.toggleGreyscale(it) }
+                                availableFilters = listOf(
+                                    com.example.apexphotolab.working_project.tool_panel.filters.GreyscaleFilter
+                                ),
+                                onFilterSelected = { filter -> state.updateActiveFilter(filter) },
+                                onDismiss = { state.showFilterPanel = false }
                             )
                         }
                         state.showHistoryPanel -> {

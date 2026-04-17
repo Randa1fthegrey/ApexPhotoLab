@@ -1,4 +1,4 @@
-package com.example.apexphotolab.working_project.tool_panel.save.ui
+package com.example.apexphotolab.working_project.tool_panel.save.dialogs
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,13 +8,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.platform.LocalContext
-import com.example.apexphotolab.SettingsPersistence
 
+/**
+ * Job: UI Specialist (Dialog).
+ * Responsibility: Asks the user for save confirmation and tracks the "Do not show again" preference.
+ */
 @Composable
-fun SaveConfirmDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
-    val context = LocalContext.current
+fun SaveConfirmDialog(
+    onDismiss: () -> Unit, 
+    onConfirm: (Boolean) -> Unit
+) {
     var checked by remember { mutableStateOf(false) }
+    
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Save Project?") },
@@ -28,12 +33,7 @@ fun SaveConfirmDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
             }
         },
         confirmButton = {
-            TextButton(onClick = { 
-                if(checked) {
-                    SettingsPersistence.setShouldShowSaveConfirmation(context, false)
-                }
-                onConfirm()
-            }) {
+            TextButton(onClick = { onConfirm(checked) }) {
                 Text("Save")
             }
         },

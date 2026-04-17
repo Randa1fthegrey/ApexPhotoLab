@@ -5,7 +5,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import com.example.apexphotolab.working_project.tool_panel.export.svg.svg_assembly.SvgGenerator
-import com.example.apexphotolab.working_project.tool_panel.layers.Layer
+import com.example.apexphotolab.working_project.util.layers.Layer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext

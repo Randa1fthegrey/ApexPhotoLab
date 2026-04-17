@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.example.apexphotolab.working_project.tool_panel.brush_logic.BrushOverlay
 import com.example.apexphotolab.working_project.tool_panel.eraser.EraserMode
-import com.example.apexphotolab.working_project.tool_panel.layers.Layer
+import com.example.apexphotolab.working_project.util.layers.Layer
 
 /**
  * Job: The "Stage" (UI Composition).

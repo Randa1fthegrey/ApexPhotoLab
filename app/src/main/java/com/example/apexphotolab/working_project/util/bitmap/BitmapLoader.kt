@@ -1,9 +1,10 @@
-package com.example.apexphotolab.working_project.util
+package com.example.apexphotolab.working_project.util.bitmap
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import com.example.apexphotolab.working_project.util.bitmap.BitmapOrientationFixer
 
 /**
  * Job: Resource Resolution.
@@ -19,7 +20,7 @@ object BitmapLoader {
         return try {
             context.contentResolver.openInputStream(uri)?.use { stream ->
                 val decoded = BitmapFactory.decodeStream(stream) ?: return null
-                
+
                 // Get a fresh stream for the EXIF reader in the fixer
                 context.contentResolver.openInputStream(uri)?.use { exifStream ->
                     BitmapOrientationFixer.applyExifOrientation(decoded, exifStream)

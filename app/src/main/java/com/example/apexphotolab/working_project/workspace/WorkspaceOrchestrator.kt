@@ -3,8 +3,8 @@ package com.example.apexphotolab.working_project.workspace
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
-import com.example.apexphotolab.working_project.tool_panel.layers.Layer
-import com.example.apexphotolab.working_project.util.BitmapLoader
+import com.example.apexphotolab.working_project.util.layers.Layer
+import com.example.apexphotolab.working_project.util.bitmap.BitmapLoader
 import com.example.apexphotolab.working_project.tool_panel.util.BitmapRegistry
 
 /**

@@ -1,4 +1,4 @@
-package com.example.apexphotolab.working_project.util
+package com.example.apexphotolab.working_project.util.bitmap
 
 import android.graphics.Bitmap
 import android.graphics.Matrix
@@ -21,7 +21,7 @@ object BitmapOrientationFixer {
         } catch (e: Exception) {
             return bitmap
         }
-        
+
         val orientation = exif.getAttributeInt(
             ExifInterface.TAG_ORIENTATION,
             ExifInterface.ORIENTATION_NORMAL

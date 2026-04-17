@@ -1,7 +1,7 @@
-package com.example.apexphotolab.working_project.managers
+package com.example.apexphotolab.working_project.managers.layers
 
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import com.example.apexphotolab.working_project.tool_panel.layers.Layer
+import com.example.apexphotolab.working_project.util.layers.Layer
 import java.util.Collections
 
 /**

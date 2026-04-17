@@ -1,8 +1,12 @@
-package com.example.apexphotolab.working_project.tool_panel.layers
+package com.example.apexphotolab.working_project.util.layers
 
 import android.net.Uri
 import org.json.JSONObject
 
+/**
+ * Job: Data Translator (The "Passport Clerk").
+ * Responsibility: Maps Layer objects to JSON and vice-versa for persistence.
+ */
 object LayerSerializer {
     fun toJson(layer: Layer): JSONObject {
         return JSONObject().apply {

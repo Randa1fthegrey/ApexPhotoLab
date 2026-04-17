@@ -2,7 +2,7 @@ package com.example.apexphotolab.working_project.tool_panel.export.data
 
 import android.content.Context
 import android.graphics.Bitmap
-import com.example.apexphotolab.working_project.tool_panel.layers.Layer
+import com.example.apexphotolab.working_project.util.layers.Layer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.DataOutputStream

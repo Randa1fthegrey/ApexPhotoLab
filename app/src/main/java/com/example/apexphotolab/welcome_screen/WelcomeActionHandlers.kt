@@ -4,8 +4,8 @@ import android.content.Context
 import android.net.Uri
 import android.widget.Toast
 import com.example.apexphotolab.SettingsPersistence
-import com.example.apexphotolab.working_project.tool_panel.save.ProjectManager
-import com.example.apexphotolab.working_project.util.BitmapLoader
+import com.example.apexphotolab.working_project.managers.project.ProjectManager
+import com.example.apexphotolab.working_project.util.bitmap.BitmapLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
