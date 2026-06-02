@@ -23,7 +23,7 @@ object AlphaFillGenerator {
             VRAM_BlobConverter.convertToVRAM(info.blob, vram, info.width)
 
             val edges = VRAM_EdgeFinder.findEdgesVRAM(vram, info.width, info.height)
-            val paths = AlphaPathTracer.trace(edges.toList(), vram, info.width)
+            val paths = AlphaPathTracer.trace(edges.toList(), vram, info.width, info.pixels)
 
             if (paths.isNotEmpty()) {
                 val gradientId = "alphaGrad${gradientIdCounter++}"

@@ -5,14 +5,16 @@ import java.nio.ByteBuffer
 
 /**
  * Job: VRAM Edge Finder.
- * Responsibility: Identifying perimeter pixels of a shape using VRAM bitmasks
- * to prevent heap-based OOM crashes.
+ * Responsibility: Identifying perimeter pixels of a shape using VRAM bitmasks.
  */
 object VRAM_EdgeFinder {
 
+    /**
+     * Standard bitmask edge finder. 
+     * Now primarily used to find the "Fences" created by the 3D Geometric Map.
+     */
     fun findEdgesVRAM(vram: ByteBuffer, width: Int, height: Int): HashSet<Point> {
         val edgePixels = HashSet<Point>()
-
         val offsets = arrayOf(
             Point(0, -1), Point(1, -1), Point(1, 0), Point(1, 1),
             Point(0, 1), Point(-1, 1), Point(-1, 0), Point(-1, -1)
@@ -27,23 +29,14 @@ object VRAM_EdgeFinder {
                     for (offset in offsets) {
                         val nx = x + offset.x
                         val ny = y + offset.y
-
-                        // 1. Boundary Check
                         if (nx !in 0 until width || ny !in 0 until height) {
-                            isEdge = true
-                            break
+                            isEdge = true; break
                         }
-
-                        // 2. Neighbor Check (against bitmask)
                         if (!getBit(vram, ny * width + nx)) {
-                            isEdge = true
-                            break
+                            isEdge = true; break
                         }
                     }
-
-                    if (isEdge) {
-                        edgePixels.add(Point(x, y))
-                    }
+                    if (isEdge) edgePixels.add(Point(x, y))
                 }
             }
         }

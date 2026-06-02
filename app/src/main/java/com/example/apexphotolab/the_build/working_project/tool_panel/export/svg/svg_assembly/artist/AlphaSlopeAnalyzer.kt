@@ -19,7 +19,7 @@ object AlphaSlopeAnalyzer {
         imageHeight: Int
     ): AlphaGradientDetector.AlphaGradientInfo {
         if (blob.isEmpty()) {
-            return AlphaGradientDetector.AlphaGradientInfo(blob, 255, 255, GradientFillGenerator.GradientDirection.HORIZONTAL, imageWidth, imageHeight)
+            return AlphaGradientDetector.AlphaGradientInfo(blob, 255, 255, GradientFillGenerator.GradientDirection.HORIZONTAL, imageWidth, imageHeight, pixels)
         }
 
         val boundingBox = blob.getBoundingBox()
@@ -32,9 +32,9 @@ object AlphaSlopeAnalyzer {
         val verticalDiff = abs(topEdgeAlpha - bottomEdgeAlpha)
 
         return if (horizontalDiff > verticalDiff) {
-            AlphaGradientDetector.AlphaGradientInfo(blob, leftEdgeAlpha, rightEdgeAlpha, GradientFillGenerator.GradientDirection.HORIZONTAL, imageWidth, imageHeight)
+            AlphaGradientDetector.AlphaGradientInfo(blob, leftEdgeAlpha, rightEdgeAlpha, GradientFillGenerator.GradientDirection.HORIZONTAL, imageWidth, imageHeight, pixels)
         } else {
-            AlphaGradientDetector.AlphaGradientInfo(blob, topEdgeAlpha, bottomEdgeAlpha, GradientFillGenerator.GradientDirection.VERTICAL, imageWidth, imageHeight)
+            AlphaGradientDetector.AlphaGradientInfo(blob, topEdgeAlpha, bottomEdgeAlpha, GradientFillGenerator.GradientDirection.VERTICAL, imageWidth, imageHeight, pixels)
         }
     }
 

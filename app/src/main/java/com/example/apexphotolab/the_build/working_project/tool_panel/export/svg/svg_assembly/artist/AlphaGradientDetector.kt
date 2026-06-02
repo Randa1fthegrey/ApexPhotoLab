@@ -17,7 +17,8 @@ object AlphaGradientDetector {
         val endAlpha: Int,
         val direction: GradientFillGenerator.GradientDirection,
         val width: Int,
-        val height: Int
+        val height: Int,
+        val pixels: IntArray
     )
 
     fun detect(image: Bitmap): List<AlphaGradientInfo> {

@@ -36,7 +36,7 @@ object VRAM_Garage {
     }
 
     private const val TAG = "VRAM_Garage"
-    private const val TOTAL_WORKERS = 31 // Supports 1-based ColorWorker IDs (1-30)
+    private const val TOTAL_WORKERS = 41 // 0-9 for Buckets, 10-40 for Swarm Agents
     private const val SLOT_SIZE_BYTES = 512 * 1024 // 0.5 MB
     private const val GARAGE_SIZE_BYTES = TOTAL_WORKERS * SLOT_SIZE_BYTES
 }

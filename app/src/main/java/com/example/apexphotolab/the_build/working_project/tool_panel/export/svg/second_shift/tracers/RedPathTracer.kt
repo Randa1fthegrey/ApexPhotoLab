@@ -1,6 +1,7 @@
 package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.tracers
 
 import android.graphics.Point
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.first_shift.color.ColorWallScale
 import java.nio.ByteBuffer
 import kotlin.math.abs
 
@@ -14,6 +15,7 @@ object RedPathTracer {
         homeCandidates: List<Point>,
         vram: ByteBuffer,
         width: Int,
+        pixels: IntArray,
         remainingPixels: MutableSet<Point>? = null
     ): List<List<Point>> {
         val allPaths = mutableListOf<List<Point>>()
@@ -28,17 +30,16 @@ object RedPathTracer {
             var previousPoint: Point? = null
 
             while (true) {
-                // COLLISION PROTECTION: Only one worker can claim a pixel in the swarm
                 if (!myRemaining.remove(currentPoint)) break
                 
                 path.add(currentPoint)
                 stack.add(currentPoint)
 
-                var nextPoint = findNextStep(currentPoint, previousPoint, myRemaining, home, path.size, vram, width)
+                var nextPoint = findNextStep(currentPoint, previousPoint, myRemaining, home, path.size, vram, width, pixels)
 
                 if (nextPoint == null) {
                     // --- 180 LOGIC RECOVERY ---
-                    nextPoint = findRecoveryPoint(currentPoint, myRemaining, vram, width)
+                    nextPoint = findRecoveryPoint(currentPoint, myRemaining, vram, width, pixels)
                 }
 
                 if (nextPoint != null) {
@@ -54,7 +55,7 @@ object RedPathTracer {
 
                     while (stack.isNotEmpty()) {
                         val junction = stack.removeAt(stack.size - 1)
-                        val branch = findNextStep(junction, null, myRemaining, home, path.size, vram, width)
+                        val branch = findNextStep(junction, null, myRemaining, home, path.size, vram, width, pixels)
                         if (branch != null) {
                             path.add(Point(-1, -1))
                             previousPoint = junction
@@ -92,7 +93,8 @@ object RedPathTracer {
         home: Point,
         pathSize: Int,
         vram: ByteBuffer,
-        width: Int
+        width: Int,
+        pixels: IntArray
     ): Point? {
         val lastMoveIndex = if (previous != null) {
             val dx = current.x - previous.x
@@ -102,14 +104,26 @@ object RedPathTracer {
 
         val searchStartIndex = if (lastMoveIndex != -1) (lastMoveIndex + 5) % 8 else 0
 
+        // COLORBLIND VISION: We follow the bitmask, but verify tension/territory
+        val currentPixel = pixels[current.y * width + current.x]
+
         for (i in 0 until 8) {
             val idx = (searchStartIndex + i) % 8
             if (idx % 2 != 0) continue
             val offset = OFFSETS[idx]
             val nx = current.x + offset.x
             val ny = current.y + offset.y
+            
             if (nx == home.x && ny == home.y && pathSize > 10) return home
-            if (remaining.contains(Point(nx, ny)) && getBit(vram, ny * width + nx)) return Point(nx, ny)
+            
+            val neighborPoint = Point(nx, ny)
+            if (remaining.contains(neighborPoint) && getBit(vram, ny * width + nx)) {
+                val neighborPixel = pixels[ny * width + nx]
+                // SOLID GROUND CHECK: Stay inside the fence
+                if (ColorWallScale.isSolidGround(currentPixel, neighborPixel)) {
+                    return neighborPoint
+                }
+            }
         }
 
         for (i in 0 until 8) {
@@ -118,8 +132,16 @@ object RedPathTracer {
             val offset = OFFSETS[idx]
             val nx = current.x + offset.x
             val ny = current.y + offset.y
+            
             if (nx == home.x && ny == home.y && pathSize > 10) return home
-            if (remaining.contains(Point(nx, ny)) && getBit(vram, ny * width + nx)) return Point(nx, ny)
+            
+            val neighborPoint = Point(nx, ny)
+            if (remaining.contains(neighborPoint) && getBit(vram, ny * width + nx)) {
+                val neighborPixel = pixels[ny * width + nx]
+                if (ColorWallScale.isSolidGround(currentPixel, neighborPixel)) {
+                    return neighborPoint
+                }
+            }
         }
         return null
     }
@@ -128,8 +150,10 @@ object RedPathTracer {
         current: Point,
         remaining: Set<Point>,
         vram: ByteBuffer,
-        width: Int
+        width: Int,
+        pixels: IntArray
     ): Point? {
+        val currentPixel = pixels[current.y * width + current.x]
         for (r in 1..3) {
             for (dy in -r..r) {
                 for (dx in -r..r) {
@@ -137,7 +161,10 @@ object RedPathTracer {
                     val nx = current.x + dx
                     val ny = current.y + dy
                     if (remaining.contains(Point(nx, ny)) && getBit(vram, ny * width + nx)) {
-                        return Point(nx, ny)
+                        val neighborPixel = pixels[ny * width + nx]
+                        if (ColorWallScale.isSolidGround(currentPixel, neighborPixel)) {
+                            return Point(nx, ny)
+                        }
                     }
                 }
             }

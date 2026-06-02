@@ -4,7 +4,7 @@ import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.overflow_work.TracingSwarmManager
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.utils.VRAM_Garage
 object SwarmAgent3 : SwarmAgent {
-    override val id = 3
+    override val id = 12
     override suspend fun runSwarm() {
         while (true) {
             val assignment = TracingSwarmManager.checkIn(id) ?: break

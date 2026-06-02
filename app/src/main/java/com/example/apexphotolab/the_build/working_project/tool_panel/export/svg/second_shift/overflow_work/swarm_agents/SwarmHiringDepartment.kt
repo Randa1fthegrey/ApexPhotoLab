@@ -15,8 +15,6 @@ object SwarmHiringDepartment {
         SwarmAgent1, SwarmAgent2, SwarmAgent3, SwarmAgent4, SwarmAgent5,
         SwarmAgent6, SwarmAgent7, SwarmAgent8, SwarmAgent9, SwarmAgent10,
         SwarmAgent11, SwarmAgent12, SwarmAgent13, SwarmAgent14, SwarmAgent15,
-        SwarmAgent16, SwarmAgent17, SwarmAgent18, SwarmAgent19, SwarmAgent20,
-        SwarmAgent21, SwarmAgent22, SwarmAgent23, SwarmAgent24, SwarmAgent25,
-        SwarmAgent26, SwarmAgent27, SwarmAgent28, SwarmAgent29, SwarmAgent30
+        SwarmAgent16, SwarmAgent17, SwarmAgent18, SwarmAgent19, SwarmAgent20
     )
 }

@@ -7,6 +7,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -18,6 +21,7 @@ import com.example.apexphotolab.the_build.welcome_screen.new_project.ui.ProjectN
 import com.example.apexphotolab.the_build.welcome_screen.new_project.ProjectType
 import com.example.apexphotolab.the_build.welcome_screen.new_project.ui.ProjectTypeDialog
 import com.example.apexphotolab.the_build.welcome_screen.new_project.rememberNewProjectWorkflowState
+import com.example.apexphotolab.the_build.welcome_screen.rgb_remote.ui.ColorBoundaryTool
 
 /**
  * Job: UI Rendering (The Orchestrator).
@@ -36,6 +40,7 @@ fun WelcomeScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    var showBoundaryTool by remember { mutableStateOf(false) }
 
     // --- WORKERS ---
     val workflow = rememberNewProjectWorkflowState()
@@ -84,6 +89,10 @@ fun WelcomeScreen(
         )
     }
 
+    if (showBoundaryTool) {
+        ColorBoundaryTool(onDismiss = { showBoundaryTool = false })
+    }
+
     // --- UI LAYOUT ---
     Column(
         modifier = modifier
@@ -121,6 +130,11 @@ fun WelcomeScreen(
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = { pickProjectDirLauncher.launch(null) }) {
                 Text("Set Custom Project Folder")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = { showBoundaryTool = true }) {
+                Text("Open Color Boundary Tool")
             }
 
             Spacer(modifier = Modifier.height(32.dp))

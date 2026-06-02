@@ -14,10 +14,11 @@ object RedDiscovery {
         edges: HashSet<Point>,
         vram: ByteBuffer,
         width: Int,
+        pixels: IntArray,
         sharedRemainingSet: MutableSet<Point>? = null,
         specificCandidates: List<Point>? = null
     ): List<List<Point>> {
         val candidates = specificCandidates ?: edges.sortedBy { it.y * 10000 + it.x }
-        return RedPathTracer.trace(candidates, vram, width, sharedRemainingSet)
+        return RedPathTracer.trace(candidates, vram, width, pixels, sharedRemainingSet)
     }
 }
