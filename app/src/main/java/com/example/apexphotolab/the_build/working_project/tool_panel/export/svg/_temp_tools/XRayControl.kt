@@ -9,7 +9,7 @@ import android.graphics.Color
  * - Every corner/point where the tracer makes a turn is numbered.
  */
 object XRayControl {
-    const val IS_XRAY_ENABLED = false
+    const val IS_XRAY_ENABLED = true
     
     // Global counter to ensure every point across the entire image has a unique ID
     var globalPointCounter = 1

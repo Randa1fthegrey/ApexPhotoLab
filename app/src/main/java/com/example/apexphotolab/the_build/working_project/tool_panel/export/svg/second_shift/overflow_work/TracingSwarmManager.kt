@@ -5,6 +5,7 @@ import java.nio.ByteBuffer
 import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Job: Tracing Swarm Manager.
@@ -15,6 +16,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 object TracingSwarmManager {
 
     private val activeContexts = ConcurrentHashMap<Int, TracingContext>()
+    private val activeAgentCount = AtomicInteger(0)
 
     class TracingContext(
         val colorIndex: Int,
@@ -25,6 +27,23 @@ object TracingSwarmManager {
         val homeCandidates: ConcurrentLinkedQueue<Point>,
         val remainingPixels: MutableSet<Point>
     )
+
+    fun registerAgent() {
+        activeAgentCount.incrementAndGet()
+    }
+
+    fun unregisterAgent() {
+        activeAgentCount.decrementAndGet()
+    }
+
+    fun isSwarmIdle(): Boolean {
+        return activeAgentCount.get() <= 0
+    }
+
+    fun wipeAll() {
+        activeContexts.clear()
+        activeAgentCount.set(0)
+    }
 
     /**
      * Registers a color bucket's data so it can be assisted by other workers.
@@ -53,16 +72,18 @@ object TracingSwarmManager {
     fun checkIn(agentId: Int): WorkAssignment? {
         // Priority 1: Check if its own "home" still has work (Agents 1-10 only)
         val homeIndex = agentId - 1
-        val homeContext = activeContexts[homeIndex]
-        if (homeContext != null && homeContext.homeCandidates.isNotEmpty()) {
-            return pullSlice(homeContext)
+        if (homeIndex in 0..9) {
+            val homeContext = activeContexts[homeIndex]
+            if (homeContext != null && homeContext.homeCandidates.isNotEmpty()) {
+                return pullSlice(homeContext)
+            }
         }
 
         // Priority 2: Look for any color group with the most remaining work
         val target = activeContexts.values
             .maxByOrNull { it.homeCandidates.size } ?: return null
 
-        if (target.homeCandidates.size < STEAL_THRESHOLD) return null
+        if (target.homeCandidates.isEmpty()) return null
 
         return pullSlice(target)
     }

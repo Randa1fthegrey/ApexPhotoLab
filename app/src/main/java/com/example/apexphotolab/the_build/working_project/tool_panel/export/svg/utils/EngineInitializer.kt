@@ -3,6 +3,10 @@ package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg
 import android.graphics.Bitmap
 import android.graphics.Point
 import android.util.Log
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.VPS_HiringDepartment
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.CVPS_HiringDepartment
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs.CVPS_job1
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.vps_jobs.VPS_job1
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.svg_assembly.final_assembly.SVGAssembler
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.first_shift.color.ColorPalette
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.first_shift.color.ValueClamper
@@ -16,7 +20,6 @@ import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.svg_assembly.artist.GradientFillGenerator
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.svg_assembly.artist.PathDataGenerator
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.svg_assembly.artist.SolidFillGenerator
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.first_shift.color.ramps.*
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.third_shift.FloodFiller
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.third_shift.SeedFinder
 import kotlinx.coroutines.runBlocking
@@ -32,18 +35,19 @@ object EngineInitializer {
         runBlocking {
             val dummyBitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
 
+            // --- VPS & CVPS Warmup ---
+            for (i in 0 until 10) {
+                val cvpsWorker = CVPS_HiringDepartment.getWorkerByColorId(i)
+                val rampData = CVPS_job1.RampData()
+                cvpsWorker.runColorTask(1, rampData)
+            }
+            
+            val vpsWorker = VPS_HiringDepartment.getWorkerById(1)
+            val vpsData = VPS_job1.QuantizationData(IntArray(1), IntArray(1), 0..0, VRAM_Garage.getSlotForManager(1), List(10) { mutableListOf() })
+            vpsWorker.runTask(1, vpsData)
+
             // --- Data Layer ---
             val p1 = ColorPalette.PALETTE.size
-            RedRamp.generate().size
-            GreenRamp.generate().size
-            BlueRamp.generate().size
-            YellowRamp.generate().size
-            CyanRamp.generate().size
-            MagentaRamp.generate().size
-            WhiteRamp.generate().size
-            AlphaRamp.generate().size
-            BlackRamp.generate().size
-            GreyRamp.generate().size
             ValueClamper.apply(emptyList()).size
             SVGAssembler.assemble(emptyList(), 0, 0).length
 

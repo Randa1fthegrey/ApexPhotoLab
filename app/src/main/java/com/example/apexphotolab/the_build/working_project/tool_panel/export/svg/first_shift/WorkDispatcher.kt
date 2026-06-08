@@ -1,5 +1,8 @@
 package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.first_shift
 
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.VPS_HiringDepartment
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.vps_jobs.VPS_job1
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg._temp_tools.VPS_Audit
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.utils.VRAM_Garage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -10,7 +13,7 @@ import kotlinx.coroutines.withContext
 
 /**
  * Job: Work Dispatcher.
- * Responsibility: Managing the work queue and merging pixel buckets from parallel first shift workers.
+ * Responsibility: Orchestrating the parallel quantization work queue and delegating result merging to the Merger.
  */
 object WorkDispatcher {
 
@@ -20,10 +23,15 @@ object WorkDispatcher {
         targetPixels: IntArray
     ): List<List<Int>> = withContext(Dispatchers.Default) {
 
-        val hiredCrew = HiringDepartment.hireWorkers()
+        VPS_Audit.logSystemOnline()
+
+        val hiredCrew = VPS_HiringDepartment.hireWorkers()
+
         if (hiredCrew.isEmpty()) {
             return@withContext emptyList()
         }
+
+        VPS_Audit.logShiftHandoff(1)
 
         val workQueue = Channel<IntRange>(Channel.Factory.UNLIMITED)
 
@@ -38,10 +46,10 @@ object WorkDispatcher {
                 val localBuckets = List(10) { mutableListOf<Int>() }
 
                 for (slice in workQueue) {
-                    val result = worker.processSlice(sourcePixels, targetPixels, slice, vramSlot)
-                    for (i in 0 until 10) {
-                        localBuckets[i].addAll(result[i])
-                    }
+                    VPS_Audit.logCompute(1, worker.id)
+
+                    val taskData = VPS_job1.QuantizationData(sourcePixels, targetPixels, slice, vramSlot, localBuckets)
+                    worker.runTask(1, taskData)
                 }
                 localBuckets
             }
@@ -49,14 +57,6 @@ object WorkDispatcher {
 
         val allResults = workerJobs.awaitAll()
         
-        // Merge the buckets from all workers into a single 10-bucket list
-        val finalBuckets = List(10) { mutableListOf<Int>() }
-        for (workerResult in allResults) {
-            for (i in 0 until 10) {
-                finalBuckets[i].addAll(workerResult[i])
-            }
-        }
-        
-        return@withContext finalBuckets
+        return@withContext FirstShiftResultMerger.merge(allResults)
     }
 }

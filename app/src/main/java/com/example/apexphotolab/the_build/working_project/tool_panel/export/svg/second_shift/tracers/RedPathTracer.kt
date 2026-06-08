@@ -104,9 +104,6 @@ object RedPathTracer {
 
         val searchStartIndex = if (lastMoveIndex != -1) (lastMoveIndex + 5) % 8 else 0
 
-        // COLORBLIND VISION: We follow the bitmask, but verify tension/territory
-        val currentPixel = pixels[current.y * width + current.x]
-
         for (i in 0 until 8) {
             val idx = (searchStartIndex + i) % 8
             if (idx % 2 != 0) continue
@@ -118,11 +115,7 @@ object RedPathTracer {
             
             val neighborPoint = Point(nx, ny)
             if (remaining.contains(neighborPoint) && getBit(vram, ny * width + nx)) {
-                val neighborPixel = pixels[ny * width + nx]
-                // SOLID GROUND CHECK: Stay inside the fence
-                if (ColorWallScale.isSolidGround(currentPixel, neighborPixel)) {
-                    return neighborPoint
-                }
+                return neighborPoint
             }
         }
 
@@ -137,10 +130,7 @@ object RedPathTracer {
             
             val neighborPoint = Point(nx, ny)
             if (remaining.contains(neighborPoint) && getBit(vram, ny * width + nx)) {
-                val neighborPixel = pixels[ny * width + nx]
-                if (ColorWallScale.isSolidGround(currentPixel, neighborPixel)) {
-                    return neighborPoint
-                }
+                return neighborPoint
             }
         }
         return null
@@ -153,7 +143,6 @@ object RedPathTracer {
         width: Int,
         pixels: IntArray
     ): Point? {
-        val currentPixel = pixels[current.y * width + current.x]
         for (r in 1..3) {
             for (dy in -r..r) {
                 for (dx in -r..r) {
@@ -161,10 +150,7 @@ object RedPathTracer {
                     val nx = current.x + dx
                     val ny = current.y + dy
                     if (remaining.contains(Point(nx, ny)) && getBit(vram, ny * width + nx)) {
-                        val neighborPixel = pixels[ny * width + nx]
-                        if (ColorWallScale.isSolidGround(currentPixel, neighborPixel)) {
-                            return Point(nx, ny)
-                        }
+                        return Point(nx, ny)
                     }
                 }
             }
