@@ -2,8 +2,6 @@ package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg
 
 import android.graphics.Color
 import android.graphics.Point
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg._temp_tools.PathLabeller
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg._temp_tools.XRayControl
 
 /**
  * Job: Solid Fill Generator.
@@ -20,8 +18,8 @@ object SolidFillGenerator {
         val b = Color.blue(color)
         val colorHex = String.format("#%06X", 0xFFFFFF and color)
 
-        val opacity = if (XRayControl.IS_XRAY_ENABLED) 1.0 else alpha / 255.0
-        val fillAttr = if (XRayControl.IS_XRAY_ENABLED) "none" else colorHex
+        val opacity = alpha / 255.0
+        val fillAttr = colorHex
 
         // Identification: Is this a Fill (White) or a Structural Outline (Grey/Black)?
         val isWhiteFill = r > 240 && g > 240 && b > 240
@@ -35,7 +33,6 @@ object SolidFillGenerator {
 
         val closedPathData = StringBuilder()
         val openPathData = StringBuilder()
-        val diagnosticLabels = StringBuilder()
 
         paths.forEach { path ->
             val (data, isClosed) = PathDataGenerator.generateWithStatus(path)
@@ -43,11 +40,6 @@ object SolidFillGenerator {
                 closedPathData.append(data).append(" ")
             } else {
                 openPathData.append(data).append(" ")
-            }
-
-            // Generate corner labels if X-Ray is on
-            if (XRayControl.IS_XRAY_ENABLED) {
-                diagnosticLabels.append(PathLabeller.label(path, color))
             }
         }
 
@@ -59,11 +51,6 @@ object SolidFillGenerator {
                 if (isNotEmpty()) append("\n")
                 // FORCE FILL ON OPEN PATHS: Bars touching edges are often "open" but represent solid regions
                 append("<path d=\"${openPathData.toString().trim()} Z\" fill=\"$fillAttr\" fill-opacity=\"$opacity\" stroke=\"$colorHex\" stroke-opacity=\"$opacity\" stroke-width=\"$strokeWidth\" stroke-linejoin=\"round\" stroke-linecap=\"round\" fill-rule=\"evenodd\" />")
-            }
-
-            // Add the numbered labels on top of the paths
-            if (diagnosticLabels.isNotEmpty()) {
-                append("\n").append(diagnosticLabels.toString())
             }
         }
     }

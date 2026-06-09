@@ -1,7 +1,7 @@
 package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.utils
 
 import android.graphics.Bitmap
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.svg_assembly.artist.AlphaFillGenerator
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.svg_assembly.artist.alpha.AlphaFillGenerator
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.svg_assembly.artist.AlphaGradientDetector
 
 /**

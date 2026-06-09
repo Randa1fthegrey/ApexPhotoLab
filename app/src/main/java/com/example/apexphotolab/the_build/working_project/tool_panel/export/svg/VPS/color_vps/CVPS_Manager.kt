@@ -6,6 +6,7 @@ import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs.CVPS_job4
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs.CVPS_job5
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs.CVPS_job6
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs.CVPS_job7
 
 /**
  * Job: Color VPS System Manager (The Switchboard).
@@ -60,6 +61,14 @@ object CVPS_Manager {
             // ==========================================
             6 -> {
                 CVPS_job6.execute(colorId, data)
+            }
+            // ------------------------------------------
+
+            // ==========================================
+            // LOGIC FOR JOB 7: SOLIDIFICATION (TEAM 2)
+            // ==========================================
+            7 -> {
+                CVPS_job7.execute(colorId, data)
             }
             // ------------------------------------------
         }

@@ -10,7 +10,7 @@ import java.nio.ByteBuffer
 object VRAM_EdgeFinder {
 
     /**
-     * Standard bitmask edge finder. 
+     * Standard bitmask edge finder.
      * Now primarily used to find the "Fences" created by the 3D Geometric Map.
      */
     fun findEdgesVRAM(vram: ByteBuffer, width: Int, height: Int): HashSet<Point> {

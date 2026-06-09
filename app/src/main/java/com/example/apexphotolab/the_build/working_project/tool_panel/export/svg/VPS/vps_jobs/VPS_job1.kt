@@ -1,7 +1,7 @@
 package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.vps_jobs
 
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.first_shift.color.ColorPalette
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.first_shift.color.ColorSorter
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.first_shift.palette.ColorPalette
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.first_shift.palette.ColorSorter
 import kotlinx.coroutines.ensureActive
 import java.nio.ByteBuffer
 import kotlin.coroutines.coroutineContext

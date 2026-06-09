@@ -2,8 +2,8 @@ package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg
 
 import android.graphics.Bitmap
 import android.graphics.Point
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.third_shift.CensusReport
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.third_shift.ColorBlendingRoutingManager
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.third_shift.census_takers.CensusReport
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.third_shift.blending.ColorBlendingRoutingManager
 
 /**
  * Job: Assembly Orchestrator.

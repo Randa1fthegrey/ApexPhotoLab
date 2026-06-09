@@ -1,21 +1,12 @@
 package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs
 
 import android.graphics.Point
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.tracers.AlphaPathTracer
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.tracers.BlackPathTracer
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.tracers.BluePathTracer
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.tracers.CyanPathTracer
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.tracers.GreenPathTracer
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.tracers.GreyPathTracer
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.tracers.MagentaPathTracer
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.tracers.RedPathTracer
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.tracers.WhitePathTracer
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.tracers.YellowPathTracer
 import java.nio.ByteBuffer
+import kotlin.math.abs
 
 /**
- * Job: CVPS Job 2 - Discovery.
- * Responsibility: Coordinating path discovery for specific color groups.
+ * Job: CVPS Job 2 - Discovery (Primary Path Tracing).
+ * Responsibility: Walking edge pixels in VRAM to discover raw path fragments.
  */
 object CVPS_job2 {
 
@@ -32,19 +23,143 @@ object CVPS_job2 {
     fun execute(colorId: Int, data: Any?) {
         val dData = data as? DiscoveryData ?: return
         val candidates = dData.specificCandidates ?: dData.edges.sortedBy { it.y * 10000 + it.x }
-
-        dData.result = when (colorId) {
-            0 -> RedPathTracer.trace(candidates, dData.vram, dData.width, dData.pixels, dData.sharedRemainingSet)
-            1 -> GreenPathTracer.trace(candidates, dData.vram, dData.width, dData.pixels, dData.sharedRemainingSet)
-            2 -> BluePathTracer.trace(candidates, dData.vram, dData.width, dData.pixels, dData.sharedRemainingSet)
-            3 -> YellowPathTracer.trace(candidates, dData.vram, dData.width, dData.pixels, dData.sharedRemainingSet)
-            4 -> CyanPathTracer.trace(candidates, dData.vram, dData.width, dData.pixels, dData.sharedRemainingSet)
-            5 -> MagentaPathTracer.trace(candidates, dData.vram, dData.width, dData.pixels, dData.sharedRemainingSet)
-            6 -> WhitePathTracer.trace(candidates, dData.vram, dData.width, dData.pixels, dData.sharedRemainingSet)
-            7 -> AlphaPathTracer.trace(candidates, dData.vram, dData.width, dData.pixels, dData.sharedRemainingSet)
-            8 -> BlackPathTracer.trace(candidates, dData.vram, dData.width, dData.pixels, dData.sharedRemainingSet)
-            9 -> GreyPathTracer.trace(candidates, dData.vram, dData.width, dData.pixels, dData.sharedRemainingSet)
-            else -> emptyList()
-        }
+        
+        // UNIFIED TRACING LOGIC: Replaces 10 legacy files
+        dData.result = trace(candidates, dData.vram, dData.width, dData.pixels, dData.sharedRemainingSet)
     }
+
+    private fun trace(
+        homeCandidates: List<Point>,
+        vram: ByteBuffer,
+        width: Int,
+        pixels: IntArray,
+        remainingPixels: MutableSet<Point>? = null
+    ): List<List<Point>> {
+        val allPaths = mutableListOf<List<Point>>()
+        val myRemaining = remainingPixels ?: homeCandidates.toMutableSet()
+
+        for (home in homeCandidates) {
+            if (!myRemaining.contains(home)) continue
+
+            val path = mutableListOf<Point>()
+            val stack = mutableListOf<Point>()
+            var currentPoint = home
+            var previousPoint: Point? = null
+
+            while (true) {
+                if (!myRemaining.remove(currentPoint)) break
+                
+                path.add(currentPoint)
+                stack.add(currentPoint)
+
+                var nextPoint = findNextStep(currentPoint, previousPoint, myRemaining, home, path.size, vram, width)
+
+                if (nextPoint == null) {
+                    nextPoint = findRecoveryPoint(currentPoint, myRemaining, vram, width)
+                }
+
+                if (nextPoint != null) {
+                    if (nextPoint == home && path.size > 10) {
+                        allPaths.add(path)
+                        break
+                    }
+                    previousPoint = currentPoint
+                    currentPoint = nextPoint
+                } else {
+                    var foundBranch = false
+                    if (stack.isNotEmpty()) stack.removeAt(stack.size - 1)
+
+                    while (stack.isNotEmpty()) {
+                        val junction = stack.removeAt(stack.size - 1)
+                        val branch = findNextStep(junction, null, myRemaining, home, path.size, vram, width)
+                        if (branch != null) {
+                            path.add(Point(-1, -1))
+                            previousPoint = junction
+                            currentPoint = branch
+                            foundBranch = true
+                            break
+                        }
+                    }
+
+                    if (!foundBranch) {
+                        if (path.size > 2) allPaths.add(path)
+                        break
+                    }
+                }
+            }
+        }
+        return allPaths
+    }
+
+    private fun findNextStep(
+        current: Point,
+        previous: Point?,
+        remaining: Set<Point>,
+        home: Point,
+        pathSize: Int,
+        vram: ByteBuffer,
+        width: Int
+    ): Point? {
+        val lastMoveIndex = if (previous != null) {
+            val dx = current.x - previous.x
+            val dy = current.y - previous.y
+            OFFSETS.indexOfFirst { it.x == dx && it.y == dy }
+        } else -1
+
+        val searchStartIndex = if (lastMoveIndex != -1) (lastMoveIndex + 5) % 8 else 0
+
+        for (i in 0 until 8) {
+            val idx = (searchStartIndex + i) % 8
+            val offset = OFFSETS[idx]
+            val nx = current.x + offset.x
+            val ny = current.y + offset.y
+            
+            if (nx == home.x && ny == home.y && pathSize > 10) return home
+            
+            val neighborPoint = Point(nx, ny)
+            if (remaining.contains(neighborPoint) && getBit(vram, ny * width + nx)) {
+                return neighborPoint
+            }
+        }
+        return null
+    }
+
+    private fun findRecoveryPoint(
+        current: Point,
+        remaining: Set<Point>,
+        vram: ByteBuffer,
+        width: Int
+    ): Point? {
+        for (r in 1..3) {
+            for (dy in -r..r) {
+                for (dx in -r..r) {
+                    if (abs(dx) < r && abs(dy) < r) continue
+                    val nx = current.x + dx
+                    val ny = current.y + dy
+                    if (remaining.contains(Point(nx, ny)) && getBit(vram, ny * width + nx)) {
+                        return Point(nx, ny)
+                    }
+                }
+            }
+        }
+        return null
+    }
+
+    private fun getBit(buffer: ByteBuffer, index: Int): Boolean {
+        val byteIdx = index / 8
+        if (byteIdx >= buffer.capacity()) return false
+        val bitIdx = index % 8
+        return (buffer.get(byteIdx).toInt() and (1 shl bitIdx)) != 0
+    }
+
+    private val OFFSETS = arrayOf(
+        Point(0, -1),  // 0: N
+        Point(1, -1),  // 1: NE
+        Point(1, 0),   // 2: E
+        Point(1, 1),   // 3: SE
+        Point(0, 1),   // 4: S
+        Point(-1, 1),  // 5: SW
+        Point(-1, 0),  // 6: W
+        Point(-1, -1)  // 7: NW
+    )
 }

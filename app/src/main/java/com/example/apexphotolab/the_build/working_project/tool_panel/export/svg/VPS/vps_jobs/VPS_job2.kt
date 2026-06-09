@@ -1,8 +1,8 @@
 package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.vps_jobs
 
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.TracingRouter
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.overflow_work.OverflowRouter
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.overflow_work.TracingSwarmManager
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.dispatchers.TracingRouter
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.swarm_mgmt.TracingSwarmManager
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.infrastructure.SecondShiftResultManager
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.utils.VRAM_Garage
 
 /**
@@ -38,7 +38,7 @@ object VPS_job2 {
                 )
 
                 // Deposit results
-                OverflowRouter.deposit(assignment.colorIndex, blobs)
+                SecondShiftResultManager.deposit(assignment.colorIndex, blobs)
             }
         } finally {
             TracingSwarmManager.unregisterAgent()

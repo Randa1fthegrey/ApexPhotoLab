@@ -1,9 +1,9 @@
 package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs
 
 import android.graphics.Bitmap
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.GradientReport
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.gradient_scouts.BorderChecker
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.gradient_scouts.SpineLogic
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.scouts.GradientReport
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.scouts.BorderChecker
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.scouts.SpineLogic
 
 /**
  * Job: CVPS Job 3 - Gradient Scouts.

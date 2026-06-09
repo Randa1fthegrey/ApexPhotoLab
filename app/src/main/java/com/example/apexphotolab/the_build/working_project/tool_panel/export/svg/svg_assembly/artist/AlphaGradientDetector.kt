@@ -3,11 +3,14 @@ package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Point
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.svg_assembly.artist.alpha.AlphaPixelExtractor
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.svg_assembly.artist.alpha.AlphaSlopeAnalyzer
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.svg_assembly.artist.gradient.GradientFillGenerator
 import java.util.LinkedList
 
 /**
- * Job: Alpha Gradient Detector.
- * Responsibility: Detecting all transparent regions in an image and returning their gradient properties.
+ * Job: Alpha Gradient Detector (The Scanner).
+ * Responsibility: Discovering connected transparent regions (blobs) via flood-fill analysis.
  */
 object AlphaGradientDetector {
 
@@ -22,17 +25,15 @@ object AlphaGradientDetector {
     )
 
     fun detect(image: Bitmap): List<AlphaGradientInfo> {
+        val pixels = AlphaPixelExtractor.extract(image)
         val width = image.width
         val height = image.height
-        val pixels = IntArray(width * height)
-        image.getPixels(pixels, 0, width, 0, 0, width, height)
 
         val transparentBlobs = findTransparentBlobs(pixels, width, height)
         val reports = mutableListOf<AlphaGradientInfo>()
 
         for (blob in transparentBlobs) {
-            val report = AlphaSlopeAnalyzer.analyze(blob, pixels, width, height)
-            reports.add(report)
+            reports.add(AlphaSlopeAnalyzer.analyze(blob, pixels, width, height))
         }
 
         return reports
@@ -46,7 +47,6 @@ object AlphaGradientDetector {
             for (x in 0 until width) {
                 val index = y * width + x
 
-                // 1. Initial trigger: Must be very transparent
                 if (Color.alpha(pixels[index]) < STRICT_ALPHA_THRESHOLD && !visited[index]) {
                     val newBlob = HashSet<Point>()
                     val queue = LinkedList<Point>()
@@ -66,7 +66,6 @@ object AlphaGradientDetector {
                         for (neighbor in neighbors) {
                             if (neighbor.x in 0 until width && neighbor.y in 0 until height) {
                                 val neighborIndex = neighbor.y * width + neighbor.x
-                                // 2. Expansion trigger: Must also be very transparent
                                 if (Color.alpha(pixels[neighborIndex]) < STRICT_ALPHA_THRESHOLD && !visited[neighborIndex]) {
                                     visited[neighborIndex] = true
                                     queue.add(neighbor)
