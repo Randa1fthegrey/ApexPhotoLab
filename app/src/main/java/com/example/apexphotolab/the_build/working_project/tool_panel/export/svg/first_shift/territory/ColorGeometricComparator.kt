@@ -11,16 +11,22 @@ object ColorGeometricComparator {
 
     /**
      * Checks if two pixels are solid neighbors or if there is tension.
+     * Uses a 4D Euclidean distance (ARGB) to provide a "Fuzzy Buffer" (The 99% Rule).
      */
     fun areSimilar(pixelA: Int, pixelB: Int): Boolean {
-        // First check if they even share the same territory
-        if (ColorTerritoryMapper.map(pixelA) != ColorTerritoryMapper.map(pixelB)) return false
-
+        val aDiff = Color.alpha(pixelA) - Color.alpha(pixelB)
         val rDiff = Color.red(pixelA) - Color.red(pixelB)
         val gDiff = Color.green(pixelA) - Color.green(pixelB)
         val bDiff = Color.blue(pixelA) - Color.blue(pixelB)
 
-        val distance = sqrt((rDiff * rDiff + gDiff * gDiff + bDiff * bDiff).toDouble())
-        return distance < 10.0 // ~99% similarity in RGB space
+        val distance = sqrt((aDiff * aDiff + rDiff * rDiff + gDiff * gDiff + bDiff * bDiff).toDouble())
+        
+        // 1. PHYSICAL SIMILARITY: If pixels are within 10 units of each other, 
+        // they are solid ground, regardless of mathematical territory flips.
+        if (distance < 10.0) return true
+
+        // 2. TERRITORY SIMILARITY: If they are physically different, they must 
+        // at least map to the same absolute territory to be considered solid.
+        return ColorTerritoryMapper.map(pixelA) == ColorTerritoryMapper.map(pixelB)
     }
 }

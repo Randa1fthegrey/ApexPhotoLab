@@ -1,6 +1,7 @@
 package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.dispatchers
 
 import android.graphics.Point
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.first_shift.territory.ColorWallScale
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.infrastructure.SecondShiftNoiseFilter
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.vram.SecondShiftVramManager
 import java.nio.ByteBuffer
@@ -53,10 +54,13 @@ object SecondShiftEdgeScanner {
         val neighborIdx = ny * width + nx
         if (claimedIndices.contains(neighborIdx)) return
 
-        val neighborGroup = SecondShiftNoiseFilter.getCleanGroup(pixels[neighborIdx])
+        val currentPixel = pixels[currentIdx]
+        val neighborPixel = pixels[neighborIdx]
 
-        // BOUNDARY DETECTED
-        if (currentGroup != neighborGroup) {
+        // FUZZY EDGE DETECTION: Using the 99% Rule (isSolidGround)
+        if (!ColorWallScale.isSolidGround(currentPixel, neighborPixel)) {
+            val neighborGroup = SecondShiftNoiseFilter.getCleanGroup(neighborPixel)
+
             SecondShiftVramManager.setEdgeBit(vram, currentIdx)
             SecondShiftVramManager.setEdgeBit(vram, neighborIdx)
 
