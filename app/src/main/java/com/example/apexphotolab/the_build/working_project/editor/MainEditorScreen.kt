@@ -69,7 +69,7 @@ fun MainEditorScreen(
         gesturesEnabled = false,
         drawerContent = {
             Row(modifier = Modifier.fillMaxSize()) {
-                Box(modifier = Modifier.fillMaxHeight().width(320.dp)) {
+                Box(modifier = Modifier.fillMaxHeight().width(val_util.DRAWER_WIDTH)) {
                     when {
                         state.showLayersPanel -> {
                             LayersPanel(

@@ -33,7 +33,7 @@ object CVPS_job6 {
 
         val svgResults = mutableListOf<String>()
 
-        bData.paths.forEachIndexed { index, path ->
+        for ((index, path) in bData.paths.withIndex()) {
             val report = bData.reports[index]
 
             if (report.complexityScore == 0) {

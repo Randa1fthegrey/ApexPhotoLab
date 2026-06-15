@@ -10,35 +10,35 @@ import org.json.JSONObject
 object LayerSerializer {
     fun toJson(layer: Layer): JSONObject {
         return JSONObject().apply {
-            put("id", layer.id)
-            put("title", layer.title)
-            put("imageUri", layer.imageUri.toString())
-            put("isVisible", layer.isVisible)
-            put("zOrder", layer.zOrder)
-            put("width", layer.width)
-            put("height", layer.height)
-            put("xPosition", layer.xPosition)
-            put("yPosition", layer.yPosition)
-            put("scale", layer.scale)
-            put("rotation", layer.rotation)
-            put("isLocked", layer.isLocked)
+            put(val_util.KEY_ID, layer.id)
+            put(val_util.KEY_TITLE, layer.title)
+            put(val_util.KEY_URI, layer.imageUri.toString())
+            put(val_util.KEY_VISIBLE, layer.isVisible)
+            put(val_util.KEY_ZORDER, layer.zOrder)
+            put(val_util.KEY_WIDTH, layer.width)
+            put(val_util.KEY_HEIGHT, layer.height)
+            put(val_util.KEY_X, layer.xPosition)
+            put(val_util.KEY_Y, layer.yPosition)
+            put(val_util.KEY_SCALE, layer.scale)
+            put(val_util.KEY_ROTATION, layer.rotation)
+            put(val_util.KEY_LOCKED, layer.isLocked)
         }
     }
 
     fun fromJson(json: JSONObject): Layer {
         return Layer(
-            id = json.getString("id"),
-            title = json.getString("title"),
-            imageUri = Uri.parse(json.getString("imageUri")),
-            isVisible = json.getBoolean("isVisible"),
-            zOrder = json.getInt("zOrder"),
-            width = json.optInt("width", 0),
-            height = json.optInt("height", 0),
-            xPosition = json.getDouble("xPosition").toFloat(),
-            yPosition = json.getDouble("yPosition").toFloat(),
-            scale = json.optDouble("scale", 1.0).toFloat(),
-            rotation = json.optDouble("rotation", 0.0).toFloat(),
-            isLocked = json.optBoolean("isLocked", false)
+            id = json.getString(val_util.KEY_ID),
+            title = json.getString(val_util.KEY_TITLE),
+            imageUri = Uri.parse(json.getString(val_util.KEY_URI)),
+            isVisible = json.getBoolean(val_util.KEY_VISIBLE),
+            zOrder = json.getInt(val_util.KEY_ZORDER),
+            width = json.optInt(val_util.KEY_WIDTH, 0),
+            height = json.optInt(val_util.KEY_HEIGHT, 0),
+            xPosition = json.getDouble(val_util.KEY_X).toFloat(),
+            yPosition = json.getDouble(val_util.KEY_Y).toFloat(),
+            scale = json.optDouble(val_util.KEY_SCALE, 1.0).toFloat(),
+            rotation = json.optDouble(val_util.KEY_ROTATION, 0.0).toFloat(),
+            isLocked = json.optBoolean(val_util.KEY_LOCKED, false)
         )
     }
 }

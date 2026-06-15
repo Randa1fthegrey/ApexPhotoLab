@@ -17,34 +17,34 @@ object SVGAssembler {
         // Separate definitions from drawable paths
         svgElements.forEach { element ->
             val trimmed = element.trim()
-            if (trimmed.contains("</linearGradient>")) {
+            if (trimmed.contains(val_util.TAG_GRADIENT_CLOSE)) {
                 // Split it into the definition and the path parts
-                val defPart = trimmed.substringBeforeLast("</linearGradient>") + "</linearGradient>"
-                val pathPart = trimmed.substringAfterLast("</linearGradient>").trim()
+                val defPart = trimmed.substringBeforeLast(val_util.TAG_GRADIENT_CLOSE) + val_util.TAG_GRADIENT_CLOSE
+                val pathPart = trimmed.substringAfterLast(val_util.TAG_GRADIENT_CLOSE).trim()
 
                 if (defPart.isNotEmpty()) defs.add(defPart)
                 if (pathPart.isNotEmpty()) paths.add(pathPart)
-            } else if (trimmed.startsWith("<linearGradient")) {
+            } else if (trimmed.startsWith(val_util.TAG_GRADIENT_START)) {
                 defs.add(trimmed)
-            } else if (trimmed.startsWith("<path")) {
+            } else if (trimmed.startsWith(val_util.TAG_PATH_START)) {
                 paths.add(trimmed)
-            } else if (trimmed.startsWith("<!--")) {
+            } else if (trimmed.startsWith(val_util.TAG_COMMENT_START)) {
                 paths.add(trimmed)
             }
         }
 
         return buildString {
-            append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n")
-            append("<svg width=\"$width\" height=\"$height\" xmlns=\"http://www.w3.org/2000/svg\">\n")
+            append(val_util.HEADER_XML)
+            append("${val_util.TAG_SVG_START_PREFIX}$width${val_util.TAG_SVG_START_MIDDLE}$height${val_util.TAG_SVG_START_SUFFIX}")
 
             // Write all definitions if there are any
             if (defs.isNotEmpty()) {
-                append("  <defs>\n")
+                append(val_util.TAG_DEFS_START)
                 defs.forEach { def ->
                     // Indent for readability
                     def.lines().forEach { line -> append("    $line\n") }
                 }
-                append("  </defs>\n")
+                append(val_util.TAG_DEFS_END)
             }
 
             // Write all path elements
@@ -52,7 +52,7 @@ object SVGAssembler {
                 append("  $path\n")
             }
 
-            append("</svg>")
+            append(val_util.TAG_SVG_END)
         }
     }
 }

@@ -78,7 +78,7 @@ class EditorState(
         get() = layers.find { it.id == selectedLayerId }
 
     val activeLayerName: String
-        get() = currentLayer?.title ?: "Background"
+        get() = currentLayer?.title ?: val_util.LAYER_BASE_FALLBACK_TITLE
 
     val isLayerLocked: Boolean
         get() = currentLayer?.isLocked ?: false
@@ -192,9 +192,9 @@ class EditorState(
                     resolution = exportResolution,
                     onProgress = { exportProgress = it }
                 )
-                Toast.makeText(context, "Export Finished", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, val_util.TOAST_EXPORT_FINISHED, Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
-                Toast.makeText(context, "Export Failed", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, val_util.TOAST_EXPORT_FAILED, Toast.LENGTH_SHORT).show()
             } finally {
                 showExportProgress = false
             }
@@ -207,7 +207,7 @@ class EditorState(
             if (newLayer != null) {
                 addLayer(newLayer)
             } else {
-                Toast.makeText(context, "Failed to add layer", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, val_util.TOAST_LAYER_ADD_FAILED, Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -217,7 +217,7 @@ class EditorState(
             ProjectSaveManager.saveProject(context, projectUri, layers.toList(), note)
             updateSaveTime()
             closeAllPanels(scope, drawerState)
-            Toast.makeText(context, "Snapshot Saved", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, val_util.TOAST_SNAPSHOT_SAVED, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -226,9 +226,9 @@ class EditorState(
             val success = rollback(context, projectUri, snapshot)
             if (success) {
                 closeAllPanels(scope, drawerState)
-                Toast.makeText(context, "Project Restored", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, val_util.TOAST_PROJECT_RESTORED, Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(context, "Rollback Failed", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, val_util.TOAST_ROLLBACK_FAILED, Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -237,9 +237,9 @@ class EditorState(
         scope.launch {
             val success = quickSave(context, projectUri)
             if (success) {
-                Toast.makeText(context, "Saved project!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, val_util.TOAST_PROJECT_SAVED, Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(context, "Save Failed", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, val_util.TOAST_SAVE_FAILED, Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -296,7 +296,7 @@ class EditorState(
     fun removeLayers(ids: Set<String>) {
         listManager.removeLayers(layers, ids)
         if (ids.contains(selectedLayerId)) {
-            selectedLayerId = "base"
+            selectedLayerId = val_util.LAYER_BASE_ID
         }
     }
 

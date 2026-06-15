@@ -13,7 +13,7 @@ class LayerListManager {
         val index = layers.indexOfFirst { it.id == layer.id }
         if (index != -1) {
             val targetIndex = if (up) index + 1 else index - 1
-            if (targetIndex in layers.indices && layers[targetIndex].id != "base") {
+            if (targetIndex in layers.indices && layers[targetIndex].id != val_util.LAYER_BASE_ID) {
                 Collections.swap(layers, index, targetIndex)
             }
         }

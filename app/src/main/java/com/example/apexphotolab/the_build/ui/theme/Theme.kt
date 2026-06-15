@@ -15,15 +15,15 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = val_util.Purple80,
+    secondary = val_util.PurpleGrey80,
+    tertiary = val_util.Pink80
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = val_util.Purple40,
+    secondary = val_util.PurpleGrey40,
+    tertiary = val_util.Pink40
 )
 
 @Composable
@@ -54,7 +54,7 @@ fun ApexPhotoLabTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        typography = val_util.Typography,
         content = content
     )
 }

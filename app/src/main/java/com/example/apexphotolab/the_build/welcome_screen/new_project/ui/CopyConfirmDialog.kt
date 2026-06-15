@@ -13,16 +13,16 @@ import androidx.compose.runtime.Composable
 fun CopyConfirmDialog(projectName: String, onDismiss: () -> Unit, onConfirm: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Create New Project?") },
-        text = { Text("This will copy the selected image into a new project named \"$projectName\". The original image will not be affected. Continue?") },
+        title = { Text(val_util.COPY_TITLE) },
+        text = { Text("${val_util.COPY_MESSAGE_START}$projectName${val_util.COPY_MESSAGE_END}") },
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text("Continue")
+                Text(val_util.BUTTON_CONTINUE)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(val_util.BUTTON_CANCEL)
             }
         }
     )

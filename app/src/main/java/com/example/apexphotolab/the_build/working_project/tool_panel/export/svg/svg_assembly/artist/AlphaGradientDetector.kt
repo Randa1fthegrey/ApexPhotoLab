@@ -47,7 +47,7 @@ object AlphaGradientDetector {
             for (x in 0 until width) {
                 val index = y * width + x
 
-                if (Color.alpha(pixels[index]) < STRICT_ALPHA_THRESHOLD && !visited[index]) {
+                if (Color.alpha(pixels[index]) < val_util.ALPHA_THRESHOLD && !visited[index]) {
                     val newBlob = HashSet<Point>()
                     val queue = LinkedList<Point>()
 
@@ -66,7 +66,7 @@ object AlphaGradientDetector {
                         for (neighbor in neighbors) {
                             if (neighbor.x in 0 until width && neighbor.y in 0 until height) {
                                 val neighborIndex = neighbor.y * width + neighbor.x
-                                if (Color.alpha(pixels[neighborIndex]) < STRICT_ALPHA_THRESHOLD && !visited[neighborIndex]) {
+                                if (Color.alpha(pixels[neighborIndex]) < val_util.ALPHA_THRESHOLD && !visited[neighborIndex]) {
                                     visited[neighborIndex] = true
                                     queue.add(neighbor)
                                 }
@@ -79,6 +79,4 @@ object AlphaGradientDetector {
         }
         return blobs
     }
-
-    private const val STRICT_ALPHA_THRESHOLD = 1
 }

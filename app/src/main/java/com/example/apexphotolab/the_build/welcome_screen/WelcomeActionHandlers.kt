@@ -41,7 +41,7 @@ class WelcomeActionHandlers(
         uri?.let {
             SettingsPersistence.setProjectDir(context, it)
             onProjectDirSet()
-            Toast.makeText(context, "Custom project folder set!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, val_util.TOAST_FOLDER_SET, Toast.LENGTH_SHORT).show()
         }
     }
 }

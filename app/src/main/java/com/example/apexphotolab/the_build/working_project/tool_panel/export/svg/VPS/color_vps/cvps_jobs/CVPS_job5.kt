@@ -27,12 +27,12 @@ object CVPS_job5 {
         }
 
         val reachRadius = when (colorId) {
-            0, 1, 2, 3, 4, 5 -> 10 // Red, Green, Blue, Yellow, Cyan, Magenta
-            6 -> 5  // White
-            7 -> 15 // Alpha
-            8 -> 20 // Black
-            9 -> 15 // Grey
-            else -> 10
+            0, 1, 2, 3, 4, 5 -> val_util.REACH_RADIUS_DEFAULT
+            6 -> val_util.REACH_RADIUS_WHITE
+            7 -> val_util.REACH_RADIUS_ALPHA
+            8 -> val_util.REACH_RADIUS_BLACK
+            9 -> val_util.REACH_RADIUS_GREY
+            else -> val_util.REACH_RADIUS_DEFAULT
         }
 
         val consolidatedPaths = mutableListOf<List<Point>>()
@@ -52,7 +52,7 @@ object CVPS_job5 {
 
                 val nextBounds = getBoundingBox(paths[j])
                 if (isSpatiallyRelated(currentBounds, nextBounds, reachRadius)) {
-                    currentPath.add(Point(-1, -1))
+                    currentPath.add(val_util.SENTINEL)
                     currentPath.addAll(paths[j])
                     usedIndices.add(j)
                 }

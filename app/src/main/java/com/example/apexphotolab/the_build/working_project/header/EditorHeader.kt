@@ -42,7 +42,7 @@ fun EditorHeader(
             Spacer(modifier = Modifier.windowInsetsTopHeight(WindowInsets.statusBars))
             Row(
                 modifier = Modifier
-                    .defaultMinSize(minHeight = 56.dp)
+                    .defaultMinSize(minHeight = val_util.HEADER_MIN_HEIGHT)
                     .height(IntrinsicSize.Min)
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -51,14 +51,14 @@ fun EditorHeader(
                 Box(
                     modifier = Modifier
                         .fillMaxHeight()
-                        .width(64.dp)
+                        .width(val_util.TAB_WIDTH)
                         .background(MaterialTheme.colorScheme.primaryContainer)
                         .clickable { onTabClick() },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = activeToolIcon,
-                        contentDescription = "Open Tools",
+                        contentDescription = val_util.DESC_OPEN_TOOLS,
                         tint = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
@@ -81,9 +81,9 @@ fun EditorHeader(
                 ) {
                     IconButton(
                         onClick = onQuickSaveClick,
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(val_util.ICON_SAVE_SIZE)
                     ) {
-                        Text(text = "💾", fontSize = 18.sp)
+                        Text(text = val_util.ICON_SAVE, fontSize = 18.sp)
                     }
                     Text(
                         text = "=",

@@ -37,7 +37,7 @@ fun ProjectFileExplorer(
 
     deletionState.pendingDeletion?.let { project ->
         DeleteConfirmDialog(
-            projectName = project.name ?: "this project",
+            projectName = project.name ?: val_util.FALLBACK_PROJECT_NAME,
             onDismiss = { deletionState.setPending(null) },
             onConfirm = {
                 deletionState.executeDeletion(context, scope) {
@@ -53,7 +53,7 @@ fun ProjectFileExplorer(
             .statusBarsPadding()
     ) {
         // --- STATIC SECTION ---
-        item { ProjectCategoryHeader("Static Projects") }
+        item { ProjectCategoryHeader(val_util.CAT_STATIC) }
         if (categoryState.staticProjects.isEmpty()) {
             item { EmptyCategoryNotice() }
         } else {
@@ -69,7 +69,7 @@ fun ProjectFileExplorer(
         item { Spacer(modifier = Modifier.height(24.dp)) }
 
         // --- ANIMATED SECTION ---
-        item { ProjectCategoryHeader("Animated Projects") }
+        item { ProjectCategoryHeader(val_util.CAT_ANIMATED) }
         if (categoryState.animatedProjects.isEmpty()) {
             item { EmptyCategoryNotice() }
         } else {
@@ -85,7 +85,7 @@ fun ProjectFileExplorer(
         item { Spacer(modifier = Modifier.height(24.dp)) }
 
         // --- SEQUENTIAL SECTION ---
-        item { ProjectCategoryHeader("Sequential Projects") }
+        item { ProjectCategoryHeader(val_util.CAT_SEQUENTIAL) }
         if (categoryState.sequentialProjects.isEmpty()) {
             item { EmptyCategoryNotice() }
         } else {

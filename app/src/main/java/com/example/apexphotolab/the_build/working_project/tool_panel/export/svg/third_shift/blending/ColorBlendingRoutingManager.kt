@@ -26,7 +26,7 @@ object ColorBlendingRoutingManager {
         val allSvgPaths = mutableListOf<String>()
 
         // 2. ROUTING
-        familyGroups.forEach { (groupIndex, indices) ->
+        for ((groupIndex, indices) in familyGroups) {
             val familyPaths = indices.map { pathFragments[it] }
             val familyReports = indices.map { censusReports[it] }
 

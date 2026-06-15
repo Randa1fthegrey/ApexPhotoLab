@@ -38,7 +38,7 @@ class ProjectPersistenceManager {
             projectDirName = result.projectName
             layers.clear()
             val initializedLayers = result.layers.map { layer ->
-                if (layer.id == "base") layer.copy(isLocked = true) else layer
+                if (layer.id == val_util.LAYER_BASE_ID) layer.copy(isLocked = true) else layer
             }
             layers.addAll(initializedLayers)
             updateSaveTime()
@@ -58,7 +58,7 @@ class ProjectPersistenceManager {
         val documentFile = DocumentFile.fromTreeUri(context, projectDirUri) ?: return false
         val history = ProjectManager.getHistory(documentFile)
         val quickSaveCount = history.count { snapshot ->
-            snapshot.name?.contains(projectDirName) == true && !snapshot.name!!.contains("Project Birth")
+            snapshot.name?.contains(projectDirName) == true && !snapshot.name!!.contains(val_util.SNAPSHOT_BIRTH)
         }
         val autoTitle = if (quickSaveCount == 0) projectDirName else "$projectDirName ($quickSaveCount)"
 

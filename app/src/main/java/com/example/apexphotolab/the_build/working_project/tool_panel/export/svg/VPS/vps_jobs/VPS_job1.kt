@@ -24,7 +24,7 @@ object VPS_job1 {
         val qData = data as? QuantizationData ?: return
 
         for (i in qData.slice) {
-            if (i % CANCELLATION_CHECK_INTERVAL == 0) {
+            if (i % val_util.CANCELLATION_CHECK_INTERVAL == 0) {
                 coroutineContext.ensureActive()
             }
 
@@ -38,6 +38,4 @@ object VPS_job1 {
             }
         }
     }
-
-    private const val CANCELLATION_CHECK_INTERVAL = 4096
 }

@@ -104,7 +104,7 @@ fun WelcomeScreen(
             modifier = Modifier.weight(1f),
             contentAlignment = Alignment.Center
         ) {
-            Text("Graphic coming soon!", textAlign = TextAlign.Center)
+            Text(val_util.GRAPHIC_PLACEHOLDER, textAlign = TextAlign.Center)
         }
 
         Column(
@@ -116,25 +116,25 @@ fun WelcomeScreen(
                 onClick = { workflow.startFlow() },
                 enabled = hasValidProjectDir
             ) {
-                Text("Start New Project")
+                Text(val_util.BTN_START)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = onContinueProject, enabled = hasValidProjectDir) {
-                Text("Continue Project")
+                Text(val_util.BTN_CONTINUE)
             }
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = onDeleteProject, enabled = hasValidProjectDir) {
-                Text("Delete Project")
+                Text(val_util.BTN_DELETE)
             }
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = { pickProjectDirLauncher.launch(null) }) {
-                Text("Set Custom Project Folder")
+                Text(val_util.BTN_SET_FOLDER)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = { showBoundaryTool = true }) {
-                Text("Open Color Boundary Tool")
+                Text(val_util.BTN_BOUNDARY_TOOL)
             }
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -154,19 +154,19 @@ private fun ThemeSelectionRow(
         horizontalArrangement = Arrangement.Center
     ) {
         ThemeSwitcher(
-            label = "Light",
+            label = val_util.LABEL_LIGHT,
             checked = useDarkTheme == false,
             onCheckedChange = { onThemeChange(false) }
         )
         Spacer(modifier = Modifier.width(16.dp))
         ThemeSwitcher(
-            label = "Dark",
+            label = val_util.LABEL_DARK,
             checked = useDarkTheme == true,
             onCheckedChange = { onThemeChange(true) }
         )
         Spacer(modifier = Modifier.width(16.dp))
         ThemeSwitcher(
-            label = "System",
+            label = val_util.LABEL_SYSTEM,
             checked = useDarkTheme == null,
             onCheckedChange = { onThemeChange(null) }
         )

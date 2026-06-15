@@ -30,6 +30,7 @@ object TracingRouter {
             edges = edges,
             vram = vram,
             width = width,
+            height = height,
             pixels = pixels,
             sharedRemainingSet = sharedRemainingSet,
             specificCandidates = specificCandidates

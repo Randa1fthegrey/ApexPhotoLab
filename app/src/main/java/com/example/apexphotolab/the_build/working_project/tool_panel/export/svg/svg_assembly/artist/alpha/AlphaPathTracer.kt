@@ -19,6 +19,7 @@ object AlphaPathTracer {
             edges = edges,
             vram = vram,
             width = info.width,
+            height = info.height,
             pixels = info.pixels
         )
 

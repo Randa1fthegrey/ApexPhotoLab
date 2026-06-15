@@ -28,19 +28,19 @@ fun EraserSettings(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Brush Size", style = MaterialTheme.typography.labelSmall)
-            Text("${brushSize.toInt()} px", style = MaterialTheme.typography.labelSmall)
+            Text(val_util.LABEL_BRUSH_SIZE, style = MaterialTheme.typography.labelSmall)
+            Text("${brushSize.toInt()}${val_util.UNIT_PX}", style = MaterialTheme.typography.labelSmall)
         }
         Slider(
             value = brushSize,
             onValueChange = onBrushSizeChange,
-            valueRange = 5f..200f,
+            valueRange = val_util.BRUSH_MIN..val_util.BRUSH_MAX,
             modifier = Modifier.height(24.dp)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
         
-        Text("Eraser Mode", style = MaterialTheme.typography.labelSmall)
+        Text(val_util.LABEL_ERASER_MODE, style = MaterialTheme.typography.labelSmall)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)

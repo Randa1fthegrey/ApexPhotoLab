@@ -19,22 +19,22 @@ fun ProjectNameDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
     var text by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Name Your Project") },
+        title = { Text(val_util.NAME_TITLE) },
         text = {
             OutlinedTextField(
                 value = text,
                 onValueChange = { text = it },
-                label = { Text("Project Name") }
+                label = { Text(val_util.NAME_LABEL) }
             )
         },
         confirmButton = {
             TextButton(onClick = { onConfirm(text) }) {
-                Text("Continue")
+                Text(val_util.BUTTON_CONTINUE)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(val_util.BUTTON_CANCEL)
             }
         }
     )

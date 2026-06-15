@@ -37,23 +37,23 @@ object ExportFileManager {
         mimeType: String
     ): Uri {
         val directory = DocumentFile.fromTreeUri(context, finalDirectoryUri)
-            ?: throw IOException("Could not access selected directory.")
+            ?: throw IOException(val_util.ERROR_ACCESS_DIR)
 
         if (!directory.canWrite()) {
-            throw IOException("Cannot write to the selected directory.")
+            throw IOException(val_util.ERROR_CANNOT_WRITE)
         }
 
         // Overwrite if a file with the same name exists.
         directory.findFile(finalFileName)?.delete()
 
         val finalDocFile = directory.createFile(mimeType, finalFileName)
-            ?: throw IOException("Could not create the final export file.")
+            ?: throw IOException(val_util.ERROR_CREATE_FILE)
 
         context.contentResolver.openOutputStream(finalDocFile.uri)?.use { outputStream ->
             tempFile.inputStream().use { inputStream ->
                 inputStream.copyTo(outputStream)
             }
-        } ?: throw IOException("Failed to open output stream for final URI: ${finalDocFile.uri}")
+        } ?: throw IOException("${val_util.ERROR_OPEN_STREAM}${finalDocFile.uri}")
 
         return finalDocFile.uri
     }

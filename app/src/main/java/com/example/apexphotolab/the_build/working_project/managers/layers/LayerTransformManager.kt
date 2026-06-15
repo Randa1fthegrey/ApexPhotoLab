@@ -55,7 +55,7 @@ class LayerTransformManager {
             val updatedLayer = it.copy(
                 xPosition = it.xPosition + pan.x,
                 yPosition = it.yPosition + pan.y,
-                scale = (it.scale * zoom).coerceIn(0.05f, 20f),
+                scale = (it.scale * zoom).coerceIn(val_util.SCALE_MIN, val_util.SCALE_MAX),
                 rotation = it.rotation + rotation
             )
             onUpdate(updatedLayer)

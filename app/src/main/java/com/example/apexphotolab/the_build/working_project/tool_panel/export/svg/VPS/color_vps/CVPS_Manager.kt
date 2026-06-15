@@ -1,7 +1,7 @@
 package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps
 
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs.CVPS_job1
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs.CVPS_job2
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs.CVPS_job2_TEST
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs.CVPS_job3
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs.CVPS_job4
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs.CVPS_job5
@@ -28,7 +28,7 @@ object CVPS_Manager {
             // LOGIC FOR JOB 2: DISCOVERY
             // ==========================================
             2 -> {
-                CVPS_job2.execute(colorId, data)
+                CVPS_job2_TEST.execute(colorId, data)
             }
             // ------------------------------------------
 

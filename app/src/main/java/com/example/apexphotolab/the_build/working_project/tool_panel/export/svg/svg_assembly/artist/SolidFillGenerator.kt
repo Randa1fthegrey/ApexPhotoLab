@@ -22,13 +22,13 @@ object SolidFillGenerator {
         val fillAttr = colorHex
 
         // Identification: Is this a Fill (White) or a Structural Outline (Grey/Black)?
-        val isWhiteFill = r > 240 && g > 240 && b > 240
-        val isStructuralOutline = (r == g && g == b && r < 200)
+        val isWhiteFill = r > val_util.COLOR_WHITE_THRESHOLD && g > val_util.COLOR_WHITE_THRESHOLD && b > val_util.COLOR_WHITE_THRESHOLD
+        val isStructuralOutline = (r == g && g == b && r < val_util.COLOR_STRUCTURAL_THRESHOLD)
 
         val strokeWidth = when {
-            isWhiteFill -> "0.5"
-            isStructuralOutline -> "2.0"
-            else -> "0.8"
+            isWhiteFill -> val_util.STROKE_WHITE
+            isStructuralOutline -> val_util.STROKE_STRUCTURAL
+            else -> val_util.STROKE_DEFAULT
         }
 
         val closedPathData = StringBuilder()

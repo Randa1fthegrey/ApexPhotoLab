@@ -15,12 +15,12 @@ object ProjectDeleter {
         try {
             if (projectDir.delete()) {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(context, "Project '${projectDir.name}' deleted.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "${val_util.TOAST_DELETED_PREFIX}${projectDir.name}${val_util.TOAST_DELETED_SUFFIX}", Toast.LENGTH_SHORT).show()
                 }
                 true
             } else {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(context, "Error deleting project.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, val_util.TOAST_ERROR, Toast.LENGTH_SHORT).show()
                 }
                 false
             }

@@ -21,16 +21,12 @@ import kotlin.math.sqrt
  */
 object ColorMatcher {
 
-    private const val BLACK_FLOOR = 0.18f // 18% Brightness
-    private const val WHITE_CEILING = 0.82f // 82% Brightness
-    private const val WHITE_SAT_LIMIT = 0.15f // Max saturation to be in the "White Zone"
-
     fun isSimilar(colorA: Int, colorB: Int, threshold: Float): Boolean {
         // 0. Alpha Check
         val a1 = Color.alpha(colorA)
         val a2 = Color.alpha(colorB)
-        if (a1 < 30 && a2 < 30) return true // Both nearly transparent
-        if ((a1 < 30) != (a2 < 30)) return false // One transparent, one not
+        if (a1 < val_util.ALPHA_TOLERANCE && a2 < val_util.ALPHA_TOLERANCE) return true // Both nearly transparent
+        if ((a1 < val_util.ALPHA_TOLERANCE) != (a2 < val_util.ALPHA_TOLERANCE)) return false // One transparent, one not
 
         // Get HSV for Luma checks
         val hsvA = FloatArray(3)
@@ -45,12 +41,12 @@ object ColorMatcher {
 
         // 1. THE BLACK ZONE (Neutralization)
         // If both are extremely dark, they are "The Same" regardless of subtle color shifts.
-        if (valA <= BLACK_FLOOR && valB <= BLACK_FLOOR) return true
+        if (valA <= val_util.BLACK_FLOOR && valB <= val_util.BLACK_FLOOR) return true
 
         // 2. THE WHITE ZONE (Neutralization)
         // If both are extremely bright and low saturation (pale), they match.
-        if (valA >= WHITE_CEILING && satA <= WHITE_SAT_LIMIT &&
-            valB >= WHITE_CEILING && satB <= WHITE_SAT_LIMIT) return true
+        if (valA >= val_util.WHITE_CEILING && satA <= val_util.WHITE_SAT_LIMIT &&
+            valB >= val_util.WHITE_CEILING && satB <= val_util.WHITE_SAT_LIMIT) return true
 
         // 3. THE VIBRANT ZONE (Euclidean Distance)
         val r1 = Color.red(colorA)
@@ -67,7 +63,7 @@ object ColorMatcher {
                     (b1 - b2).toDouble().pow(2)
         )
 
-        val normalizedDistance = distance / 441.673
+        val normalizedDistance = distance / val_util.MAX_RGB_DISTANCE
 
         return normalizedDistance <= threshold
     }

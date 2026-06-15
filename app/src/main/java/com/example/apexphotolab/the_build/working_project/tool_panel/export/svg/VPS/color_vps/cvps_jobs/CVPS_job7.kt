@@ -56,16 +56,16 @@ object CVPS_job7 {
 
                 for (i in pool.indices) {
                     val candidate = pool[i]
-                    if (isNear(pathEnd, candidate.first(), STITCH_RADIUS)) {
+                    if (isNear(pathEnd, candidate.first(), val_util.STITCH_RADIUS)) {
                         matchIndex = i; reverseCandidate = false; addToStart = false; break
                     }
-                    if (isNear(pathEnd, candidate.last(), STITCH_RADIUS)) {
+                    if (isNear(pathEnd, candidate.last(), val_util.STITCH_RADIUS)) {
                         matchIndex = i; reverseCandidate = true; addToStart = false; break
                     }
-                    if (isNear(pathStart, candidate.last(), STITCH_RADIUS)) {
+                    if (isNear(pathStart, candidate.last(), val_util.STITCH_RADIUS)) {
                         matchIndex = i; reverseCandidate = false; addToStart = true; break
                     }
-                    if (isNear(pathStart, candidate.first(), STITCH_RADIUS)) {
+                    if (isNear(pathStart, candidate.first(), val_util.STITCH_RADIUS)) {
                         matchIndex = i; reverseCandidate = true; addToStart = true; break
                     }
                 }
@@ -91,12 +91,12 @@ object CVPS_job7 {
                 }
             }
 
-            if (currentPath.size >= MIN_PATH_SIZE) {
+            if (currentPath.size >= val_util.MIN_PATH_SIZE) {
                 val start = currentPath.first()
                 val end = currentPath.last()
                 
                 // Closure check
-                if (isNear(end, start, CLOSURE_RADIUS) && isPaveLegal(end, start, vram, width, height)) {
+                if (isNear(end, start, val_util.CLOSURE_RADIUS) && isPaveLegal(end, start, vram, width, height)) {
                     if (start.x != end.x || start.y != end.y) {
                         paveGap(currentPath, end, start)
                     }
@@ -116,17 +116,12 @@ object CVPS_job7 {
         return stitchedPaths
     }
 
-    private const val STITCH_RADIUS = 25
-    private const val CLOSURE_RADIUS = 100
-    private const val MIN_PATH_SIZE = 10
-
     private fun isNear(p1: Point, p2: Point, radius: Int): Boolean = abs(p1.x - p2.x) <= radius && abs(p1.y - p2.y) <= radius
 
     private fun isPaveLegal(from: Point, to: Point, vram: ByteBuffer, width: Int, height: Int): Boolean {
-        val buffer = 50
         // If near border, bypass legality check (allow perimeter closure)
-        if (from.x < buffer || from.x > width - buffer || from.y < buffer || from.y > height - buffer ||
-            to.x < buffer || to.x > width - buffer || to.y < buffer || to.y > height - buffer) return true
+        if (from.x < val_util.BORDER_BUFFER || from.x > width - val_util.BORDER_BUFFER || from.y < val_util.BORDER_BUFFER || from.y > height - val_util.BORDER_BUFFER ||
+            to.x < val_util.BORDER_BUFFER || to.x > width - val_util.BORDER_BUFFER || to.y < val_util.BORDER_BUFFER || to.y > height - val_util.BORDER_BUFFER) return true
 
         var cx = from.x; var cy = from.y
         while (cx != to.x || cy != to.y) {
@@ -146,8 +141,7 @@ object CVPS_job7 {
     }
 
     private fun isPathOnBorder(path: List<Point>, w: Int, h: Int): Boolean {
-        val buffer = 50
-        return path.any { it.x != -1 && (it.x < buffer || it.x > w - buffer || it.y < buffer || it.y > h - buffer) }
+        return path.any { it.x != -1 && (it.x < val_util.BORDER_BUFFER || it.x > w - val_util.BORDER_BUFFER || it.y < val_util.BORDER_BUFFER || it.y > h - val_util.BORDER_BUFFER) }
     }
 
     private fun paveGap(path: MutableList<Point>, from: Point, to: Point) {

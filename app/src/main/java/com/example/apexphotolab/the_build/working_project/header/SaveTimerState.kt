@@ -27,12 +27,12 @@ fun rememberSaveTimerState(lastSaveTime: Long): SaveTimerState {
         val minutes = (elapsedMillis / 1000) / 60
         
         val timerText = if (lastSaveTime == 0L) {
-            "Not Saved" 
+            val_util.TEXT_NOT_SAVED 
         } else {
             String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)
         }
         
-        val isOverdue = minutes >= 5
+        val isOverdue = minutes >= val_util.TIMER_OVERDUE_MINUTES
         
         SaveTimerState(text = timerText, isOverdue = isOverdue)
     }

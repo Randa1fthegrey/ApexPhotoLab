@@ -1,6 +1,9 @@
 package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.svg_assembly.artist
 
 import android.graphics.Point
+import kotlin.math.abs
+
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.val_util as global_val_util
 
 /**
  * Job: Path Data Generator.
@@ -15,42 +18,55 @@ object PathDataGenerator {
     fun generateWithStatus(path: List<Point>): Pair<String, Boolean> {
         if (path.isEmpty()) return Pair("", false)
 
-        val pathData = StringBuilder()
-        var segmentCount = 0
-        var isFirstPointInSegment = true
-
-        val hasSentinels = path.any { it.x == -1 }
-        val points = if (hasSentinels) path else simplify(path)
-
-        for (p in points) {
-            // Sentinel Handling: Segment Break
-            if (p.x == -1 && p.y == -1) {
-                if (segmentCount > 2) {
-                    pathData.append("Z ")
+        // Split by sentinels, simplify each segment, and rejoin
+        val segments = mutableListOf<List<Point>>()
+        var currentSegment = mutableListOf<Point>()
+        
+        for (p in path) {
+            if (p.x == global_val_util.SENTINEL.x && p.y == global_val_util.SENTINEL.y) {
+                if (currentSegment.isNotEmpty()) {
+                    segments.add(simplify(currentSegment))
+                    currentSegment = mutableListOf()
                 }
-                isFirstPointInSegment = true
-                segmentCount = 0
-                continue
-            }
-
-            if (isFirstPointInSegment) {
-                // Segment Start: Absolute Move
-                pathData.append("M ${p.x} ${p.y} ")
-                isFirstPointInSegment = false
             } else {
-                // Segment Continuation: Absolute Line
-                pathData.append("L ${p.x} ${p.y} ")
+                currentSegment.add(p)
             }
-            segmentCount++
+        }
+        if (currentSegment.isNotEmpty()) {
+            segments.add(simplify(currentSegment))
         }
 
-        // Final closure check
-        if (segmentCount > 2) {
-            pathData.append("Z")
+        val pathData = StringBuilder()
+        var totalPoints = 0
+        var hasClosedSegment = false
+
+        for (segment in segments) {
+            if (segment.isEmpty()) continue
+            
+            // Segment Start
+            pathData.append("M ${segment[0].x} ${segment[0].y} ")
+            
+            for (i in 1 until segment.size) {
+                pathData.append("L ${segment[i].x} ${segment[i].y} ")
+            }
+            
+            // Auto-close if segment is a loop
+            if (segment.size > 2 && isLoop(segment)) {
+                pathData.append("Z ")
+                hasClosedSegment = true
+            }
+            
+            totalPoints += segment.size
         }
 
-        val isClosed = hasSentinels || pathData.contains("Z")
-        return Pair(pathData.toString().trim(), isClosed)
+        return Pair(pathData.toString().trim(), hasClosedSegment)
+    }
+
+    private fun isLoop(segment: List<Point>): Boolean {
+        if (segment.size < 3) return false
+        val first = segment.first()
+        val last = segment.last()
+        return abs(first.x - last.x) <= 1 && abs(first.y - last.y) <= 1
     }
 
     /**

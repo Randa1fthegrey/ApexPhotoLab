@@ -31,25 +31,25 @@ object BmpSaver {
         flattened.recycle()
 
         val imageSize = width * height * 4
-        val fileSize = 14 + 40 + imageSize
+        val fileSize = val_util.BMP_HEADER_SIZE + val_util.BMP_DIB_SIZE + imageSize
 
         // 1. FILE HEADER (14 bytes)
-        val fileHeader = ByteBuffer.allocate(14).order(ByteOrder.LITTLE_ENDIAN)
-        fileHeader.put(0x42.toByte()) // B
-        fileHeader.put(0x4D.toByte()) // M
+        val fileHeader = ByteBuffer.allocate(val_util.BMP_HEADER_SIZE).order(ByteOrder.LITTLE_ENDIAN)
+        fileHeader.put(val_util.BMP_SIG_B) // B
+        fileHeader.put(val_util.BMP_SIG_M) // M
         fileHeader.putInt(fileSize)
         fileHeader.putShort(0) // Reserved 1
         fileHeader.putShort(0) // Reserved 2
-        fileHeader.putInt(54)  // Offset to pixel data
+        fileHeader.putInt(val_util.BMP_DATA_OFFSET)  // Offset to pixel data
         outputStream.write(fileHeader.array())
 
         // 2. DIB HEADER (BITMAPINFOHEADER - 40 bytes)
-        val dibHeader = ByteBuffer.allocate(40).order(ByteOrder.LITTLE_ENDIAN)
-        dibHeader.putInt(40)     // Header size
+        val dibHeader = ByteBuffer.allocate(val_util.BMP_DIB_SIZE).order(ByteOrder.LITTLE_ENDIAN)
+        dibHeader.putInt(val_util.BMP_DIB_SIZE)     // Header size
         dibHeader.putInt(width)
         dibHeader.putInt(height) // Positive height = bottom-to-top
-        dibHeader.putShort(1)    // Planes
-        dibHeader.putShort(32)   // Bit count (RGBA)
+        dibHeader.putShort(val_util.BMP_PLANES)    // Planes
+        dibHeader.putShort(val_util.BMP_BIT_COUNT_RGBA)   // Bit count (RGBA)
         dibHeader.putInt(0)      // Compression (0 = BI_RGB)
         dibHeader.putInt(imageSize)
         dibHeader.putInt(0)      // X pixels per meter

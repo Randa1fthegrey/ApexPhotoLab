@@ -118,7 +118,7 @@ fun EditorWorkspace(
 
         Box(
             modifier = Modifier
-                .padding(32.dp)
+                .padding(val_util.CANVAS_PADDING)
                 .aspectRatio(canvasAspectRatio, matchHeightConstraintsFirst = true)
                 .onGloballyPositioned { canvasSize = it.size },
             contentAlignment = Alignment.Center

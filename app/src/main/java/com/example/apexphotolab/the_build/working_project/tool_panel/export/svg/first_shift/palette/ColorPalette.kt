@@ -9,26 +9,26 @@ import android.graphics.Color
 object ColorPalette {
 
     val PALETTE: IntArray = intArrayOf(
-        Color.rgb(255, 0, 0),     // 0: Red
-        Color.rgb(0, 255, 0),     // 1: Green
-        Color.rgb(0, 0, 255),     // 2: Blue
-        Color.rgb(255, 255, 0),   // 3: Yellow
-        Color.rgb(0, 255, 255),   // 4: Cyan
-        Color.rgb(255, 0, 255),   // 5: Magenta
-        Color.rgb(255, 255, 255), // 6: White
-        Color.argb(0, 0, 0, 0),   // 7: Alpha (Transparent)
-        Color.rgb(0, 0, 0),       // 8: Black
-        Color.rgb(128, 128, 128)  // 9: Grey
+        val_util.COLOR_RED,
+        val_util.COLOR_GREEN,
+        val_util.COLOR_BLUE,
+        val_util.COLOR_YELLOW,
+        val_util.COLOR_CYAN,
+        val_util.COLOR_MAGENTA,
+        val_util.COLOR_WHITE,
+        val_util.COLOR_ALPHA,
+        val_util.COLOR_BLACK,
+        val_util.COLOR_GREY
     )
 
-    fun getRedRange(): IntRange = 0..0
-    fun getGreenRange(): IntRange = 1..1
-    fun getBlueRange(): IntRange = 2..2
-    fun getYellowRange(): IntRange = 3..3
-    fun getCyanRange(): IntRange = 4..4
-    fun getMagentaRange(): IntRange = 5..5
-    fun getWhiteRange(): IntRange = 6..6
-    fun getAlphaRange(): IntRange = 7..7
-    fun getBlackRange(): IntRange = 8..8
-    fun getGreyRange(): IntRange = 9..9
+    fun getRedRange(): IntRange = val_util.IDX_RED..val_util.IDX_RED
+    fun getGreenRange(): IntRange = val_util.IDX_GREEN..val_util.IDX_GREEN
+    fun getBlueRange(): IntRange = val_util.IDX_BLUE..val_util.IDX_BLUE
+    fun getYellowRange(): IntRange = val_util.IDX_YELLOW..val_util.IDX_YELLOW
+    fun getCyanRange(): IntRange = val_util.IDX_CYAN..val_util.IDX_CYAN
+    fun getMagentaRange(): IntRange = val_util.IDX_MAGENTA..val_util.IDX_MAGENTA
+    fun getWhiteRange(): IntRange = val_util.IDX_WHITE..val_util.IDX_WHITE
+    fun getAlphaRange(): IntRange = val_util.IDX_ALPHA..val_util.IDX_ALPHA
+    fun getBlackRange(): IntRange = val_util.IDX_BLACK..val_util.IDX_BLACK
+    fun getGreyRange(): IntRange = val_util.IDX_GREY..val_util.IDX_GREY
 }

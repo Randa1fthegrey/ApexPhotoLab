@@ -12,8 +12,8 @@ import com.example.apexphotolab.the_build.working_project.tool_panel.eraser.Eras
  * Tracks current tool selection, parameters, and layer focus.
  */
 class ToolSettingsManager {
-    var selectedLayerId by mutableStateOf("base")
+    var selectedLayerId by mutableStateOf(val_util.LAYER_BASE_ID)
     var activeTool by mutableStateOf(WorkspaceTool.MOVE)
-    var brushSize by mutableFloatStateOf(20f)
+    var brushSize by mutableFloatStateOf(val_util.BRUSH_SIZE_DEFAULT)
     var eraserMode by mutableStateOf(EraserMode.FREEFORM)
 }

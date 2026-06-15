@@ -11,10 +11,10 @@ import com.example.apexphotolab.the_build.working_project.tool_panel.export.ui.R
  * Responsibility: Holds the persistent configuration for the Export screen.
  */
 class ExportConfigurationManager {
-    var exportResolution by mutableStateOf("1024 x 1024")
+    var exportResolution by mutableStateOf(val_util.RES_DEFAULT)
     var exportCategory by mutableStateOf(ResolutionCategory.STANDARD)
     var widescreenIndex by mutableIntStateOf(1)
     var standardIndex by mutableIntStateOf(0)
-    var customWidth by mutableStateOf("1024")
-    var customHeight by mutableStateOf("1024")
+    var customWidth by mutableStateOf(val_util.RES_DEFAULT_W)
+    var customHeight by mutableStateOf(val_util.RES_DEFAULT_H)
 }

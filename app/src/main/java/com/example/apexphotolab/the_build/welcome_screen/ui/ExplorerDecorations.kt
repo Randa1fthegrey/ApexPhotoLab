@@ -39,7 +39,7 @@ fun ProjectCategoryHeader(title: String) {
 @Composable
 fun EmptyCategoryNotice() {
     Text(
-        text = "No projects in this category.",
+        text = val_util.NOTICE_EMPTY,
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(16.dp)

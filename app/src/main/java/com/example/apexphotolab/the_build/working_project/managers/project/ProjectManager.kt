@@ -15,7 +15,7 @@ import org.json.JSONArray
 object ProjectManager {
 
     fun loadLayers(context: Context, projectDir: DocumentFile): List<Layer> {
-        val layersFile = projectDir.findFile("layers.json") ?: return emptyList()
+        val layersFile = projectDir.findFile(val_util.FILE_LAYERS_JSON) ?: return emptyList()
         val jsonString = context.contentResolver.openInputStream(layersFile.uri)?.bufferedReader()?.use { it.readText() }
             ?: return emptyList()
 
@@ -33,7 +33,7 @@ object ProjectManager {
 
     fun getHistory(projectDir: DocumentFile): List<DocumentFile> {
         return projectDir.listFiles()
-            .filter { it.name?.startsWith("save_") == true && it.name?.endsWith(".json") == true }
+            .filter { it.name?.startsWith(val_util.PREFIX_SAVE) == true && it.name?.endsWith(val_util.EXT_JSON) == true }
             .sortedByDescending { it.lastModified() }
     }
 
@@ -42,7 +42,7 @@ object ProjectManager {
             val snapshotData = context.contentResolver.openInputStream(snapshot.uri)?.bufferedReader()?.use { it.readText() }
                 ?: return false
 
-            val layersFile = projectDir.findFile("layers.json") ?: projectDir.createFile("application/json", "layers.json")
+            val layersFile = projectDir.findFile(val_util.FILE_LAYERS_JSON) ?: projectDir.createFile(val_util.MIME_JSON, val_util.FILE_LAYERS_JSON)
             ?: return false
 
             context.contentResolver.openOutputStream(layersFile.uri, "wt")?.use { it.write(snapshotData.toByteArray()) }
@@ -59,15 +59,15 @@ object ProjectManager {
         val projectDir = rootDir.createDirectory(projectName) ?: return null
 
         // 1. Save base image
-        val baseImageFile = projectDir.createFile("image/png", "base.png") ?: return null
+        val baseImageFile = projectDir.createFile(val_util.MIME_PNG, val_util.FILE_BASE_PNG) ?: return null
         context.contentResolver.openOutputStream(baseImageFile.uri)?.use { out ->
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
         }
 
         // 2. Create initial layer
         val baseLayer = Layer(
-            id = "base",
-            title = "Background",
+            id = val_util.LAYER_BASE_ID,
+            title = val_util.LAYER_BASE_TITLE,
             imageUri = baseImageFile.uri,
             zOrder = 0,
             width = bitmap.width,
@@ -75,7 +75,7 @@ object ProjectManager {
         )
 
         // 3. Save initial project state
-        ProjectSaveManager.saveProject(context, projectDir.uri, listOf(baseLayer), "Project Birth")
+        ProjectSaveManager.saveProject(context, projectDir.uri, listOf(baseLayer), val_util.SNAPSHOT_BIRTH)
 
         return projectDir
     }
@@ -91,7 +91,7 @@ object ProjectManager {
     fun addImageLayer(context: Context, projectDir: DocumentFile, title: String, bitmap: Bitmap): Layer? {
         return try {
             val fileName = "layer_${System.currentTimeMillis()}.png"
-            val file = projectDir.createFile("image/png", fileName) ?: return null
+            val file = projectDir.createFile(val_util.MIME_PNG, fileName) ?: return null
             context.contentResolver.openOutputStream(file.uri)?.use { out ->
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
             }
@@ -121,7 +121,7 @@ object ProjectManager {
         val parts = name.split("_")
         if (parts.size < 2) return false
         val timestamp = parts[1]
-        val newName = "save_${timestamp}_${newNote}.json"
+        val newName = "${val_util.PREFIX_SAVE}${timestamp}_${newNote}${val_util.EXT_JSON}"
         return snapshot.renameTo(newName)
     }
 }

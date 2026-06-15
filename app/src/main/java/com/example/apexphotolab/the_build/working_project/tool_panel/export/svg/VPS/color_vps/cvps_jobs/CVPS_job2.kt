@@ -14,6 +14,7 @@ object CVPS_job2 {
         val edges: HashSet<Point>,
         val vram: ByteBuffer,
         val width: Int,
+        val height: Int,
         val pixels: IntArray,
         val sharedRemainingSet: MutableSet<Point>? = null,
         val specificCandidates: List<Point>? = null,
@@ -25,13 +26,14 @@ object CVPS_job2 {
         val candidates = dData.specificCandidates ?: dData.edges.sortedBy { it.y * 10000 + it.x }
         
         // UNIFIED TRACING LOGIC: Replaces 10 legacy files
-        dData.result = trace(candidates, dData.vram, dData.width, dData.pixels, dData.sharedRemainingSet)
+        dData.result = trace(candidates, dData.vram, dData.width, dData.height, dData.pixels, dData.sharedRemainingSet)
     }
 
     private fun trace(
         homeCandidates: List<Point>,
         vram: ByteBuffer,
         width: Int,
+        height: Int,
         pixels: IntArray,
         remainingPixels: MutableSet<Point>? = null
     ): List<List<Point>> {
@@ -52,10 +54,11 @@ object CVPS_job2 {
                 path.add(currentPoint)
                 stack.add(currentPoint)
 
-                var nextPoint = findNextStep(currentPoint, previousPoint, myRemaining, home, path.size, vram, width)
+                var nextPoint = findNextStep(currentPoint, previousPoint, myRemaining, home, path.size, vram, width, height)
 
                 if (nextPoint == null) {
-                    nextPoint = findRecoveryPoint(currentPoint, myRemaining, vram, width)
+                    // --- 180 LOGIC RECOVERY ---
+                    nextPoint = findRecoveryPoint(currentPoint, myRemaining, vram, width, height)
                 }
 
                 if (nextPoint != null) {
@@ -71,9 +74,9 @@ object CVPS_job2 {
 
                     while (stack.isNotEmpty()) {
                         val junction = stack.removeAt(stack.size - 1)
-                        val branch = findNextStep(junction, null, myRemaining, home, path.size, vram, width)
+                        val branch = findNextStep(junction, null, myRemaining, home, path.size, vram, width, height)
                         if (branch != null) {
-                            path.add(Point(-1, -1))
+                            path.add(val_util.SENTINEL)
                             previousPoint = junction
                             currentPoint = branch
                             foundBranch = true
@@ -98,22 +101,41 @@ object CVPS_job2 {
         home: Point,
         pathSize: Int,
         vram: ByteBuffer,
-        width: Int
+        width: Int,
+        height: Int
     ): Point? {
         val lastMoveIndex = if (previous != null) {
             val dx = current.x - previous.x
             val dy = current.y - previous.y
-            OFFSETS.indexOfFirst { it.x == dx && it.y == dy }
+            val_util.OFFSETS.indexOfFirst { it.x == dx && it.y == dy }
         } else -1
 
         val searchStartIndex = if (lastMoveIndex != -1) (lastMoveIndex + 5) % 8 else 0
 
         for (i in 0 until 8) {
             val idx = (searchStartIndex + i) % 8
-            val offset = OFFSETS[idx]
+            if (idx % 2 != 0) continue
+            val offset = val_util.OFFSETS[idx]
             val nx = current.x + offset.x
             val ny = current.y + offset.y
             
+            if (nx !in 0 until width || ny !in 0 until height) continue
+            if (nx == home.x && ny == home.y && pathSize > 10) return home
+            
+            val neighborPoint = Point(nx, ny)
+            if (remaining.contains(neighborPoint) && getBit(vram, ny * width + nx)) {
+                return neighborPoint
+            }
+        }
+
+        for (i in 0 until 8) {
+            val idx = (searchStartIndex + i) % 8
+            if (idx % 2 == 0) continue
+            val offset = val_util.OFFSETS[idx]
+            val nx = current.x + offset.x
+            val ny = current.y + offset.y
+            
+            if (nx !in 0 until width || ny !in 0 until height) continue
             if (nx == home.x && ny == home.y && pathSize > 10) return home
             
             val neighborPoint = Point(nx, ny)
@@ -128,14 +150,16 @@ object CVPS_job2 {
         current: Point,
         remaining: Set<Point>,
         vram: ByteBuffer,
-        width: Int
+        width: Int,
+        height: Int
     ): Point? {
-        for (r in 1..3) {
+        for (r in 1..val_util.RECOVERY_RADIUS) {
             for (dy in -r..r) {
                 for (dx in -r..r) {
                     if (abs(dx) < r && abs(dy) < r) continue
                     val nx = current.x + dx
                     val ny = current.y + dy
+                    if (nx !in 0 until width || ny !in 0 until height) continue
                     if (remaining.contains(Point(nx, ny)) && getBit(vram, ny * width + nx)) {
                         return Point(nx, ny)
                     }
@@ -151,15 +175,4 @@ object CVPS_job2 {
         val bitIdx = index % 8
         return (buffer.get(byteIdx).toInt() and (1 shl bitIdx)) != 0
     }
-
-    private val OFFSETS = arrayOf(
-        Point(0, -1),  // 0: N
-        Point(1, -1),  // 1: NE
-        Point(1, 0),   // 2: E
-        Point(1, 1),   // 3: SE
-        Point(0, 1),   // 4: S
-        Point(-1, 1),  // 5: SW
-        Point(-1, 0),  // 6: W
-        Point(-1, -1)  // 7: NW
-    )
 }

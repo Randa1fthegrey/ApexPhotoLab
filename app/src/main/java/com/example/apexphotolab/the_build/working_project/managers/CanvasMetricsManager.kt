@@ -10,7 +10,7 @@ import com.example.apexphotolab.the_build.working_project.util.layers.Layer
 object CanvasMetricsManager {
 
     fun calculateAspectRatio(layers: List<Layer>): Float {
-        val baseLayer = layers.find { it.id == "base" }
+        val baseLayer = layers.find { it.id == val_util.LAYER_BASE_ID }
         return if (baseLayer != null && baseLayer.width > 0 && baseLayer.height > 0) {
             baseLayer.width.toFloat() / baseLayer.height.toFloat()
         } else {
@@ -19,7 +19,7 @@ object CanvasMetricsManager {
     }
 
     fun calculateFitScale(layers: List<Layer>, canvasSize: IntSize): Float {
-        val baseLayer = layers.find { it.id == "base" }
+        val baseLayer = layers.find { it.id == val_util.LAYER_BASE_ID }
         return if (baseLayer != null && canvasSize.width > 0) {
             canvasSize.width.toFloat() / baseLayer.width.toFloat()
         } else {

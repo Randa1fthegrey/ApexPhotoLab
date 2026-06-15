@@ -48,6 +48,7 @@ object EngineInitializer {
                     edges = hashSetOf(),
                     vram = VRAM_Garage.getSlotForManager(0),
                     width = 1,
+                    height = 1,
                     pixels = IntArray(1)
                 )
                 cvpsWorker.runColorTask(2, discoveryData)

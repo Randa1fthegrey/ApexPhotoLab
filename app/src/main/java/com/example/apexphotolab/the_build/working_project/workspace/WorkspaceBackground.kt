@@ -23,13 +23,13 @@ fun WorkspaceBackground(
         modifier = modifier
             .fillMaxSize()
             .drawBehind {
-                val squareSize = 16.dp.toPx()
+                val squareSize = val_util.GRID_SQUARE_SIZE.toPx()
                 val columns = (size.width / squareSize).toInt() + 1
                 val rows = (size.height / squareSize).toInt() + 1
 
                 for (i in 0 until columns) {
                     for (j in 0 until rows) {
-                        val color = if ((i + j) % 2 == 0) Color(0xFFE0E0E0) else Color(0xFFD0D0D0)
+                        val color = if ((i + j) % 2 == 0) val_util.GRID_COLOR_LIGHT else val_util.GRID_COLOR_DARK
                         drawRect(
                             color = color,
                             topLeft = Offset(i * squareSize, j * squareSize),

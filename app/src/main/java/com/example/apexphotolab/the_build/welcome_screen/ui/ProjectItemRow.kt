@@ -21,7 +21,7 @@ fun ProjectItemRow(
     onDeleteRequest: (DocumentFile) -> Unit
 ) {
     Text(
-        text = file.name ?: "Unknown Project",
+        text = file.name ?: val_util.FALLBACK_UNKNOWN,
         modifier = Modifier
             .fillMaxWidth()
             .clickable { 

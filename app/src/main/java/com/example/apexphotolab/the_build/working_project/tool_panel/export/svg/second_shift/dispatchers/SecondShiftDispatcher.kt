@@ -25,6 +25,7 @@ object SecondShiftDispatcher {
     ): Pair<List<List<Point>>, HashSet<Point>> = withContext(Dispatchers.Default) {
 
         // 1. Preparation
+        CVPS_Audit.clearTallies()
         SecondShiftResultManager.wipeAll()
         TracingSwarmManager.wipeAll()
         val vram = SecondShiftVramManager.prepareMasterVram()
@@ -52,6 +53,8 @@ object SecondShiftDispatcher {
         // 5. Cleanup
         SecondShiftResultManager.wipeAll()
         TracingSwarmManager.wipeAll()
+
+        CVPS_Audit.reportFinalTallies()
 
         Pair(finalPaths, allEdges)
     }

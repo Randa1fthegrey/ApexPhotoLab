@@ -31,7 +31,7 @@ object ThirdShiftOrchestrator {
         val allConsolidatedReports = mutableListOf<CensusReport>()
 
         // 3. CONSOLIDATION
-        familyGroups.forEach { (groupIndex, indices) ->
+        for ((groupIndex, indices) in familyGroups) {
             val familyPaths = indices.map { pathFragments[it] }
             val familyReports = indices.map { reports[it] }
 

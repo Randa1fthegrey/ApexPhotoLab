@@ -28,7 +28,7 @@ fun ProjectTypeDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Select Project Type",
+                    text = val_util.TYPE_TITLE,
                     style = MaterialTheme.typography.headlineSmall
                 )
                 
@@ -39,7 +39,7 @@ fun ProjectTypeDialog(
                     onClick = { onConfirm(ProjectType.STATIC) },
                     modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)
                 ) {
-                    Text("Static / PNG (Single)")
+                    Text(val_util.TYPE_STATIC)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -50,7 +50,7 @@ fun ProjectTypeDialog(
                     enabled = false,
                     modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)
                 ) {
-                    Text("Animated / GIF (Motion)")
+                    Text(val_util.TYPE_ANIMATED)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -61,13 +61,13 @@ fun ProjectTypeDialog(
                     enabled = false,
                     modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)
                 ) {
-                    Text("Sequential / PDF (Document)")
+                    Text(val_util.TYPE_SEQUENTIAL)
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 TextButton(onClick = onDismiss) {
-                    Text("Cancel")
+                    Text(val_util.BUTTON_CANCEL)
                 }
             }
         }
