@@ -2,7 +2,7 @@ package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg
 
 import android.graphics.Point
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.CVPS_HiringDepartment
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs.CVPS_job2
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs.CVPS_job2_TEST
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.svg_assembly.artist.AlphaGradientDetector
 import kotlinx.coroutines.runBlocking
 import java.nio.ByteBuffer
@@ -15,7 +15,7 @@ object AlphaPathTracer {
 
     fun trace(edges: HashSet<Point>, vram: ByteBuffer, info: AlphaGradientDetector.AlphaGradientInfo): List<List<Point>> {
         val worker = CVPS_HiringDepartment.getWorkerByColorId(7) // Alpha
-        val data = CVPS_job2.DiscoveryData(
+        val data = CVPS_job2_TEST.DiscoveryData(
             edges = edges,
             vram = vram,
             width = info.width,

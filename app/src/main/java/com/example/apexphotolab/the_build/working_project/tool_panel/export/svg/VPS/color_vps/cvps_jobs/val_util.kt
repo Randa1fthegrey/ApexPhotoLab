@@ -38,7 +38,7 @@ object val_util {
     // MAINTENANCE TRAJECTORY (Job 7)
     // ==========================================
 
-    val STITCH_RADIUS = 25
+    val STITCH_RADIUS = 50
     val CLOSURE_RADIUS = 100
     val MIN_PATH_SIZE = 10
     val BORDER_BUFFER = 50

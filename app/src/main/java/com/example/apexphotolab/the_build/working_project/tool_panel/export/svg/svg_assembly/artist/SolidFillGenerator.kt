@@ -31,27 +31,18 @@ object SolidFillGenerator {
             else -> val_util.STROKE_DEFAULT
         }
 
-        val closedPathData = StringBuilder()
-        val openPathData = StringBuilder()
+        val results = StringBuilder()
 
-        paths.forEach { path ->
+        paths.forEachIndexed { i, path ->
             val (data, isClosed) = PathDataGenerator.generateWithStatus(path)
-            if (isClosed) {
-                closedPathData.append(data).append(" ")
-            } else {
-                openPathData.append(data).append(" ")
+            if (data.isNotEmpty()) {
+                val closeTag = if (isClosed) " Z" else ""
+                // Use a counter that actually increments for the report
+                results.append("  <!-- Path Segment -->\n")
+                results.append("  <path d=\"$data$closeTag\" fill=\"none\" stroke=\"$colorHex\" stroke-opacity=\"$opacity\" stroke-width=\"$strokeWidth\" stroke-linejoin=\"round\" stroke-linecap=\"round\" fill-rule=\"evenodd\" />\n")
             }
         }
 
-        return buildString {
-            if (closedPathData.isNotEmpty()) {
-                append("<path d=\"${closedPathData.toString().trim()}\" fill=\"$fillAttr\" fill-opacity=\"$opacity\" stroke=\"$colorHex\" stroke-opacity=\"$opacity\" stroke-width=\"$strokeWidth\" stroke-linejoin=\"round\" stroke-linecap=\"round\" fill-rule=\"evenodd\" />")
-            }
-            if (openPathData.isNotEmpty()) {
-                if (isNotEmpty()) append("\n")
-                // FORCE FILL ON OPEN PATHS: Bars touching edges are often "open" but represent solid regions
-                append("<path d=\"${openPathData.toString().trim()} Z\" fill=\"$fillAttr\" fill-opacity=\"$opacity\" stroke=\"$colorHex\" stroke-opacity=\"$opacity\" stroke-width=\"$strokeWidth\" stroke-linejoin=\"round\" stroke-linecap=\"round\" fill-rule=\"evenodd\" />")
-            }
-        }
+        return results.toString().trim()
     }
 }

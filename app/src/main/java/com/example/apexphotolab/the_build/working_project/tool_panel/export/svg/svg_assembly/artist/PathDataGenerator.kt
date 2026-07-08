@@ -75,29 +75,33 @@ object PathDataGenerator {
     fun generate(path: List<Point>): String = generateWithStatus(path).first
 
     /**
-     * Collinear Point Removal: Drops points that lie on a straight line between their neighbors.
+     * Pure Collinear Removal: Drops points that lie exactly on a line between neighbors.
+     * High resolution to prevent "Pac-Man" jaggedness.
      */
     private fun simplify(path: List<Point>): List<Point> {
         if (path.size <= 2) return path
         val simplified = mutableListOf<Point>()
         simplified.add(path[0])
+        
+        var prevPoint = path[0]
         for (i in 1 until path.size - 1) {
-            val prev = simplified.last()
             val curr = path[i]
             val next = path[i + 1]
             
-            val dx1 = curr.x - prev.x
-            val dy1 = curr.y - prev.y
+            val dx1 = curr.x - prevPoint.x
+            val dy1 = curr.y - prevPoint.y
             val dx2 = next.x - curr.x
             val dy2 = next.y - curr.y
             
-            // Cross product check for collinearity
             val crossProduct = dy1 * dx2 - dy2 * dx1
-            // Dot product check to ensure we aren't removing a 180-degree turn
             val dotProduct = dx1 * dx2 + dy1 * dy2
             
-            if (crossProduct != 0 || dotProduct < 0) {
+            // CROSS-PRODUCT JITTER FILTER:
+            // Only keep points that represent a significant change in direction.
+            // We ignore turn strengths of 1 or less to smooth out square pixel corners.
+            if (abs(crossProduct) > 1 || dotProduct < 0) {
                 simplified.add(curr)
+                prevPoint = curr
             }
         }
         simplified.add(path.last())

@@ -7,7 +7,7 @@ import android.util.Log
  * Responsibility: Printing the entire generated SVG code to Logcat for inspection.
  */
 object SVGCodeLogger {
-    private const val TAG = "SVG_CODE"
+    private const val TAG = "SVG_PIPELINE"
     private const val MAX_LOG_LENGTH = 3500
 
     fun log(svg: String) {

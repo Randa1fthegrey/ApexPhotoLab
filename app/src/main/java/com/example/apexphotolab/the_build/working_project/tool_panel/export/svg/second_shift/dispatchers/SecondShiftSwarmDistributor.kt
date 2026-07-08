@@ -3,6 +3,7 @@ package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg
 import android.graphics.Point
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.VPS_HiringDepartment
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg._temp_tools.VPS_Audit
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.swarm_mgmt.SwarmStateRegistry
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.swarm_mgmt.TracingSwarmManager
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -40,16 +41,25 @@ object SecondShiftSwarmDistributor {
         }
 
         // 2. Hire and Launch the Swarm via VPS
-        val hiredCrew = VPS_HiringDepartment.hireWorkers()
-        VPS_Audit.logShiftHandoff(2)
-
-        val swarmJobs = hiredCrew.map { (worker, workstation) ->
-            async(workstation) {
-                VPS_Audit.logCompute(2, worker.id)
-                worker.runTask(2, null)
+        // DETERMINISTIC ISOLATION: Use only Worker 1 to ensure a stable trace.
+        val greyContext = SwarmStateRegistry.getContext(9)
+        val allPoints = mutableListOf<Point>()
+        greyContext?.let { ctx ->
+            while (ctx.homeCandidates.isNotEmpty()) {
+                ctx.homeCandidates.poll()?.let { allPoints.add(it) }
             }
         }
 
-        swarmJobs.awaitAll()
+        val myAssignment = if (allPoints.isNotEmpty()) {
+            TracingSwarmManager.WorkAssignment(
+                9, greyContext!!.vram, greyContext.width, greyContext.height, greyContext.pixels,
+                allPoints, greyContext.remainingPixels
+            )
+        } else null
+
+        val worker = VPS_HiringDepartment.getWorkerById(1)
+        VPS_Audit.logShiftHandoff(2)
+        VPS_Audit.logCompute(2, worker.id)
+        worker.runTask(2, myAssignment)
     }
 }

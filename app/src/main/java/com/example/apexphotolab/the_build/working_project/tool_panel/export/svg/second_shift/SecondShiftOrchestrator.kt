@@ -6,8 +6,11 @@ import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.dispatchers.SecondShiftDispatcher
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.infrastructure.SecondShiftPixelExtractor
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.infrastructure.SecondShiftResultMerger
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.scouts.GradientScoutOrchestrator
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.stitching.CrossGroupStitcher
+
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs.CVPS_job2_Filter
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg._temp_tools.Pipeline_Audit
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.vram.SecondShiftVramManager
 
 /**
  * Job: Second Shift Orchestrator (The Master Manager).
@@ -26,21 +29,14 @@ object SecondShiftOrchestrator {
         // 1. DATA PREPARATION
         val pixels = SecondShiftPixelExtractor.extract(quantizedImage)
 
-        // 2. GRADIENT SCOUTS: Pre-scan for ramps
-        GradientScoutOrchestrator.run(quantizedImage, originalImage)
+        // 2. ISOLATION MODE: Bypass Multicolor
+        val multiPaths = emptyList<List<Point>>()
+        val claimedIndices = emptySet<Int>()
 
-        // 3. MULTICOLOR TEAM: Claim complex regions first
-        val (multiPaths, claimedIndices) = MulticolorTracerDispatcher.scan(pixels, width, height)
-
-        // 4. STANDARD TEAM: Process sorted color groups (skipping claimed pixels)
+        // 4. STANDARD TEAM: Process sorted color groups
         val (singlePaths, allEdges) = SecondShiftDispatcher.traceInParallel(colorGroups, width, height, pixels, claimedIndices)
 
-        // 5. DATA CONSOLIDATION
-        val combinedRawPaths = SecondShiftResultMerger.merge(multiPaths, singlePaths)
-        
-        // 6. FINAL STITCHING: Bridge spatial gaps
-        val stitchedPaths = CrossGroupStitcher.stitch(combinedRawPaths)
-
-        return Pair(stitchedPaths, allEdges)
+        // 6. ISOLATION MODE: Bypass Cross-Stitching for raw fragment analysis
+        return Pair(singlePaths, allEdges)
     }
 }

@@ -2,11 +2,7 @@ package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg
 
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs.CVPS_job1
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs.CVPS_job2_TEST
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs.CVPS_job3
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs.CVPS_job4
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs.CVPS_job5
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs.CVPS_job6
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs.CVPS_job7
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs.CVPS_job3_Solidify
 
 /**
  * Job: Color VPS System Manager (The Switchboard).
@@ -17,7 +13,7 @@ object CVPS_Manager {
     suspend fun execute(colorId: Int, jobId: Int, data: Any?) {
         when (jobId) {
             // ==========================================
-            // LOGIC FOR JOB 1: RAMPS
+            // LOGIC FOR JOB 1: RAMPS (Quantize)
             // ==========================================
             1 -> {
                 CVPS_job1.execute(colorId, data)
@@ -25,7 +21,7 @@ object CVPS_Manager {
             // ------------------------------------------
 
             // ==========================================
-            // LOGIC FOR JOB 2: DISCOVERY
+            // LOGIC FOR JOB 2: DISCOVERY (Trace)
             // ==========================================
             2 -> {
                 CVPS_job2_TEST.execute(colorId, data)
@@ -33,42 +29,10 @@ object CVPS_Manager {
             // ------------------------------------------
 
             // ==========================================
-            // LOGIC FOR JOB 3: GRADIENT SCOUTS
+            // LOGIC FOR JOB 3: SOLIDIFICATION (Assemble)
             // ==========================================
             3 -> {
-                CVPS_job3.execute(colorId, data)
-            }
-            // ------------------------------------------
-
-            // ==========================================
-            // LOGIC FOR JOB 4: SANITIZERS
-            // ==========================================
-            4 -> {
-                CVPS_job4.execute(colorId, data)
-            }
-            // ------------------------------------------
-
-            // ==========================================
-            // LOGIC FOR JOB 5: CONSOLIDATORS
-            // ==========================================
-            5 -> {
-                CVPS_job5.execute(colorId, data)
-            }
-            // ------------------------------------------
-
-            // ==========================================
-            // LOGIC FOR JOB 6: BLENDING
-            // ==========================================
-            6 -> {
-                CVPS_job6.execute(colorId, data)
-            }
-            // ------------------------------------------
-
-            // ==========================================
-            // LOGIC FOR JOB 7: SOLIDIFICATION (TEAM 2)
-            // ==========================================
-            7 -> {
-                CVPS_job7.execute(colorId, data)
+                CVPS_job3_Solidify.execute(colorId, data)
             }
             // ------------------------------------------
         }

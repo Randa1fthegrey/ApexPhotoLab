@@ -1,9 +1,9 @@
 package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.dispatchers
 
 import android.graphics.Point
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.CVPS_HiringDepartment
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs.CVPS_job4
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs.CVPS_job2_Filter
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg._temp_tools.CVPS_Audit
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg._temp_tools.SVG_Unified_Audit
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.infrastructure.SecondShiftResultManager
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.vram.SecondShiftVramManager
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.swarm_mgmt.TracingSwarmManager
@@ -31,40 +31,35 @@ object SecondShiftDispatcher {
         val vram = SecondShiftVramManager.prepareMasterVram()
 
         // 2. Perimeter Scanning
+        SVG_Unified_Audit.logHandoff("SecondShiftDispatcher", "SecondShiftEdgeScanner")
         val (bucketCandidates, allEdges) = SecondShiftEdgeScanner.scan(
             width, height, pixels, claimedIndices, vram
         )
 
-        // 3. Work Distribution & Execution
+        // 3. VRAM DISTILLATION (Thinning the tightrope)
+        // We run the filter BEFORE tracing to ensure workers only see a 1-pixel skin.
+        SVG_Unified_Audit.logHandoff("SecondShiftDispatcher", "CVPS_job2_Filter", "Thinning Buckets")
+        CVPS_job2_Filter.execute(vram, width, height, allEdges, bucketCandidates)
+
+        // 4. Work Distribution & Execution
+        SVG_Unified_Audit.logHandoff("SecondShiftDispatcher", "SecondShiftSwarmDistributor", "Tracing Distilled Edges")
         SecondShiftSwarmDistributor.distributeAndRun(
             bucketCandidates, vram, width, height, pixels
         )
 
-        // 4. Harvesting & Sanitization
+        // 5. Harvesting (ISOLATION MODE: Only Grey ID 9)
         val finalPaths = mutableListOf<List<Point>>()
-        for (i in 0 until 11) {
-            val territoryBlobs = SecondShiftResultManager.harvest(i)
-            if (territoryBlobs.isNotEmpty()) {
-                // ColorBucketDiagnostic call removed to clean up syntax
-                finalPaths.addAll(routeToPathSanitizer(i, territoryBlobs))
-            }
+        val territoryBlobs = SecondShiftResultManager.harvest(9)
+        if (territoryBlobs.isNotEmpty()) {
+            finalPaths.addAll(territoryBlobs)
         }
 
-        // 5. Cleanup
+        // 6. Cleanup
         SecondShiftResultManager.wipeAll()
         TracingSwarmManager.wipeAll()
 
         CVPS_Audit.reportFinalTallies()
 
         Pair(finalPaths, allEdges)
-    }
-
-    private suspend fun routeToPathSanitizer(index: Int, paths: List<List<Point>>): List<List<Point>> {
-        val worker = CVPS_HiringDepartment.getWorkerByColorId(index)
-        CVPS_Audit.logCompute(4, index)
-
-        val data = CVPS_job4.SanitizerData(paths)
-        worker.runColorTask(4, data)
-        return data.result
     }
 }

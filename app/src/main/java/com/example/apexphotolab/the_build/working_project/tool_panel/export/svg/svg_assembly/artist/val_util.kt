@@ -11,7 +11,7 @@ object val_util {
     // ==========================================
 
     val STROKE_WHITE = "0.5"
-    val STROKE_STRUCTURAL = "2.0"
+    val STROKE_STRUCTURAL = "0.8"
     val STROKE_DEFAULT = "0.8"
 
     // ==========================================

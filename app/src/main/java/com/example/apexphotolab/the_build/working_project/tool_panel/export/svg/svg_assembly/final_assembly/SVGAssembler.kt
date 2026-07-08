@@ -1,5 +1,7 @@
 package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.svg_assembly.final_assembly
 
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg._temp_tools.Pipeline_Audit
+
 /**
  * Job: SVG Assembler.
  * Responsibility: Combining all generated SVG elements into a single valid SVG document.
@@ -11,6 +13,7 @@ object SVGAssembler {
         width: Int,
         height: Int
     ): String {
+        Pipeline_Audit.logPhase("SVGAssembler", "Final Assembly")
         val defs = mutableListOf<String>()
         val paths = mutableListOf<String>()
 

@@ -6,7 +6,7 @@ import android.util.Log
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.VPS_HiringDepartment
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.CVPS_HiringDepartment
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs.CVPS_job1
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs.CVPS_job2
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs.CVPS_job2_TEST
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.vps_jobs.VPS_job1
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.svg_assembly.final_assembly.SVGAssembler
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.first_shift.palette.ColorPalette
@@ -22,6 +22,7 @@ import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.svg_assembly.artist.SolidFillGenerator
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.third_shift.census_takers.FloodFiller
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.third_shift.census_takers.SeedFinder
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg._temp_tools.Pipeline_Audit
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -32,6 +33,7 @@ object EngineInitializer {
 
     fun warmUp() {
         Log.d(TAG, "Warming up SVG engine...")
+        Pipeline_Audit.start()
         runBlocking {
             val dummyBitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
 
@@ -44,7 +46,7 @@ object EngineInitializer {
                 cvpsWorker.runColorTask(1, rampData)
                 
                 // Warm up Discovery Task
-                val discoveryData = CVPS_job2.DiscoveryData(
+                val discoveryData = CVPS_job2_TEST.DiscoveryData(
                     edges = hashSetOf(),
                     vram = VRAM_Garage.getSlotForManager(0),
                     width = 1,

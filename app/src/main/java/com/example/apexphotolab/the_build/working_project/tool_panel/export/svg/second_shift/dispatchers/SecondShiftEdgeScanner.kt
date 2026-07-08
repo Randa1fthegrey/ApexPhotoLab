@@ -6,10 +6,12 @@ import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.vram.SecondShiftVramManager
 import java.nio.ByteBuffer
 
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.val_util as global_val_util
+
 /**
  * Job: Second Shift Edge Scanner.
  * Responsibility: Scanning the image for Territory boundaries and marking the "Tracks" in VRAM.
- * Strict Perimeter Logic: Only flags pixels that represent a transition between color groups.
+ * Distillation Logic: Only flags pixels that have at least one neighbor of a DIFFERENT color.
  */
 object SecondShiftEdgeScanner {
 
@@ -29,49 +31,40 @@ object SecondShiftEdgeScanner {
                 val currentIdx = y * width + x
                 if (claimedIndices.contains(currentIdx)) continue
 
-                val currentGroup = SecondShiftNoiseFilter.getCleanGroup(pixels[currentIdx])
+                val currentPixel = pixels[currentIdx]
+                val currentGroup = SecondShiftNoiseFilter.getCleanGroup(currentPixel)
+                
+                var isEdge = false
+                
+                // SIMILARITY COMFORT CHECK: 
+                // A pixel is ONLY an edge if at least one of its 8 neighbors is NOT similar.
+                for (offset in global_val_util.OFFSETS) {
+                    val nx = x + offset.x
+                    val ny = y + offset.y
+                    
+                    if (nx !in 0 until width || ny !in 0 until height) {
+                        isEdge = true // Image boundary is the ultimate Abyss
+                        break
+                    }
+                    
+                    val neighborIdx = ny * width + nx
+                    val isSimilar = ColorWallScale.isSolidGround(currentPixel, pixels[neighborIdx])
+                    
+                    if (!isSimilar) {
+                        isEdge = true
+                        break
+                    }
+                }
 
-                // 2-Way Scan (East and South) is enough to find all boundaries
-                checkNeighbor(x + 1, y, currentIdx, currentGroup, width, height, pixels, claimedIndices, vram, bucketCandidates, allEdges)
-                checkNeighbor(x, y + 1, currentIdx, currentGroup, width, height, pixels, claimedIndices, vram, bucketCandidates, allEdges)
+                if (isEdge && currentGroup == 9) {
+                    SecondShiftVramManager.setEdgeBit(vram, currentIdx)
+                    val p = Point(x, y)
+                    allEdges.add(p)
+                    bucketCandidates[currentGroup].add(p)
+                }
             }
         }
 
         return Pair(bucketCandidates, allEdges)
-    }
-
-    private fun checkNeighbor(
-        nx: Int, ny: Int,
-        currentIdx: Int, currentGroup: Int,
-        width: Int, height: Int,
-        pixels: IntArray, claimedIndices: Set<Int>,
-        vram: ByteBuffer,
-        bucketCandidates: List<MutableSet<Point>>,
-        allEdges: HashSet<Point>
-    ) {
-        if (nx >= width || ny >= height) return
-
-        val neighborIdx = ny * width + nx
-        if (claimedIndices.contains(neighborIdx)) return
-
-        val currentPixel = pixels[currentIdx]
-        val neighborPixel = pixels[neighborIdx]
-
-        // FUZZY EDGE DETECTION: Using the 99% Rule (isSolidGround)
-        if (!ColorWallScale.isSolidGround(currentPixel, neighborPixel)) {
-            val neighborGroup = SecondShiftNoiseFilter.getCleanGroup(neighborPixel)
-
-            SecondShiftVramManager.setEdgeBit(vram, currentIdx)
-            SecondShiftVramManager.setEdgeBit(vram, neighborIdx)
-
-            val p1 = Point(currentIdx % width, currentIdx / width)
-            val p2 = Point(nx, ny)
-
-            allEdges.add(p1)
-            allEdges.add(p2)
-
-            if (currentGroup in 0..9) bucketCandidates[currentGroup].add(p1)
-            if (neighborGroup in 0..9) bucketCandidates[neighborGroup].add(p2)
-        }
     }
 }

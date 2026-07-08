@@ -14,9 +14,14 @@ object VPS_job2 {
     suspend fun execute(workerId: Int, data: Any?) {
         TracingSwarmManager.registerAgent()
         try {
+            // Check if we have a direct chunk assignment from the distributor
+            val chunkAssignment = data as? TracingSwarmManager.WorkAssignment
+            
+            val currentAssignment = chunkAssignment
+            
             while (true) {
-                // Fetch next assignment from the master swarm manager
-                val assignment = TracingSwarmManager.checkIn(workerId) ?: break
+                // Use chunk assignment first, otherwise check in for stolen work
+                val assignment = currentAssignment ?: TracingSwarmManager.checkIn(workerId) ?: break
 
                 // Prepare sandboxed memory slot
                 val myVramSlot = workerId + 9
@@ -39,6 +44,9 @@ object VPS_job2 {
 
                 // Deposit results
                 SecondShiftResultManager.deposit(assignment.colorIndex, blobs)
+                
+                // If we were on a one-shot chunk assignment, we are done
+                if (currentAssignment != null) break
             }
         } finally {
             TracingSwarmManager.unregisterAgent()

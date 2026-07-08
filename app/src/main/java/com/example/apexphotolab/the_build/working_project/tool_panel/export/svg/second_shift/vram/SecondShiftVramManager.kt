@@ -16,6 +16,10 @@ object SecondShiftVramManager {
         return VRAM_Garage.getSlotForManager(MASTER_SLOT)
     }
 
+    fun getMasterVram(): ByteBuffer {
+        return VRAM_Garage.getSlotForManager(MASTER_SLOT)
+    }
+
     fun setEdgeBit(buffer: ByteBuffer, index: Int) {
         val byteIdx = index / 8
         if (byteIdx < buffer.capacity()) {

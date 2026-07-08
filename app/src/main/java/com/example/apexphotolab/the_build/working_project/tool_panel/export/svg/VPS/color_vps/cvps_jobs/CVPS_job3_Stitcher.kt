@@ -7,28 +7,12 @@ import java.nio.ByteBuffer
 import kotlin.math.abs
 
 /**
- * Job: CVPS Job 7 - Solidification (Team 2 Stitching).
- * Responsibility: Stitching path fragments into watertight geometric blocks and recording border gradients.
+ * Job: CVPS Job 3 Specialist - Stitcher.
+ * Responsibility: Bridging gaps between path fragments and closing loops using a high-reach search.
  */
-object CVPS_job7 {
+object CVPS_job3_Stitcher {
 
-    data class SolidificationData(
-        val fragments: List<List<Point>>,
-        val vram: ByteBuffer,
-        val width: Int,
-        val height: Int,
-        val pixels: IntArray,
-        var result: List<List<Point>> = emptyList()
-    )
-
-    fun execute(colorId: Int, data: Any?) {
-        val sData = data as? SolidificationData ?: return
-        
-        // UNIFIED STITCHING LOGIC: Replaces 10 legacy Team 2 files
-        sData.result = solidify(colorId, sData.fragments, sData.vram, sData.width, sData.height, sData.pixels)
-    }
-
-    private fun solidify(
+    fun execute(
         colorId: Int,
         fragments: List<List<Point>>,
         vram: ByteBuffer,
@@ -119,23 +103,22 @@ object CVPS_job7 {
     private fun isNear(p1: Point, p2: Point, radius: Int): Boolean = abs(p1.x - p2.x) <= radius && abs(p1.y - p2.y) <= radius
 
     private fun isPaveLegal(from: Point, to: Point, vram: ByteBuffer, width: Int, height: Int): Boolean {
-        // If near border, bypass legality check (allow perimeter closure)
-        if (from.x < val_util.BORDER_BUFFER || from.x > width - val_util.BORDER_BUFFER || from.y < val_util.BORDER_BUFFER || from.y > height - val_util.BORDER_BUFFER ||
-            to.x < val_util.BORDER_BUFFER || to.x > width - val_util.BORDER_BUFFER || to.y < val_util.BORDER_BUFFER || to.y > height - val_util.BORDER_BUFFER) return true
-
         var cx = from.x; var cy = from.y
         while (cx != to.x || cy != to.y) {
             if (cx < to.x) cx++ else if (cx > to.x) cx--
             if (cy < to.y) cy++ else if (cy > to.y) cy--
 
-            // 2-pixel choke for internal shapes
-            for (dy in -2..2) {
-                for (dx in -2..2) {
+            var foundEdge = false
+            for (dy in -1..1) {
+                for (dx in -1..1) {
                     val nx = cx + dx; val ny = cy + dy
-                    if (nx !in 0 until width || ny !in 0 until height) return false
-                    if (!getBit(vram, ny * width + nx)) return false
+                    if (nx in 0 until width && ny in 0 until height && CVPS_VRAM_Util.getBit(vram, ny * width + nx)) {
+                        foundEdge = true; break
+                    }
                 }
+                if (foundEdge) break
             }
+            if (!foundEdge) return false
         }
         return true
     }
@@ -151,12 +134,5 @@ object CVPS_job7 {
             if (cy < to.y) cy++ else if (cy > to.y) cy--
             path.add(Point(cx, cy))
         }
-    }
-
-    private fun getBit(buffer: ByteBuffer, index: Int): Boolean {
-        val byteIdx = index / 8
-        if (byteIdx >= buffer.capacity()) return false
-        val bitIdx = index % 8
-        return (buffer.get(byteIdx).toInt() and (1 shl bitIdx)) != 0
     }
 }

@@ -10,20 +10,16 @@ import java.util.concurrent.atomic.AtomicInteger
  */
 object CVPS_Audit {
     private const val TAG = "CVPS"
-    private const val FINAL_TAG = "CVPS_FINAL"
+    private const val FINAL_TAG = "SVG_PIPELINE"
 
     private val hits = Array(10) { AtomicInteger(0) }
     private val misses = Array(10) { AtomicInteger(0) }
 
     fun logCompute(jobId: Int, colorId: Int) {
         val jobName = when (jobId) {
-            1 -> "Ramps"
+            1 -> "Quantization"
             2 -> "Discovery"
-            3 -> "Gradient Scouts"
-            4 -> "Sanitizers"
-            5 -> "Consolidators"
-            6 -> "Blending"
-            7 -> "Solidification"
+            3 -> "Solidification"
             else -> "Unknown"
         }
         val colorName = getBucketName(colorId)
@@ -46,17 +42,15 @@ object CVPS_Audit {
     }
 
     fun reportFinalTallies() {
-        Log.i(FINAL_TAG, "==========================================")
-        Log.i(FINAL_TAG, "FINAL CVPS PERFORMANCE REPORT")
-        Log.i(FINAL_TAG, "==========================================")
+        val sb = StringBuilder()
         for (i in 0..9) {
             val h = hits[i].get()
             val m = misses[i].get()
             if (h > 0 || m > 0) {
-                Log.i(FINAL_TAG, "[CVPS REPORT] Color: ${getBucketName(i)} | Hits: $h | Misses: $m")
+                sb.append("[CVPS REPORT] Color: ${getBucketName(i)} | Hits: $h | Misses: $m\n")
             }
         }
-        Log.i(FINAL_TAG, "==========================================")
+        SVG_Unified_Audit.recordFinalStats(sb.toString().trim())
     }
 
     private fun getBucketName(index: Int): String {

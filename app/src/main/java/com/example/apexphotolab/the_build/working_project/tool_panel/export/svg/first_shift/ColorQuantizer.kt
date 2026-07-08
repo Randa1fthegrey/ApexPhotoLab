@@ -1,6 +1,7 @@
 package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.first_shift
 
 import android.graphics.Bitmap
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg._temp_tools.Pipeline_Audit
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.first_shift.orchestration.FirstShiftSlicer
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.first_shift.orchestration.WorkDispatcher
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.first_shift.specialists.QuantizationBitmapAssembler
@@ -17,6 +18,7 @@ object ColorQuantizer {
 
     suspend fun quantize(image: Bitmap): Pair<Bitmap, List<List<Int>>> =
         withContext(Dispatchers.Default) {
+            Pipeline_Audit.logHandoff("ColorQuantizer", "Extraction/Dispatch")
             // 1. EXTRACTION
             val sourcePixels = QuantizationPixelExtractor.extract(image)
             val targetPixels = IntArray(sourcePixels.size)
@@ -28,9 +30,11 @@ object ColorQuantizer {
             val unsortedBuckets = WorkDispatcher.dispatch(workSlices, sourcePixels, targetPixels)
 
             // 4. INTENSITY SORTING (Slope Generation)
+            Pipeline_Audit.logHandoff("ColorQuantizer", "QuantizationIntensitySorter")
             val sortedBuckets = QuantizationIntensitySorter.sort(unsortedBuckets, sourcePixels)
 
             // 5. ASSEMBLY
+            Pipeline_Audit.logHandoff("ColorQuantizer", "QuantizationBitmapAssembler")
             val bitmap =
                 QuantizationBitmapAssembler.assemble(targetPixels, image.width, image.height)
 
