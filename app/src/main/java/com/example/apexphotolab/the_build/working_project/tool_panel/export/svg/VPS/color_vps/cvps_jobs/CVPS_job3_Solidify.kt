@@ -1,7 +1,7 @@
 package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs
 
 import android.graphics.Point
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.third_shift.census_takers.CensusReport
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.third_shift.census.CensusReport
 import java.nio.ByteBuffer
 
 /**
@@ -26,12 +26,8 @@ object CVPS_job3_Solidify {
         // 1. STITCHING: Physically bridge gaps and close loops
         val stitched = CVPS_job3_Stitcher.execute(colorId, sData.fragments, sData.vram, sData.width, sData.height, sData.pixels)
         
-        // 2. WELDING: Spatially group disconnected elements (Bypassed for GREY isolation)
-        val finalResult = if (colorId == 9) {
-            Pair(stitched, stitched.map { CensusReport(colorId, 0, 0, 0f, 0) })
-        } else {
-            CVPS_job3_Welder.execute(colorId, stitched, sData.reports)
-        }
+        // 2. WELDING: Spatially group disconnected elements for all color IDs
+        val finalResult = CVPS_job3_Welder.execute(colorId, stitched, sData.reports)
         
         sData.result = finalResult
     }

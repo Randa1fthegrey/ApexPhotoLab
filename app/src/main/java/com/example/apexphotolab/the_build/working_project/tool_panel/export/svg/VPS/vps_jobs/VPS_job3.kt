@@ -5,8 +5,8 @@ import android.graphics.Color
 import android.graphics.Point
 import android.graphics.Rect
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.infrastructure.ColorGroupSorter
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.third_shift.census_takers.CensusReport
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.third_shift.census_takers.SeedFinder
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.third_shift.census.CensusReport
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.third_shift.census.SeedFinder
 import kotlinx.coroutines.ensureActive
 import java.nio.ByteBuffer
 import java.util.LinkedList

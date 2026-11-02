@@ -3,7 +3,6 @@ package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg
 import android.graphics.Point
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.CVPS_HiringDepartment
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs.CVPS_job2_TEST
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg._temp_tools.CVPS_Audit
 import java.nio.ByteBuffer
 
 /**
@@ -24,7 +23,6 @@ object TracingRouter {
     ): List<List<Point>> {
 
         val worker = CVPS_HiringDepartment.getWorkerByColorId(index)
-        CVPS_Audit.logCompute(2, index)
 
         val data = CVPS_job2_TEST.DiscoveryData(
             edges = edges,

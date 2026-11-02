@@ -12,8 +12,7 @@ object ColorTerritoryMapper {
 
     fun map(pixel: Int): Int {
         val a = Color.alpha(pixel)
-        if (a == 0) return 7 // THE VOID (Alpha)
-        if (a < 255) return 10 // THE GHOST (Alpha Gradient)
+        if (a < 240) return 7 // THE VOID (Alpha / Translucent background)
 
         val r = Color.red(pixel)
         val g = Color.green(pixel)

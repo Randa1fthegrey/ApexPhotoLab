@@ -1,8 +1,6 @@
 package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs
 
 import android.graphics.Point
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg._temp_tools.CVPS_Audit
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg._temp_tools.SVG_Unified_Audit
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.first_shift.territory.ColorWallScale
 import java.nio.ByteBuffer
 
@@ -43,10 +41,9 @@ object CVPS_job2_Tracer {
                 
                 val step = findNextStep(current, currentDir, remaining, home, path.size, vram, width, height, pixels, colorId)
                 
-                if (step.first == home && path.size > 3) {
+                if (step.first == home && path.size > 10) {
                     path.add(home)
                     allPaths.add(path)
-                    CVPS_Audit.recordHit(colorId)
                     break
                 }
                 if (step.first != null) {
@@ -55,7 +52,6 @@ object CVPS_job2_Tracer {
                 } else {
                     if (path.size > 2) {
                         allPaths.add(path)
-                        CVPS_Audit.recordHit(colorId)
                     }
                     break
                 }
@@ -86,7 +82,7 @@ object CVPS_job2_Tracer {
             val ny = current.y + offset.y
             if (nx !in 0 until width || ny !in 0 until height) continue
             val candidate = Point(nx, ny)
-            if (candidate == home && pathSize > 3) return Pair(home, targetDir)
+            if (candidate == home && pathSize > 10) return Pair(home, targetDir)
             if (remaining.contains(candidate) && CVPS_VRAM_Util.getBit(vram, ny * width + nx)) {
                 return Pair(candidate, targetDir)
             }
@@ -97,7 +93,7 @@ object CVPS_job2_Tracer {
             val ny = current.y + offset.y
             if (nx !in 0 until width || ny !in 0 until height) continue
             val candidate = Point(nx, ny)
-            if (candidate == home && pathSize > 3) return Pair(home, targetDir)
+            if (candidate == home && pathSize > 10) return Pair(home, targetDir)
             if (remaining.contains(candidate) && CVPS_VRAM_Util.getBit(vram, ny * width + nx)) {
                 return Pair(candidate, targetDir)
             }

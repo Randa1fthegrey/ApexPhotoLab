@@ -1,7 +1,5 @@
 package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.first_shift.palette
 
-import android.graphics.Color
-
 /**
  * Job: Color Palette Assembler.
  * Responsibility: Defining the 10 "Absolute Truth" colors for the entire SVG engine.

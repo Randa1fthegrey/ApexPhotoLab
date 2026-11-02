@@ -3,7 +3,8 @@ package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg
 import android.graphics.Point
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.first_shift.territory.ColorWallScale
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.infrastructure.SecondShiftNoiseFilter
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.vram.SecondShiftVramManager
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.infrastructure.SecondShiftVramManager
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.utils.VRAM_Garage
 import java.nio.ByteBuffer
 
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.val_util as global_val_util
@@ -56,7 +57,9 @@ object SecondShiftEdgeScanner {
                     }
                 }
 
-                if (isEdge && currentGroup == 9) {
+                if (isEdge && currentGroup in 0 until 10) {
+                    val bucketVram = VRAM_Garage.getSlotForManager(currentGroup)
+                    SecondShiftVramManager.setEdgeBit(bucketVram, currentIdx)
                     SecondShiftVramManager.setEdgeBit(vram, currentIdx)
                     val p = Point(x, y)
                     allEdges.add(p)

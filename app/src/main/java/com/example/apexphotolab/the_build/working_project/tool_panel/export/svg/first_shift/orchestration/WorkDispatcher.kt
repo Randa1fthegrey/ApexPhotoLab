@@ -2,7 +2,6 @@ package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg
 
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.VPS_HiringDepartment
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.vps_jobs.VPS_job1
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg._temp_tools.VPS_Audit
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.utils.VRAM_Garage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -23,15 +22,11 @@ object WorkDispatcher {
         targetPixels: IntArray
     ): List<List<Int>> = withContext(Dispatchers.Default) {
 
-        VPS_Audit.logSystemOnline()
-
         val hiredCrew = VPS_HiringDepartment.hireWorkers()
 
         if (hiredCrew.isEmpty()) {
             return@withContext emptyList()
         }
-
-        VPS_Audit.logShiftHandoff(1)
 
         val workQueue = Channel<IntRange>(Channel.UNLIMITED)
 
@@ -46,8 +41,6 @@ object WorkDispatcher {
                 val localBuckets = List(10) { mutableListOf<Int>() }
 
                 for (slice in workQueue) {
-                    VPS_Audit.logCompute(1, worker.id)
-
                     val taskData = VPS_job1.QuantizationData(
                         sourcePixels,
                         targetPixels,

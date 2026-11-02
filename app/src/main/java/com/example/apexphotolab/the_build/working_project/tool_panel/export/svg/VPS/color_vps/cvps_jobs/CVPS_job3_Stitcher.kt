@@ -1,8 +1,6 @@
 package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.VPS.color_vps.cvps_jobs
 
 import android.graphics.Point
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.scouts.GradientIntelligenceAgency
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.scouts.GradientReport
 import java.nio.ByteBuffer
 import kotlin.math.abs
 
@@ -86,13 +84,6 @@ object CVPS_job3_Stitcher {
                     }
                 }
 
-                // Border Gradient Recording
-                if (isPathOnBorder(currentPath, width, height)) {
-                    val startColor = pixels[start.y * width + start.x]
-                    val endColor = pixels[end.y * width + end.x]
-                    GradientIntelligenceAgency.record(GradientReport(colorId, currentPath, startColor, endColor, true))
-                }
-
                 stitchedPaths.add(currentPath)
             }
         }
@@ -121,10 +112,6 @@ object CVPS_job3_Stitcher {
             if (!foundEdge) return false
         }
         return true
-    }
-
-    private fun isPathOnBorder(path: List<Point>, w: Int, h: Int): Boolean {
-        return path.any { it.x != -1 && (it.x < val_util.BORDER_BUFFER || it.x > w - val_util.BORDER_BUFFER || it.y < val_util.BORDER_BUFFER || it.y > h - val_util.BORDER_BUFFER) }
     }
 
     private fun paveGap(path: MutableList<Point>, from: Point, to: Point) {

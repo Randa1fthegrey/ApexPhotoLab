@@ -2,7 +2,7 @@ package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg
 
 import android.graphics.Point
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.second_shift.infrastructure.ColorGroupSorter
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.third_shift.census_takers.CensusReport
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.third_shift.census.CensusReport
 
 /**
  * Job: Color Blending Fragment Grouper.

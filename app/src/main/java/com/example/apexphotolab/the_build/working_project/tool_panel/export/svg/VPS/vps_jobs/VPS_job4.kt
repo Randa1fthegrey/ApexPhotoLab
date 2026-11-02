@@ -3,8 +3,8 @@ package com.example.apexphotolab.the_build.working_project.tool_panel.export.svg
 import android.graphics.Bitmap
 import android.graphics.Point
 import android.graphics.Rect
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.svg_assembly.artist.PathDataGenerator
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.third_shift.census_takers.CensusReport
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.fourth_shift.rendering.PathDataGenerator
+import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.third_shift.census.CensusReport
 
 /**
  * Job: VPS Job 4 - Blending.

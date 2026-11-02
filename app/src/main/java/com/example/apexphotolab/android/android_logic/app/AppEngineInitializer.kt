@@ -1,8 +1,6 @@
 package com.example.apexphotolab.android.android_logic.app
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.utils.EngineInitializer
 
 /**
  * Job: Hardware/Background Service preparation.
@@ -11,9 +9,5 @@ import com.example.apexphotolab.the_build.working_project.tool_panel.export.svg.
 object AppEngineInitializer {
     @Composable
     fun Initialize() {
-        // Pre-warm the SVG engine on app startup to prevent deadlocks.
-        LaunchedEffect(Unit) {
-            EngineInitializer.warmUp()
-        }
     }
 }
