@@ -1,4 +1,4 @@
-package com.example.apexphotolab.the_build.welcome_screen.ui
+package com.example.apexphotolab.the_build.welcome_screen.continue_project.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.apexphotolab.the_build.welcome_screen.ui.val_util
 
 /**
  * Job: UI Component.

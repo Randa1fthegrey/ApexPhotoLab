@@ -4,7 +4,8 @@ import android.content.Context
 import android.net.Uri
 import android.widget.Toast
 import com.example.apexphotolab.android.android_keys.SettingsPersistence
-import com.example.apexphotolab.the_build.working_project.managers.project.ProjectManager
+import com.example.apexphotolab.the_build.welcome_screen.new_project.ProjectType
+import com.example.apexphotolab.the_build.working_project.managers.project.ProjectCreator
 import com.example.apexphotolab.the_build.working_project.util.bitmap.BitmapLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -21,14 +22,14 @@ class WelcomeActionHandlers(
     private val onStartProject: (Uri) -> Unit,
     private val onProjectDirSet: () -> Unit
 ) {
-    fun handleImageResult(uri: Uri?, projectName: String) {
+    fun handleImageResult(uri: Uri?, projectName: String, projectType: ProjectType = ProjectType.STATIC) {
         uri?.let {
             scope.launch {
                 val bitmap = withContext(Dispatchers.IO) {
                     BitmapLoader.decodeCorrectedBitmap(context, it)
                 }
                 val newProjectDir = bitmap?.let { bm ->
-                    ProjectManager.createProject(context, projectName, bm)
+                    ProjectCreator.createProject(context, projectName, bm, projectType)
                 }
                 withContext(Dispatchers.Main) {
                     newProjectDir?.let { dir -> onStartProject(dir.uri) }

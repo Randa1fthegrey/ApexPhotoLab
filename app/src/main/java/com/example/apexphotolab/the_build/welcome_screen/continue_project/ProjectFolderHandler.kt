@@ -1,9 +1,10 @@
-package com.example.apexphotolab.the_build.welcome_screen
+package com.example.apexphotolab.the_build.welcome_screen.continue_project
 
 import android.content.Context
 import android.net.Uri
 import android.widget.Toast
 import com.example.apexphotolab.android.android_keys.SettingsPersistence
+import com.example.apexphotolab.the_build.welcome_screen.val_util
 
 /**
  * Job: Project Folder Handler.

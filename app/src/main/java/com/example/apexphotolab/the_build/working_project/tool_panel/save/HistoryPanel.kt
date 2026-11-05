@@ -17,7 +17,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.documentfile.provider.DocumentFile
-import com.example.apexphotolab.the_build.working_project.managers.project.ProjectManager
+import com.example.apexphotolab.the_build.working_project.managers.project.ProjectSnapshotDeleter
+import com.example.apexphotolab.the_build.working_project.managers.project.ProjectSnapshotLister
+import com.example.apexphotolab.the_build.working_project.managers.project.ProjectSnapshotRenamer
 import com.example.apexphotolab.the_build.working_project.tool_panel.save.dialogs.RenameSnapshotDialog
 import kotlinx.coroutines.launch
 
@@ -46,7 +48,7 @@ fun HistoryPanel(
 
     fun refreshHistory() {
         projectDir?.let {
-            history = ProjectManager.getHistory(it)
+            history = ProjectSnapshotLister.getHistory(it)
         }
     }
 
@@ -92,7 +94,7 @@ fun HistoryPanel(
                         if (isDeleteMode) {
                             if (selectedSnapshots.isNotEmpty()) {
                                 scope.launch {
-                                    val success = ProjectManager.deleteSnapshots(selectedSnapshots.toList())
+                                    val success = ProjectSnapshotDeleter.deleteSnapshots(selectedSnapshots.toList())
                                     if (success) {
                                         Toast.makeText(context, "Saves deleted", Toast.LENGTH_SHORT).show()
                                     }
@@ -150,7 +152,7 @@ fun HistoryPanel(
             onConfirm = { newName ->
                 snapshotToRename = null
                 scope.launch {
-                    if (ProjectManager.renameSnapshot(context, snapshot, newName)) {
+                    if (ProjectSnapshotRenamer.renameSnapshot(snapshot, newName)) {
                         refreshHistory()
                     }
                 }
@@ -158,4 +160,3 @@ fun HistoryPanel(
         )
     }
 }
-

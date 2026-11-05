@@ -15,12 +15,14 @@ class NewProjectWorkflowState {
     var showProjectNameDialog by mutableStateOf(false)
     var showCopyConfirmDialog by mutableStateOf(false)
     var projectName by mutableStateOf("")
+    var selectedType by mutableStateOf(ProjectType.STATIC)
 
     fun startFlow() {
         showProjectTypeDialog = true
     }
 
-    fun onTypeSelected() {
+    fun onTypeSelected(type: ProjectType = ProjectType.STATIC) {
+        selectedType = type
         showProjectTypeDialog = false
         showProjectNameDialog = true
     }

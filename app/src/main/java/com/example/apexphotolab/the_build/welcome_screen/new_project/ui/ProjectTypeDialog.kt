@@ -64,6 +64,16 @@ fun ProjectTypeDialog(
                     Text(val_util.TYPE_SEQUENTIAL)
                 }
 
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // NES TILE MAPPING OPTION (NES 8x8 Hardware Grid)
+                Button(
+                    onClick = { onConfirm(ProjectType.NES_TILE_MAP) },
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)
+                ) {
+                    Text(val_util.TYPE_NES_TILE_MAP)
+                }
+
                 Spacer(modifier = Modifier.height(24.dp))
 
                 TextButton(onClick = onDismiss) {

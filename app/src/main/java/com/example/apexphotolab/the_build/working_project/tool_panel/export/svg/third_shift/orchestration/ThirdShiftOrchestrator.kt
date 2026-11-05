@@ -26,7 +26,7 @@ object ThirdShiftOrchestrator {
         val width = quantizedImage.width
         val height = quantizedImage.height
         val pixels = SecondShiftPixelExtractor.extract(quantizedImage)
-        val vram = SecondShiftVramManager.getMasterVram()
+        val vram = SecondShiftVramManager.prepareMasterVram()
 
         // 1. RESOLUTION: Use origin color reports from Second Shift if available
         val reports: List<CensusReport> = if (inputReports.size == pathFragments.size) {

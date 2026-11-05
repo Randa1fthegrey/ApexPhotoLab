@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
+import com.example.apexphotolab.the_build.working_project.tool_panel.NES_Tile_Map_System.export.NesBlueprintExportManager
+import com.example.apexphotolab.the_build.working_project.tool_panel.NES_Tile_Map_System.export.NesTileSheetExportManager
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.data.managers.BitmapExportManager
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.data.savers.BitmapFileSaver
 import com.example.apexphotolab.the_build.working_project.tool_panel.export.data.savers.BmpSaver
@@ -61,6 +63,14 @@ object ProjectExporter {
             currentCoroutineContext().ensureActive()
             TextFileSaver.saveText(context, svgContent, outputUri)
         }
+    }
+
+    suspend fun exportProjectToNesTileMap(context: Context, layers: List<Layer>, outputUri: Uri) {
+        NesTileSheetExportManager.exportTileMap(context, layers, outputUri)
+    }
+
+    suspend fun exportProjectToNesJavaBlueprint(context: Context, layers: List<Layer>, outputUri: Uri) {
+        NesBlueprintExportManager.exportJavaBlueprint(context, layers, outputUri)
     }
 
     suspend fun exportProjectToBmp(context: Context, layers: List<Layer>, outputUri: Uri, applyGreyscale: Boolean = false, targetWidth: Int = val_util.DIMEN_DEFAULT, targetHeight: Int = val_util.DIMEN_DEFAULT) =

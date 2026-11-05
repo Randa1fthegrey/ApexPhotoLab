@@ -8,7 +8,7 @@ import com.example.apexphotolab.android.android_logic.NavigationHandler
 import com.example.apexphotolab.android.android_logic.ProjectFolderHandler
 import com.example.apexphotolab.android.android_logic.ProjectSelectionHandler
 import com.example.apexphotolab.the_build.welcome_screen.ui.WelcomeScreen
-import com.example.apexphotolab.the_build.welcome_screen.ProjectFileExplorer
+import com.example.apexphotolab.the_build.welcome_screen.continue_project.ui.ProjectFileExplorer
 import com.example.apexphotolab.the_build.working_project.editor.MainEditorScreen
 
 /**

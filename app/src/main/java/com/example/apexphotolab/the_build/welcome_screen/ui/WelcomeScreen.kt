@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.apexphotolab.the_build.ui.theme.ThemeSwitcher
 import com.example.apexphotolab.the_build.welcome_screen.WelcomeActionHandlers
 import com.example.apexphotolab.the_build.welcome_screen.new_project.ui.CopyConfirmDialog
 import com.example.apexphotolab.the_build.welcome_screen.new_project.ui.ProjectNameDialog
@@ -51,7 +52,7 @@ fun WelcomeScreen(
     // --- LAUNCHERS ---
     val pickImageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri -> handlers.handleImageResult(uri, workflow.projectName) }
+        onResult = { uri -> handlers.handleImageResult(uri, workflow.projectName, workflow.selectedType) }
     )
 
     val pickProjectDirLauncher = rememberLauncherForActivityResult(
@@ -64,7 +65,9 @@ fun WelcomeScreen(
         ProjectTypeDialog(
             onDismiss = { workflow.dismissAll() },
             onConfirm = { type ->
-                if (type == ProjectType.STATIC) workflow.onTypeSelected()
+                if (type == ProjectType.STATIC || type == ProjectType.NES_TILE_MAP) {
+                    workflow.onTypeSelected(type)
+                }
             }
         )
     }

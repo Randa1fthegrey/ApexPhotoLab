@@ -36,4 +36,5 @@ object val_util {
     val TYPE_STATIC = "Static / PNG (Single)"
     val TYPE_ANIMATED = "Animated / GIF (Motion)"
     val TYPE_SEQUENTIAL = "Sequential / PDF (Document)"
+    val TYPE_NES_TILE_MAP = "NES Tile Mapping (Hardware Grid)"
 }

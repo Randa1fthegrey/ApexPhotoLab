@@ -7,5 +7,6 @@ package com.example.apexphotolab.the_build.working_project.tool_panel.export.dat
 enum class ExportType {
     PNG, SVG, JPG,
     WEBP_LOSSY, WEBP_LOSSLESS,
-    BMP, PSD, TIFF, XCF
+    BMP, PSD, TIFF, XCF,
+    NES_TILE_MAP, NES_JAVA_BLUEPRINT
 }

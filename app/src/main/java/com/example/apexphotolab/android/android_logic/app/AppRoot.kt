@@ -18,6 +18,9 @@ import com.example.apexphotolab.the_build.ui.theme.ApexPhotoLabTheme
  */
 @Composable
 fun AppRoot(appState: AppState) {
+    // Pre-warm project cache in background on cold-boot
+    AppEngineInitializer.Initialize()
+
     // Instantiate specialized handlers for state and navigation transitions
     val navHandler = remember(appState) { NavigationHandler(appState) }
     val folderHandler = remember(appState) { ProjectFolderHandler(appState) }

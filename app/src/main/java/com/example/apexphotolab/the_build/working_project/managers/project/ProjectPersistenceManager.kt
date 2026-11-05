@@ -10,9 +10,6 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.documentfile.provider.DocumentFile
 import com.example.apexphotolab.android.android_keys.SettingsPersistence
 import com.example.apexphotolab.the_build.working_project.util.layers.Layer
-import com.example.apexphotolab.the_build.working_project.managers.project.ProjectLoadManager
-import com.example.apexphotolab.the_build.working_project.managers.project.ProjectManager
-import com.example.apexphotolab.the_build.working_project.managers.project.ProjectSaveManager
 
 /**
  * Job: Persistence/IO Worker.
@@ -56,7 +53,7 @@ class ProjectPersistenceManager {
         layers: List<Layer>
     ): Boolean {
         val documentFile = DocumentFile.fromTreeUri(context, projectDirUri) ?: return false
-        val history = ProjectManager.getHistory(documentFile)
+        val history = ProjectSnapshotLister.getHistory(documentFile)
         val quickSaveCount = history.count { snapshot ->
             snapshot.name?.contains(projectDirName) == true && !snapshot.name!!.contains(val_util.SNAPSHOT_BIRTH)
         }
@@ -78,10 +75,10 @@ class ProjectPersistenceManager {
         layers: SnapshotStateList<Layer>
     ): Boolean {
         val documentFile = DocumentFile.fromTreeUri(context, projectDirUri) ?: return false
-        val success = ProjectManager.rollback(context, documentFile, snapshot)
+        val success = ProjectSnapshotRollback.rollback(context, documentFile, snapshot)
         if (success) {
             layers.clear()
-            layers.addAll(ProjectManager.loadLayers(context, documentFile))
+            layers.addAll(ProjectLayerLoader.loadLayers(context, documentFile))
             updateSaveTime()
             return true
         }

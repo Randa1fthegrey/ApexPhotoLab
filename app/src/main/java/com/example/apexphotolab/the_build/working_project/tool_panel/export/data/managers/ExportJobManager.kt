@@ -34,6 +34,8 @@ object ExportJobManager {
                 ExportType.PSD -> Triple("export", "psd", "image/vnd.adobe.photoshop")
                 ExportType.TIFF -> Triple("export", "tiff", "image/tiff")
                 ExportType.XCF -> Triple("export", "xcf", "application/x-gimp-xcf")
+                ExportType.NES_TILE_MAP -> Triple("nes_tile_map", "png", "image/png")
+                ExportType.NES_JAVA_BLUEPRINT -> Triple("NES_BIOS_Blueprint_Data", "java", "text/plain")
             }
             tempFile = ExportFileManager.createTempFile(context, prefix, ext)
 
@@ -51,12 +53,15 @@ object ExportJobManager {
                 ExportType.PSD -> ProjectExporter.exportProjectToPsd(context, layers, Uri.fromFile(tempFile), isGreyscale, targetW, targetH)
                 ExportType.TIFF -> ProjectExporter.exportProjectToTiff(context, layers, Uri.fromFile(tempFile), isGreyscale, targetW, targetH)
                 ExportType.XCF -> ProjectExporter.exportProjectToXcf(context, layers, Uri.fromFile(tempFile), isGreyscale, targetW, targetH)
+                ExportType.NES_TILE_MAP -> ProjectExporter.exportProjectToNesTileMap(context, layers, Uri.fromFile(tempFile))
+                ExportType.NES_JAVA_BLUEPRINT -> ProjectExporter.exportProjectToNesJavaBlueprint(context, layers, Uri.fromFile(tempFile))
             }
 
             // DYNAMIC FILENAME LOGIC: Append suffix for specialized WebP formats
             val suffix = when (exportType) {
                 ExportType.WEBP_LOSSY -> "_Lossy"
                 ExportType.WEBP_LOSSLESS -> "_Lossless"
+                ExportType.NES_TILE_MAP -> "_TileMap"
                 else -> "_export"
             }
 

@@ -19,6 +19,7 @@ object val_util {
     val CAT_STATIC = "Static Projects" // *
     val CAT_ANIMATED = "Animated Projects" // *
     val CAT_SEQUENTIAL = "Sequential Projects" // *
+    val CAT_NES_TILE_MAP = "NES Tile Map Projects"
 
     // ==========================================
     // NOTIFICATIONS

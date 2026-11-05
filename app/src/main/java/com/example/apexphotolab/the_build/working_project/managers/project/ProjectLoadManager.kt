@@ -26,9 +26,8 @@ object ProjectLoadManager {
 
         return projectDir?.let {
             val projectName = it.name ?: ""
-            val layers = ProjectManager.loadLayers(context, it)
+            val layers = ProjectLayerLoader.loadLayers(context, it)
             ProjectLoadResult(projectName, layers)
         }
     }
 }
-

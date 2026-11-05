@@ -3,7 +3,7 @@ package com.example.apexphotolab.the_build.working_project.managers.layers
 import android.content.Context
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
-import com.example.apexphotolab.the_build.working_project.managers.project.ProjectManager
+import com.example.apexphotolab.the_build.working_project.managers.project.ProjectLayerWriter
 import com.example.apexphotolab.the_build.working_project.util.bitmap.BitmapLoader
 import com.example.apexphotolab.the_build.working_project.util.layers.Layer
 
@@ -23,6 +23,6 @@ object NewLayerManager {
         
         val projectDir = DocumentFile.fromTreeUri(context, projectDirUri) ?: return null
 
-        return ProjectManager.addImageLayer(context, projectDir, title, bitmap)
+        return ProjectLayerWriter.addImageLayer(context, projectDir, title, bitmap)
     }
 }

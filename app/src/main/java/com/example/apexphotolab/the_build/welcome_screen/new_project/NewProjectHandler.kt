@@ -2,7 +2,7 @@ package com.example.apexphotolab.the_build.welcome_screen.new_project
 
 import android.content.Context
 import android.net.Uri
-import com.example.apexphotolab.the_build.working_project.managers.project.ProjectManager
+import com.example.apexphotolab.the_build.working_project.managers.project.ProjectCreator
 import com.example.apexphotolab.the_build.working_project.util.bitmap.BitmapLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,13 +18,13 @@ class NewProjectHandler(
     private val scope: CoroutineScope,
     private val onProjectCreated: (Uri) -> Unit
 ) {
-    fun execute(imageUri: Uri, projectName: String) {
+    fun execute(imageUri: Uri, projectName: String, projectType: ProjectType = ProjectType.STATIC) {
         scope.launch {
             val bitmap = withContext(Dispatchers.IO) {
                 BitmapLoader.decodeCorrectedBitmap(context, imageUri)
             }
             val newProjectDir = bitmap?.let { bm ->
-                ProjectManager.createProject(context, projectName, bm)
+                ProjectCreator.createProject(context, projectName, bm, projectType)
             }
             withContext(Dispatchers.Main) {
                 newProjectDir?.let { dir -> onProjectCreated(dir.uri) }

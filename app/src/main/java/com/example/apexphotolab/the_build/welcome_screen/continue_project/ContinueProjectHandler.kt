@@ -1,4 +1,4 @@
-package com.example.apexphotolab.the_build.welcome_screen
+package com.example.apexphotolab.the_build.welcome_screen.continue_project
 
 import com.example.apexphotolab.android.android_logic.app.AppState
 import com.example.apexphotolab.android.android_keys.Screen

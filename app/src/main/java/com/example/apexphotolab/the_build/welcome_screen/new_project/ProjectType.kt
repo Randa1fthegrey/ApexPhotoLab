@@ -7,5 +7,6 @@ package com.example.apexphotolab.the_build.welcome_screen.new_project
 enum class ProjectType {
     STATIC,
     ANIMATED,
-    SEQUENTIAL
+    SEQUENTIAL,
+    NES_TILE_MAP
 }

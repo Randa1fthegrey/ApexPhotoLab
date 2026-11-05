@@ -212,6 +212,18 @@ fun ExportScreen(
                 enabled = true,
                 onClick = { onExport(ExportType.XCF) })
 
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text("Retro & Hardware", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
+            ExportButton(
+                text = "NES Tile Sheet Map (.png)",
+                enabled = true,
+                onClick = { onExport(ExportType.NES_TILE_MAP) })
+            ExportButton(
+                text = "NES Java Blueprint (.java)",
+                enabled = true,
+                onClick = { onExport(ExportType.NES_JAVA_BLUEPRINT) })
+
             Spacer(modifier = Modifier.height(64.dp))
         }
     }

@@ -1,4 +1,4 @@
-package com.example.apexphotolab.the_build.welcome_screen.ui
+package com.example.apexphotolab.the_build.ui.theme
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Switch
