@@ -39,15 +39,15 @@ object NesBlueprintExportManager {
             // Finds Universal BG + 12 Accents and funnels every pixel into these 13 buckets
             val quantizedResult = NesBackgroundQuantizer.quantizeTo13Colors(nesCanvas)
 
-            // 4. Enforce 16x16 Attribute Block Rules (Max 4 colors per 16x16 pixel block)
-            val strictNesCanvas = NesAttributeBlockQuantizer.enforceAttributeBlocks(
+            // 4. Enforce 8x8 MMC5 Attribute Block Rules and generate ExRAM attribute array
+            val strictNesResult = NesAttributeBlockQuantizer.enforceAttributeBlocks(
                 quantizedResult.bitmap13Color,
                 universalBgColor = quantizedResult.active13Colors[0],
                 master13Palette = quantizedResult.active13Colors
             )
 
             // 5. Slice 960 (32x30) 8x8 tiles from the strict NES canvas
-            val rawTiles = NesTileSlicer.slice(strictNesCanvas)
+            val rawTiles = NesTileSlicer.slice(strictNesResult)
 
             // 6. Deduplicate CHR tiles and Nametable tile IDs
             val dedupResult = NesTileDeduplicator.deduplicate(rawTiles)
@@ -55,17 +55,33 @@ object NesBlueprintExportManager {
             // 7. Encode 4,096-byte CHR Pattern Table
             val chrBytes = NesChrEncoder.encodePatternTable(dedupResult.uniqueTiles)
 
-            // 8. Format 16-byte Palette
-            val paletteBytes = byteArrayOf(
-                0x0F, 0x31, 0x28, 0x30,  // Palette 0
-                0x0F, 0x31, 0x28, 0x30,  // Palette 1
-                0x0F, 0x31, 0x28, 0x30,  // Palette 2
-                0x0F, 0x31, 0x28, 0x30   // Palette 3
-            )
+            // 8. Format 16-byte Palette (Building the 4 optimal sub-palettes)
+            val paletteBytes = ByteArray(16)
+            for (p in 0 until 4) {
+                // Index 0 of every sub-palette is always the Universal Background
+                paletteBytes[p * 4] = (quantizedResult.active13Colors[0] and 0xFF).toByte()
+                // Fill remaining 3 slots with the accents (1..12)
+                for (a in 1..3) {
+                    val accentIdx = 1 + (p * 3) + (a - 1)
+                    val colorCode = if (accentIdx < quantizedResult.active13Colors.size) {
+                        quantizedResult.active13Colors[accentIdx]
+                    } else {
+                        quantizedResult.active13Colors[0] // Fallback to background
+                    }
+                    paletteBytes[p * 4 + a] = (colorCode and 0xFF).toByte()
+                }
+            }
 
             // 9. Format 1,024-byte Nametable + Attributes
+            // Combine 960 Nametable Tiles
             val nametableBytes = ByteArray(1024)
-            System.arraycopy(dedupResult.nametableTileIds, 0, nametableBytes, 0, 960)
+            val nametableConverted = ByteArray(960)
+            for (i in 0 until 960) {
+                nametableConverted[i] = (dedupResult.nametableTileIds[i] and 0xFF).toByte()
+            }
+            System.arraycopy(nametableConverted, 0, nametableBytes, 0, 960)
+            // Note: For Blueprint data with MMC5, ExRAM replaces standard attribute bytes, 
+            // but we fill the remaining 64 bytes with 0 for backward compatibility with 1024-byte standard NAM.
 
             // 10. Generate .java source code string
             val javaCode = NesBlueprintJavaExporter.generateJavaClass(

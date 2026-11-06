@@ -4,10 +4,11 @@ import android.graphics.Bitmap
 import android.graphics.Color
 
 /**
- * Job: 16x16 Attribute Block Quantizer (The 4-Color Grid Enforcer).
- * Responsibility: Scans a 256x240 image divided into 16x16 pixel blocks.
- * For each block, determines the dominant 3 accent colors (plus Universal BG),
- * assigns the optimal sub-palette, and snaps every pixel in the block strictly to those 4 colors.
+ * Job: 8x8 MMC5 EXRAM Attribute Block Quantizer.
+ * Responsibility: Simulates the Nintendo MMC5 (ExRAM) hardware capability.
+ * Instead of standard 16x16 attribute blocks, MMC5 allows a unique 4-color sub-palette
+ * for EVERY SINGLE 8x8 tile. This prevents chunky mosaic blocking and allows maximum
+ * high-fidelity color detailing per tile!
  */
 object NesAttributeBlockQuantizer {
 
@@ -20,19 +21,19 @@ object NesAttributeBlockQuantizer {
 
         val finalPixels = IntArray(rawPixels.size)
 
-        // Process image in 16x16 pixel blocks
-        val cols = width / 16
-        val rows = height / 16
+        // Process image in 8x8 pixel blocks (MMC5 ExRAM mode)
+        val cols = width / 8
+        val rows = height / 8
 
         for (blockY in 0 until rows) {
             for (blockX in 0 until cols) {
 
-                // 1. Gather color counts for this specific 16x16 block
+                // 1. Gather color counts for this specific 8x8 block
                 val colorCounts = mutableMapOf<Int, Int>()
-                for (y in 0 until 16) {
-                    for (x in 0 until 16) {
-                        val pxX = blockX * 16 + x
-                        val pxY = blockY * 16 + y
+                for (y in 0 until 8) {
+                    for (x in 0 until 8) {
+                        val pxX = blockX * 8 + x
+                        val pxY = blockY * 8 + y
                         if (pxX < width && pxY < height) {
                             val pixel = rawPixels[pxY * width + pxX]
                             if (pixel != universalBgColor) {
@@ -42,9 +43,22 @@ object NesAttributeBlockQuantizer {
                     }
                 }
 
-                // 2. Select the top 3 accent colors for this block
+                // 2. Select the top 3 accent colors for this 8x8 block (Prioritizing high-contrast details)
                 val blockAccents = colorCounts.entries
-                    .sortedByDescending { it.value }
+                    .sortedWith(Comparator { a, b ->
+                        // Blend pixel count with brightness contrast to ensure small bright details (like text) survive
+                        val aLuma = getLuminance(a.key)
+                        val bLuma = getLuminance(b.key)
+                        val bgLuma = getLuminance(universalBgColor)
+                        
+                        val aContrast = Math.abs(aLuma - bgLuma)
+                        val bContrast = Math.abs(bLuma - bgLuma)
+                        
+                        val aScore = a.value * (1.0 + aContrast * 2.0)
+                        val bScore = b.value * (1.0 + bContrast * 2.0)
+                        
+                        bScore.compareTo(aScore)
+                    })
                     .map { it.key }
                     .take(3)
                     .toIntArray()
@@ -70,11 +84,11 @@ object NesAttributeBlockQuantizer {
                     blockPalette[i] = bestMatch
                 }
 
-                // 4. Snap every pixel in the 16x16 block strictly to this 4-color Sub-Palette
-                for (y in 0 until 16) {
-                    for (x in 0 until 16) {
-                        val pxX = blockX * 16 + x
-                        val pxY = blockY * 16 + y
+                // 4. Snap every pixel in the 8x8 block strictly to this 4-color Sub-Palette
+                for (y in 0 until 8) {
+                    for (x in 0 until 8) {
+                        val pxX = blockX * 8 + x
+                        val pxY = blockY * 8 + y
                         if (pxX < width && pxY < height) {
                             val idx = pxY * width + pxX
                             finalPixels[idx] = findNearestColor(rawPixels[idx], blockPalette)
@@ -96,13 +110,19 @@ object NesAttributeBlockQuantizer {
         return Math.sqrt((r * r + g * g + b * b).toDouble())
     }
 
+    private fun getLuminance(color: Int): Double {
+        val r = Color.red(color)
+        val g = Color.green(color)
+        val b = Color.blue(color)
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b
+    }
+
     private fun findNearestColor(targetColor: Int, palette: IntArray): Int {
         val targetR = Color.red(targetColor)
         val targetG = Color.green(targetColor)
         val targetB = Color.blue(targetColor)
 
-        // Give strong bias to retaining bright colors (Cyan, Gold, White)
-        // over snapping everything down to dark Navy/Grey.
+        // Luma preserves brightness mapping, preventing bright edges from sinking into dark backgrounds
         val targetLuma = 0.2126 * targetR + 0.7152 * targetG + 0.0722 * targetB
 
         var minScore = Double.MAX_VALUE
@@ -119,8 +139,8 @@ object NesAttributeBlockQuantizer {
 
             val luma = 0.2126 * r + 0.7152 * g + 0.0722 * b
             
-            // Penalty for mismatching brightness (prevents snapping bright edges to black)
-            val lumaPenalty = Math.abs(targetLuma - luma) * 2.0
+            // Penalty for mismatching brightness
+            val lumaPenalty = Math.abs(targetLuma - luma) * 3.0
 
             val score = dist + lumaPenalty
 

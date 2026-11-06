@@ -7,8 +7,8 @@ import android.graphics.Paint
 
 /**
  * Job: Unassembled CHR Tile Sheet Generator.
- * Responsibility: Assembles all unique 8x8 CHR tiles into a side-by-side visual tile sheet (16x16 grid),
- * with pixel scaling (e.g. 4x) and tile grid lines for human inspection.
+ * Responsibility: Assembles all unique 8x8 CHR tiles into a side-by-side visual tile sheet,
+ * dynamically expanding rows to support up to 960 MMC5 ExRAM tiles.
  */
 object NesTileSetSheetGenerator {
 
@@ -17,18 +17,17 @@ object NesTileSetSheetGenerator {
         scale: Int = 4,
         drawGridLines: Boolean = true
     ): Bitmap {
-        val totalTiles = minOf(256, maxOf(1, uniqueTiles.size))
+        val totalTiles = maxOf(1, uniqueTiles.size)
         val gridCols = 16
-        val gridRows = (totalTiles + gridCols - 1) / gridCols // Up to 16 rows
+        val gridRows = (totalTiles + gridCols - 1) / gridCols // MMC5 can expand up to 60 rows
 
         val baseWidth = gridCols * 8 // 128 px
-        val baseHeight = maxOf(1, gridRows) * 8 // Up to 128 px
+        val baseHeight = gridRows * 8
 
         val rawSheetPixels = IntArray(baseWidth * baseHeight) { Color.BLACK }
 
         // Render each 8x8 unique tile into the base sheet grid
         uniqueTiles.forEachIndexed { tileIndex, tilePixels ->
-            if (tileIndex >= 256) return@forEachIndexed
             val tileCol = tileIndex % gridCols
             val tileRow = tileIndex / gridCols
 
@@ -53,7 +52,6 @@ object NesTileSetSheetGenerator {
             return baseBitmap
         }
 
-        // Scale up for easy human viewing (4x scale = 512x512 px)
         val scaledWidth = baseWidth * scale
         val scaledHeight = baseHeight * scale
         val scaledBitmap = Bitmap.createScaledBitmap(baseBitmap, scaledWidth, scaledHeight, false)
@@ -66,7 +64,6 @@ object NesTileSetSheetGenerator {
                 style = Paint.Style.STROKE
             }
 
-            // Draw tile grid boundaries
             for (col in 0..gridCols) {
                 val x = (col * 8 * scale).toFloat()
                 canvas.drawLine(x, 0f, x, scaledHeight.toFloat(), paint)

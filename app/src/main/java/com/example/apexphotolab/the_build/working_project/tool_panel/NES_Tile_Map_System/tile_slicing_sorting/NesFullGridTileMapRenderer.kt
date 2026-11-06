@@ -15,7 +15,7 @@ object NesFullGridTileMapRenderer {
 
     fun renderFullGridMap(
         uniqueTiles: List<IntArray>,
-        nametableTileIds: ByteArray,
+        nametableTileIds: IntArray,
         scale: Int = 4,
         drawGridLines: Boolean = true
     ): Bitmap {
@@ -28,7 +28,7 @@ object NesFullGridTileMapRenderer {
         // Render all 960 tiles into their exact 32x30 grid positions
         for (gridIndex in 0 until 960) {
             if (gridIndex >= nametableTileIds.size) break
-            val tileId = nametableTileIds[gridIndex].toInt() and 0xFF
+            val tileId = nametableTileIds[gridIndex]
             val col = gridIndex % 32
             val row = gridIndex / 32
 

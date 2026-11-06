@@ -46,7 +46,7 @@ object NesVectorTraceManager {
         // --- 2. SVG SECOND SHIFT: Edge Scanning & Tracing ---
         // This generates the raw structural wireframe loops for the circuits and letters
         val (secondShiftPaths, originColors, allEdges) = SecondShiftDispatcher.traceInParallel(
-            firstShiftPixels, width, height, rawPixels, emptySet<Int>()
+            firstShiftPixels, width, height, rawPixels, emptySet()
         )
 
         // --- 3. SVG THIRD SHIFT: Solidification & Color Grouping ---
@@ -56,7 +56,7 @@ object NesVectorTraceManager {
         )
 
         // Organize into Map for the Painter
-        val groupedForPainter = mutableMapOf<CensusReport, List<List<Point>>>()
+        val groupedForPainter = mutableMapOf<CensusReport, List<List<android.graphics.Point>>>()
         for (i in finalPaths.indices) {
             val report = finalReports[i]
             val path = finalPaths[i]
