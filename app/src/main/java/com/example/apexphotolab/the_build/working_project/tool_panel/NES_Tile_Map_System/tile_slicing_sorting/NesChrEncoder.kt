@@ -36,8 +36,8 @@ object NesChrEncoder {
     }
 
     fun encodePatternTable(uniqueTilesColorIndices: List<IntArray>): ByteArray {
-        val patternTable = ByteArray(4096)
-        val tileCount = minOf(256, uniqueTilesColorIndices.size)
+        val tileCount = uniqueTilesColorIndices.size
+        val patternTable = ByteArray(tileCount * 16)
 
         for (i in 0 until tileCount) {
             val encodedTile = encodeTile(uniqueTilesColorIndices[i])

@@ -50,13 +50,13 @@ object NesAttributeBlockQuantizer {
                         val aLuma = getLuminance(a.key)
                         val bLuma = getLuminance(b.key)
                         val bgLuma = getLuminance(universalBgColor)
-                        
+
                         val aContrast = Math.abs(aLuma - bgLuma)
                         val bContrast = Math.abs(bLuma - bgLuma)
-                        
+
                         val aScore = a.value * (1.0 + aContrast * 2.0)
                         val bScore = b.value * (1.0 + bContrast * 2.0)
-                        
+
                         bScore.compareTo(aScore)
                     })
                     .map { it.key }
@@ -138,7 +138,7 @@ object NesAttributeBlockQuantizer {
                        (targetB - b) * (targetB - b).toDouble()
 
             val luma = 0.2126 * r + 0.7152 * g + 0.0722 * b
-            
+
             // Penalty for mismatching brightness
             val lumaPenalty = Math.abs(targetLuma - luma) * 3.0
 

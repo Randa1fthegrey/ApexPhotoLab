@@ -55,11 +55,11 @@ object NesBlueprintExportManager {
             // 7. Encode 4,096-byte CHR Pattern Table
             val chrBytes = NesChrEncoder.encodePatternTable(dedupResult.uniqueTiles)
 
-            // 8. Format 16-byte Palette (Building the 4 optimal sub-palettes)
+            // 8. Format 16-byte Palette (Building the 4 optimal sub-palettes mapped to NES indices 0x00-0x3F)
             val paletteBytes = ByteArray(16)
             for (p in 0 until 4) {
                 // Index 0 of every sub-palette is always the Universal Background
-                paletteBytes[p * 4] = (quantizedResult.active13Colors[0] and 0xFF).toByte()
+                paletteBytes[p * 4] = getNesColorIndex(quantizedResult.active13Colors[0])
                 // Fill remaining 3 slots with the accents (1..12)
                 for (a in 1..3) {
                     val accentIdx = 1 + (p * 3) + (a - 1)
@@ -68,25 +68,31 @@ object NesBlueprintExportManager {
                     } else {
                         quantizedResult.active13Colors[0] // Fallback to background
                     }
-                    paletteBytes[p * 4 + a] = (colorCode and 0xFF).toByte()
+                    paletteBytes[p * 4 + a] = getNesColorIndex(colorCode)
                 }
             }
 
-            // 9. Format 1,024-byte Nametable + Attributes
-            // Combine 960 Nametable Tiles
+            // 9. Format 1,024-byte Nametable + 1,024-byte MMC5 ExRAM Attributes
             val nametableBytes = ByteArray(1024)
-            val nametableConverted = ByteArray(960)
+            val exRamBytes = ByteArray(1024)
+
             for (i in 0 until 960) {
-                nametableConverted[i] = (dedupResult.nametableTileIds[i] and 0xFF).toByte()
+                val tileId = dedupResult.nametableTileIds[i]
+                val palIndex = (i / 32) % 4
+                
+                // Nametable = lower 8 bits of Tile ID
+                nametableBytes[i] = (tileId and 0xFF).toByte()
+                
+                // ExRAM = (PaletteIndex << 6) | (TileID upper 6 bits)
+                val upperBits = (tileId shr 8) and 0x3F
+                exRamBytes[i] = ((palIndex shl 6) or upperBits).toByte()
             }
-            System.arraycopy(nametableConverted, 0, nametableBytes, 0, 960)
-            // Note: For Blueprint data with MMC5, ExRAM replaces standard attribute bytes, 
-            // but we fill the remaining 64 bytes with 0 for backward compatibility with 1024-byte standard NAM.
 
             // 10. Generate .java source code string
             val javaCode = NesBlueprintJavaExporter.generateJavaClass(
                 paletteBytes,
                 nametableBytes,
+                exRamBytes,
                 chrBytes
             )
 
@@ -95,6 +101,33 @@ object NesBlueprintExportManager {
 
         } finally {
             rawBitmap.recycle()
+        }
+    }
+
+    private fun getNesColorIndex(argb: Int): Byte {
+        val targetColor = argb or -0x1000000 // Forces 0xFF alpha mask
+        val index = NesBackgroundQuantizer.NES_MASTER_PALETTE.indexOf(targetColor)
+        return if (index >= 0) {
+            index.toByte()
+        } else {
+            var minDistance = Double.MAX_VALUE
+            var bestIndex = 0x0F // Default Black
+            val r1 = android.graphics.Color.red(targetColor)
+            val g1 = android.graphics.Color.green(targetColor)
+            val b1 = android.graphics.Color.blue(targetColor)
+            
+            for (i in NesBackgroundQuantizer.NES_MASTER_PALETTE.indices) {
+                val c2 = NesBackgroundQuantizer.NES_MASTER_PALETTE[i]
+                val r2 = android.graphics.Color.red(c2)
+                val g2 = android.graphics.Color.green(c2)
+                val b2 = android.graphics.Color.blue(c2)
+                val dist = (r1 - r2) * (r1 - r2) + (g1 - g2) * (g1 - g2) + (b1 - b2) * (b1 - b2).toDouble()
+                if (dist < minDistance) {
+                    minDistance = dist
+                    bestIndex = i
+                }
+            }
+            bestIndex.toByte()
         }
     }
 }
